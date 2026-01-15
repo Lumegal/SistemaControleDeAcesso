@@ -1,33 +1,48 @@
-// context/auth.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import { router } from "expo-router";
-import IUsuario from "../interfaces/Usuario";
+import { ILoginRequest, ILoginResponse, IUsuario } from "../interfaces/usuario";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { httpClient } from "../services/httpclient";
 
 interface IAuthContext {
-  usuario: IUsuario;
-  setUsuario: (usuario: IUsuario) => void;
-  handleLogin: () => void;
+  isAuthenticated: boolean;
+  login: (usuario: ILoginRequest) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
+const AuthContext = createContext<IAuthContext>({
+  isAuthenticated: false,
+  login: async () => {},
+  logout: async () => {},
+});
 
-const AuthContext = createContext<IAuthContext>({} as IAuthContext);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [usuario, setUsuario] = useState<IUsuario>({ email: "", senha: "" });
+  const login = async (usuario: ILoginRequest) => {
+    const response = await httpClient("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(usuario),
+    });
 
-  function handleLogin() {
-    if (usuario && usuario.email === "admin" && usuario.senha === "admin") {
-      router.push("home");
-    } else {
-      alert("Usuário ou senha inválidos");
+    const token: string = response.token;
+
+    await AsyncStorage.setItem("token", token);
+    setIsAuthenticated(true);
+
+    if (token === "Usuário ou senha inválidos") {
+      throw new Error("Usuário ou senha inválidos");
     }
-  }
+  };
+
+  const logout = async () => {
+    setIsAuthenticated(false);
+    await AsyncStorage.removeItem("token");
+    setIsAuthenticated(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ usuario, handleLogin, setUsuario }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
