@@ -45,7 +45,7 @@ export default function Login() {
       setCarregando(true);
       await login({ email, senha });
 
-      router.push("/home");
+      router.push("/main");
     } catch (erro: any) {
       alert(erro.message);
     } finally {
@@ -54,7 +54,7 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.background}>
+    <View style={globalStyles.background}>
       <View style={styles.mainContent}>
         <Text
           style={{
@@ -71,7 +71,7 @@ export default function Login() {
           <Feather
             name="mail"
             size={20}
-            color="#0033A0"
+            color={colors.blue}
             style={styles.iconSpace}
           />
           <TextInput
@@ -85,7 +85,7 @@ export default function Login() {
         </View>
 
         <View style={styles.loginInputContainer}>
-          <Feather name="lock" size={20} color="#0033A0" />
+          <Feather name="lock" size={20} color={colors.blue} />
           <TextInput
             style={styles.input}
             placeholder="Senha"
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 20,
-    backgroundColor: "#0033a0",
+    backgroundColor: colors.blue,
     boxShadow: "0px 5px 5px #000c27ff",
   },
   buttonCancelar: {
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
     borderWidth: 1,
-    borderColor: "#0033A0",
+    borderColor: colors.blue,
     borderRadius: 10,
     justifyContent: "space-between",
     boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.8)",

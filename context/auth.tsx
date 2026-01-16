@@ -1,6 +1,5 @@
 import React, { createContext, ReactNode, useContext, useState } from "react";
-import { router } from "expo-router";
-import { ILoginRequest, ILoginResponse, IUsuario } from "../interfaces/usuario";
+import { ILoginRequest } from "../interfaces/usuario";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { httpClient } from "../services/httpclient";
 
