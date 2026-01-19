@@ -1,6 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
-import SideBar from "../sideBar";
+import SideBar from "../(components)/sideBar";
+import TopBar from "../(components)/topBar";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -16,7 +17,9 @@ export default function Main() {
         }}
       >
         <SideBar />
-        <View style={{ flex: 8 }}></View>
+        <View style={{ flex: 8 }}>
+          <TopBar />
+        </View>
       </View>
     </View>
   );

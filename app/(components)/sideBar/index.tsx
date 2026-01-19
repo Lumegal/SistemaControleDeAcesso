@@ -7,17 +7,21 @@ import {
   Platform,
   Image,
 } from "react-native";
-import { colors } from "../../colors";
+import { colors } from "../../../colors";
 import {
   Feather,
-  AntDesign,
   MaterialIcons,
   FontAwesome,
   MaterialCommunityIcons,
   FontAwesome6,
 } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useAuth } from "../../../context/auth";
+import { useState } from "react";
 
 export default function SideBar() {
+  const { logout } = useAuth();
+  const [carregando, setCarregando] = useState<boolean>(false);
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
 
@@ -29,7 +33,7 @@ export default function SideBar() {
     },
     logo: {
       width: "100%",
-      height: "15%",
+      height: "10%",
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: "white",
@@ -71,11 +75,29 @@ export default function SideBar() {
     menuIcon: {
       color: textMainColor,
     },
+    logoutButton: {
+      width: "90%",
+      alignSelf: "center",
+      marginTop: "auto",
+      backgroundColor: "#db2114",
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 12,
+      padding: 24,
+      borderRadius: 12,
+      gap: 12,
+      ...Platform.select({
+        web: {
+          transitionDuration: "150ms",
+        },
+      }),
+    },
     version: {
       color: textMainColor,
       textAlign: "center",
       opacity: 0.7,
-      marginTop: "auto",
+      marginTop: 12,
     },
   });
 
@@ -83,14 +105,14 @@ export default function SideBar() {
     <View style={styles.sideBar}>
       <View style={styles.logo}>
         <Image
-          source={require("../../assets/Logo-Lumegal-Site.jpg")}
+          source={require("../../../assets/Logo-Lumegal-Site.jpg")}
           resizeMode="contain"
           style={styles.logoImage}
         />
       </View>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {/* Principal */}
-        <View style={styles.menuSection}>
+        {/* <View style={styles.menuSection}>
           <Text style={styles.menuSectionLabel} selectable={false}>
             Principal
           </Text>
@@ -114,35 +136,13 @@ export default function SideBar() {
               Dashboard
             </Text>
           </Pressable>
-        </View>
+        </View> */}
 
         {/* Operações */}
         <View style={styles.menuSection}>
           <Text style={styles.menuSectionLabel} selectable={false}>
             Operações
           </Text>
-
-          {/* Cargas */}
-          <Pressable
-            style={(state: any) => [
-              styles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
-            onPress={() => console.log("Cargas")}
-          >
-            <Feather
-              name="package"
-              size={menuIconSize}
-              style={styles.menuIcon}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Cargas
-            </Text>
-          </Pressable>
 
           {/* Nova carga */}
           <Pressable
@@ -154,7 +154,16 @@ export default function SideBar() {
                 },
               state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
             ]}
-            onPress={() => console.log("Nova carga")}
+            onPress={() => {
+              console.log("Nova carga");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "operacoes",
+                  subPage: "novaCarga",
+                },
+              });
+            }}
           >
             <MaterialIcons
               name="add-circle-outline"
@@ -163,6 +172,36 @@ export default function SideBar() {
             />
             <Text style={styles.menuOptionLabel} selectable={false}>
               Nova carga
+            </Text>
+          </Pressable>
+
+          {/* Cargas */}
+          <Pressable
+            style={(state: any) => [
+              styles.menuOption,
+              Platform.OS === "web" &&
+                state.hovered && {
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                },
+              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "operacoes",
+                  subPage: "cargas"
+                },
+              })
+            }
+          >
+            <Feather
+              name="package"
+              size={menuIconSize}
+              style={styles.menuIcon}
+            />
+            <Text style={styles.menuOptionLabel} selectable={false}>
+              Cargas
             </Text>
           </Pressable>
         </View>
@@ -183,7 +222,16 @@ export default function SideBar() {
                 },
               state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
             ]}
-            onPress={() => console.log("Motoristas")}
+             onPress={() => {
+              console.log("Motoristas");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "cadastros",
+                  subPage: "motoristas",
+                },
+              });
+            }}
           >
             <FontAwesome
               name="drivers-license-o"
@@ -205,7 +253,16 @@ export default function SideBar() {
                 },
               state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
             ]}
-            onPress={() => console.log("Clientes")}
+            onPress={() => {
+              console.log("Clientes");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "cadastros",
+                  subPage: "clientes",
+                },
+              });
+            }}
           >
             <MaterialCommunityIcons
               name="office-building-outline"
@@ -227,7 +284,16 @@ export default function SideBar() {
                 },
               state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
             ]}
-            onPress={() => console.log("Veículos")}
+            onPress={() => {
+              console.log("Motoristas");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "cadastros",
+                  subPage: "veiculos",
+                },
+              });
+            }}
           >
             <MaterialCommunityIcons
               name="truck-outline"
@@ -290,8 +356,35 @@ export default function SideBar() {
             </Text>
           </Pressable>
         </View>
+
+        <Pressable
+          style={(state: any) => [
+            styles.logoutButton,
+            Platform.OS === "web" &&
+              state.hovered && {
+                backgroundColor: "rgba(255, 0, 0, 0.8)",
+              },
+            state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
+          ]}
+          onPress={async () => {
+            try {
+              setCarregando(true);
+              await logout();
+              router.push("/");
+            } catch (erro: any) {
+              alert(erro.message);
+            } finally {
+              setCarregando(false);
+            }
+          }}
+        >
+          <Feather name="log-out" size={menuIconSize} style={styles.menuIcon} />
+          <Text style={styles.menuOptionLabel} selectable={false}>
+            Logout
+          </Text>
+        </Pressable>
         <Text style={styles.version} selectable={false}>
-          V0.2.0
+          V0.3.0
         </Text>
       </ScrollView>
     </View>

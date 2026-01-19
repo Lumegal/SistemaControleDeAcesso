@@ -31,7 +31,7 @@ export default function Login() {
     const getData = async () => {
       try {
         setEmpresas(await getAllEmpresa());
-        logout();
+        await logout();
       } catch (erro: any) {
         alert(erro.message);
       }
@@ -45,7 +45,12 @@ export default function Login() {
       setCarregando(true);
       await login({ email, senha });
 
-      router.push("/main");
+      router.push({
+        pathname: "/main",
+        params: {
+          pageName: "novaCarga",
+        },
+      });
     } catch (erro: any) {
       alert(erro.message);
     } finally {
