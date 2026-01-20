@@ -1,7 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
-import SideBar from "../(components)/sideBar";
-import TopBar from "../(components)/topBar";
+import SideBar from "../_components/sideBar";
+import TopBar from "../_components/topBar";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();

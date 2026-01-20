@@ -16,12 +16,8 @@ import {
   FontAwesome6,
 } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useAuth } from "../../../context/auth";
-import { useState } from "react";
 
 export default function SideBar() {
-  const { logout } = useAuth();
-  const [carregando, setCarregando] = useState<boolean>(false);
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
 
@@ -97,7 +93,7 @@ export default function SideBar() {
       color: textMainColor,
       textAlign: "center",
       opacity: 0.7,
-      marginTop: 12,
+      marginTop: "auto",
     },
   });
 
@@ -357,14 +353,14 @@ export default function SideBar() {
           </Pressable>
         </View>
 
-        <Pressable
+        {/* <Pressable
           style={(state: any) => [
             styles.logoutButton,
             Platform.OS === "web" &&
               state.hovered && {
                 backgroundColor: "rgba(255, 0, 0, 0.8)",
               },
-            state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
+            state.pressed && { backgroundColor: "rgba(209, 25, 25, 0.8)" },
           ]}
           onPress={async () => {
             try {
@@ -382,7 +378,7 @@ export default function SideBar() {
           <Text style={styles.menuOptionLabel} selectable={false}>
             Logout
           </Text>
-        </Pressable>
+        </Pressable> */}
         <Text style={styles.version} selectable={false}>
           V0.3.0
         </Text>

@@ -12,20 +12,19 @@ import { getAllEmpresa } from "../services/empresa";
 import { IEmpresa } from "../interfaces/empresa";
 import { colors } from "../colors";
 import { Feather } from "@expo/vector-icons";
-import Carregando from "../components/Carregando";
 import { router } from "expo-router";
+import { useLoading } from "../context/providers/loading";
 
 export default function Login() {
   const { login, logout } = useAuth();
   const globalStyles = getGlobalStyles();
+  const { showLoading, hideLoading } = useLoading();
 
   const [email, setEmail] = useState(" ");
   const [senha, setSenha] = useState(" ");
   const [isSenhaVisible, setIsSenhaVisible] = useState<boolean>(false);
 
   const [empresas, setEmpresas] = useState<IEmpresa[]>([]);
-
-  const [carregando, setCarregando] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -42,19 +41,20 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      setCarregando(true);
+      showLoading();
       await login({ email, senha });
 
       router.push({
         pathname: "/main",
         params: {
-          pageName: "novaCarga",
+          pageName: "operacoes",
+          subPage: "novaCarga",
         },
       });
     } catch (erro: any) {
       alert(erro.message);
     } finally {
-      setCarregando(false);
+      hideLoading();
     }
   };
 
@@ -118,7 +118,6 @@ export default function Login() {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
-      {carregando && <Carregando />}
     </View>
   );
 }
