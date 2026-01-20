@@ -380,7 +380,7 @@ export default function SideBar() {
           </Text>
         </Pressable> */}
         <Text style={styles.version} selectable={false}>
-          V0.3.0
+          V0.5.0
         </Text>
       </ScrollView>
     </View>

@@ -14,7 +14,7 @@ import { useLoading } from "../../../context/providers/loading";
 
 export default function TopBar() {
   const { showLoading, hideLoading } = useLoading();
-  const { logout } = useAuth();
+  const { usuario, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -50,7 +50,7 @@ export default function TopBar() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.userName}>Thiago Raia</Text>
+      <Text style={styles.userName}>{usuario?.nome || "Carregando..."}</Text>
 
       <Pressable
         style={styles.userButton}
