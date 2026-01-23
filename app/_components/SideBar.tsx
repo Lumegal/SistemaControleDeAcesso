@@ -7,7 +7,7 @@ import {
   Platform,
   Image,
 } from "react-native";
-import { colors } from "../../../colors";
+import { colors } from "../../colors";
 import {
   Feather,
   MaterialIcons,
@@ -16,10 +16,14 @@ import {
   FontAwesome6,
 } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { MenuOptionButton } from "./MenuOptionButton";
+import { getGlobalStyles } from "../../globalStyles";
 
 export default function SideBar() {
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
+
+  const globalStyles = getGlobalStyles();
 
   const styles = StyleSheet.create({
     sideBar: {
@@ -50,18 +54,6 @@ export default function SideBar() {
       color: textMainColor,
       fontSize: 18,
       fontWeight: 600,
-    },
-    menuOption: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 20,
-      borderRadius: 12,
-      gap: 12,
-      ...Platform.select({
-        web: {
-          transitionDuration: "150ms",
-        },
-      }),
     },
     menuOptionLabel: {
       color: textMainColor,
@@ -101,7 +93,7 @@ export default function SideBar() {
     <View style={styles.sideBar}>
       <View style={styles.logo}>
         <Image
-          source={require("../../../assets/Logo-Lumegal-Site.jpg")}
+          source={require("../../assets/Logo-Lumegal-Site.jpg")}
           resizeMode="contain"
           style={styles.logoImage}
         />
@@ -114,7 +106,7 @@ export default function SideBar() {
           </Text>
           <Pressable
             style={(state: any) => [
-              styles.menuOption,
+              globalStyles.menuOption,
               Platform.OS === "web" &&
                 state.hovered && {
                   backgroundColor: "rgba(255,255,255,0.2)",
@@ -141,15 +133,17 @@ export default function SideBar() {
           </Text>
 
           {/* Nova carga */}
-          <Pressable
-            style={(state: any) => [
-              styles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            labelStyle={styles.menuOptionLabel}
+            label="Nova carga"
+            icon={
+              <MaterialIcons
+                name="add-circle-outline"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
             onPress={() => {
               console.log("Nova carga");
               router.push({
@@ -160,46 +154,30 @@ export default function SideBar() {
                 },
               });
             }}
-          >
-            <MaterialIcons
-              name="add-circle-outline"
-              size={menuIconSize}
-              style={styles.menuIcon}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Nova carga
-            </Text>
-          </Pressable>
+          />
 
           {/* Cargas */}
-          <Pressable
-            style={(state: any) => [
-              styles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            labelStyle={styles.menuOptionLabel}
+            label="Cargas"
+            icon={
+              <Feather
+                name="package"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
             onPress={() =>
               router.push({
                 pathname: "/main",
                 params: {
                   pageName: "operacoes",
-                  subPage: "cargas"
+                  subPage: "cargas",
                 },
               })
             }
-          >
-            <Feather
-              name="package"
-              size={menuIconSize}
-              style={styles.menuIcon}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Cargas
-            </Text>
-          </Pressable>
+          />
         </View>
 
         {/* Cadastros */}
@@ -209,16 +187,18 @@ export default function SideBar() {
           </Text>
 
           {/* Motoristas */}
-          <Pressable
-            style={(state: any) => [
-              styles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
-             onPress={() => {
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            labelStyle={styles.menuOptionLabel}
+            label="Motoristas"
+            icon={
+              <FontAwesome
+                name="drivers-license-o"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
+            onPress={() => {
               console.log("Motoristas");
               router.push({
                 pathname: "/main",
@@ -228,21 +208,12 @@ export default function SideBar() {
                 },
               });
             }}
-          >
-            <FontAwesome
-              name="drivers-license-o"
-              size={menuIconSize}
-              style={styles.menuIcon}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Motoristas
-            </Text>
-          </Pressable>
+          />
 
           {/* Clientes */}
           <Pressable
             style={(state: any) => [
-              styles.menuOption,
+              globalStyles.menuOption,
               Platform.OS === "web" &&
                 state.hovered && {
                   backgroundColor: "rgba(255,255,255,0.2)",
@@ -263,7 +234,7 @@ export default function SideBar() {
             <MaterialCommunityIcons
               name="office-building-outline"
               size={menuIconSize}
-              style={styles.menuIcon}
+              color={textMainColor}
             />
             <Text style={styles.menuOptionLabel} selectable={false}>
               Clientes
@@ -273,7 +244,7 @@ export default function SideBar() {
           {/* Veículos */}
           <Pressable
             style={(state: any) => [
-              styles.menuOption,
+              globalStyles.menuOption,
               Platform.OS === "web" &&
                 state.hovered && {
                   backgroundColor: "rgba(255,255,255,0.2)",
@@ -294,7 +265,7 @@ export default function SideBar() {
             <MaterialCommunityIcons
               name="truck-outline"
               size={menuIconSize}
-              style={styles.menuIcon}
+              color={textMainColor}
             />
             <Text style={styles.menuOptionLabel} selectable={false}>
               Veículos
@@ -311,7 +282,7 @@ export default function SideBar() {
           {/* PDF */}
           <Pressable
             style={(state: any) => [
-              styles.menuOption,
+              globalStyles.menuOption,
               Platform.OS === "web" &&
                 state.hovered && {
                   backgroundColor: "rgba(255,255,255,0.2)",
@@ -323,7 +294,7 @@ export default function SideBar() {
             <FontAwesome6
               name="file-pdf"
               size={menuIconSize}
-              style={styles.menuIcon}
+              color={textMainColor}
             />
             <Text style={styles.menuOptionLabel} selectable={false}>
               PDF
@@ -333,7 +304,7 @@ export default function SideBar() {
           {/* Excel */}
           <Pressable
             style={(state: any) => [
-              styles.menuOption,
+              globalStyles.menuOption,
               Platform.OS === "web" &&
                 state.hovered && {
                   backgroundColor: "rgba(255,255,255,0.2)",
@@ -345,7 +316,7 @@ export default function SideBar() {
             <MaterialCommunityIcons
               name="microsoft-excel"
               size={menuIconSize}
-              style={styles.menuIcon}
+              color={textMainColor}
             />
             <Text style={styles.menuOptionLabel} selectable={false}>
               Excel
@@ -380,7 +351,7 @@ export default function SideBar() {
           </Text>
         </Pressable> */}
         <Text style={styles.version} selectable={false}>
-          V0.5.0
+          V0.6.0
         </Text>
       </ScrollView>
     </View>

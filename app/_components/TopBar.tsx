@@ -8,9 +8,9 @@ import {
   Platform,
 } from "react-native";
 import { Entypo, Feather, FontAwesome6 } from "@expo/vector-icons";
-import { useAuth } from "../../../context/auth";
+import { useAuth } from "../../context/auth";
 import { router } from "expo-router";
-import { useLoading } from "../../../context/providers/loading";
+import { useLoading } from "../../context/providers/loading";
 
 export default function TopBar() {
   const { showLoading, hideLoading } = useLoading();
@@ -50,7 +50,9 @@ export default function TopBar() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.userName}>{usuario?.nome || "Carregando..."}</Text>
+      <Text style={styles.userName}>
+        {(usuario && usuario.nome.trim().split(/\s+/)[0]) || "Carregando..."}
+      </Text>
 
       <Pressable
         style={styles.userButton}
