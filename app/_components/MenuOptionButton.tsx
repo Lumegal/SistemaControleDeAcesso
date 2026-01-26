@@ -12,15 +12,15 @@ interface MenuOptionButtonProps {
   hoverStyle?: StyleProp<ViewStyle>;
   pressedStyle?: StyleProp<ViewStyle>;
   labelStyle: StyleProp<TextStyle>;
-  label: string;
+  label: string | React.ReactNode;
   icon?: React.ReactNode;
   onPress: () => void;
 }
 
 export function MenuOptionButton({
   containerStyle,
-  hoverStyle = { backgroundColor: "rgba(255,255,255,0.2)" },
-  pressedStyle = { backgroundColor: "rgba(255,255,255,0.5)" },
+  hoverStyle = { opacity: 0.7 },
+  pressedStyle = { opacity: 0.5 },
   labelStyle,
   label,
   icon,

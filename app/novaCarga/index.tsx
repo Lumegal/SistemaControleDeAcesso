@@ -2,8 +2,11 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Text, View, TextInput, StyleSheet, Pressable } from "react-native";
 import { FormTitle } from "../_components/FormTitle";
+import { getGlobalStyles } from "../../globalStyles";
 
 export default function NovaCarga() {
+  const globalStyles = getGlobalStyles();
+
   const [tipoOperacao, setTipoOperacao] = useState<
     "carregamento" | "descarregamento" | null
   >(null);
@@ -11,47 +14,6 @@ export default function NovaCarga() {
   const checkboxSize: number = 24;
 
   const styles = StyleSheet.create({
-    formContainer: {
-      justifyContent: "flex-start",
-      flex: 1,
-      paddingHorizontal: 12,
-      gap: 40,
-    },
-    formRow: {
-      flexDirection: "row",
-      padding: 24,
-      gap: 40,
-      justifyContent: "space-evenly",
-    },
-    labelInputContainer: {
-      flex: 1,
-      gap: 5,
-    },
-    labelText: {
-      fontWeight: 500,
-      fontSize: 24,
-    },
-    inputText: {
-      borderWidth: 1,
-      borderColor: "#aaa",
-      borderRadius: 5,
-      padding: 10,
-      fontSize: 24,
-    },
-    button: {
-      minWidth: 150,
-      padding: 12,
-      borderRadius: 10,
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "row",
-      gap: 10,
-    },
-    buttonText: {
-      color: "white",
-      fontWeight: 600,
-      fontSize: 20,
-    },
     checkboxRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -89,16 +51,16 @@ export default function NovaCarga() {
         }
         title="Nova Carga"
       />
-      <View style={styles.formContainer}>
-        <View style={styles.formRow}>
+      <View style={globalStyles.formContainer}>
+        <View style={globalStyles.formRow}>
           {/* <View style={styles.labelInputContainer}>
             <Text style={styles.labelText}>DATA</Text>
             <TextInput style={styles.inputText} />
           </View> */}
 
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>EMPRESA*</Text>
-            <TextInput style={styles.inputText} />
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>EMPRESA*</Text>
+            <TextInput style={globalStyles.inputText} />
           </View>
 
           {/* <View style={styles.labelInputContainer}>
@@ -106,21 +68,21 @@ export default function NovaCarga() {
             <TextInput style={styles.inputText} />
           </View> */}
 
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>PLACA*</Text>
-            <TextInput style={styles.inputText} />
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>PLACA*</Text>
+            <TextInput style={globalStyles.inputText} />
           </View>
         </View>
 
-        <View style={styles.formRow}>
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>MOTORISTA*</Text>
-            <TextInput style={styles.inputText} />
+        <View style={globalStyles.formRow}>
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>MOTORISTA*</Text>
+            <TextInput style={globalStyles.inputText} />
           </View>
 
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>AJUDANTE</Text>
-            <TextInput style={styles.inputText} />
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>Nº DA NOTA FISCAL*</Text>
+            <TextInput style={globalStyles.inputText} />
           </View>
 
           {/* <View style={styles.labelInputContainer}>
@@ -129,14 +91,9 @@ export default function NovaCarga() {
           </View> */}
         </View>
 
-        <View style={styles.formRow}>
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>Nº DA NOTA FISCAL*</Text>
-            <TextInput style={styles.inputText} />
-          </View>
-
-          <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>
+        <View style={globalStyles.formRow}>
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>
               CARREGAMENTO / DESCARREGAMENTO*
             </Text>
 
@@ -181,9 +138,16 @@ export default function NovaCarga() {
           </View>
         </View>
 
-        <View style={[styles.formRow, { justifyContent: "flex-end", gap: 50 }]}>
-          <Pressable style={[styles.button, { backgroundColor: "#4cad4c" }]}>
-            <Text style={styles.buttonText} selectable={false}>
+        <View
+          style={[
+            globalStyles.formRow,
+            { justifyContent: "flex-end", gap: 50 },
+          ]}
+        >
+          <Pressable
+            style={[globalStyles.button, { backgroundColor: "#4cad4c" }]}
+          >
+            <Text style={globalStyles.buttonText} selectable={false}>
               Salvar
             </Text>
             <Feather name="check-circle" size={24} color="white" />

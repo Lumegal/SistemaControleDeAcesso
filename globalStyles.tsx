@@ -21,5 +21,46 @@ export const getGlobalStyles = () => {
         },
       }),
     },
+    formContainer: {
+      justifyContent: "flex-start",
+      flex: 1,
+      paddingHorizontal: 12,
+      gap: 40,
+    },
+    formRow: {
+      flexDirection: "row",
+      padding: 24,
+      gap: 40,
+      justifyContent: "space-evenly",
+    },
+    labelInputContainer: {
+      flex: 1,
+      gap: 5,
+    },
+    labelText: {
+      fontWeight: 500,
+      fontSize: 24,
+    },
+    inputText: {
+      borderWidth: 1,
+      borderColor: "#aaa",
+      borderRadius: 5,
+      padding: 10,
+      fontSize: 24,
+    },
+    button: {
+      minWidth: 150,
+      padding: 12,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 10,
+    },
+    buttonText: {
+      color: "white",
+      fontWeight: 600,
+      fontSize: 20,
+    },
   });
 };

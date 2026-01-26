@@ -5,6 +5,9 @@ import { useLocalSearchParams } from "expo-router";
 import SideBar from "../_components/SideBar";
 import TopBar from "../_components/TopBar";
 import Cargas from "../cargas";
+import Motoristas from "../motoristas";
+import Clientes from "../clientes";
+import Veiculos from "../veiculos";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -30,11 +33,16 @@ export default function Main() {
             <Cargas />
           )}
 
-          {params.pageName === "cadastros" && params.subPage === "motoristas"}
+          {params.pageName === "cadastros" &&
+            params.subPage === "motoristas" && <Motoristas />}
 
-          {params.pageName === "cadastros" && params.subPage === "clientes"}
+          {params.pageName === "cadastros" && params.subPage === "clientes" && (
+            <Clientes />
+          )}
 
-          {params.pageName === "cadastros" && params.subPage === "veiculos"}
+          {params.pageName === "cadastros" && params.subPage === "veiculos" && (
+            <Veiculos />
+          )}
         </View>
       </View>
     </View>

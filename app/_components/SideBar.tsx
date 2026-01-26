@@ -135,6 +135,8 @@ export default function SideBar() {
           {/* Nova carga */}
           <MenuOptionButton
             containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
             labelStyle={styles.menuOptionLabel}
             label="Nova carga"
             icon={
@@ -159,6 +161,8 @@ export default function SideBar() {
           {/* Cargas */}
           <MenuOptionButton
             containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
             labelStyle={styles.menuOptionLabel}
             label="Cargas"
             icon={
@@ -189,6 +193,8 @@ export default function SideBar() {
           {/* Motoristas */}
           <MenuOptionButton
             containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
             labelStyle={styles.menuOptionLabel}
             label="Motoristas"
             icon={
@@ -211,15 +217,19 @@ export default function SideBar() {
           />
 
           {/* Clientes */}
-          <Pressable
-            style={(state: any) => [
-              globalStyles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+            labelStyle={styles.menuOptionLabel}
+            label="Clientes"
+            icon={
+              <MaterialCommunityIcons
+                name="office-building-outline"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
             onPress={() => {
               console.log("Clientes");
               router.push({
@@ -230,27 +240,22 @@ export default function SideBar() {
                 },
               });
             }}
-          >
-            <MaterialCommunityIcons
-              name="office-building-outline"
-              size={menuIconSize}
-              color={textMainColor}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Clientes
-            </Text>
-          </Pressable>
+          />
 
           {/* Veículos */}
-          <Pressable
-            style={(state: any) => [
-              globalStyles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+            labelStyle={styles.menuOptionLabel}
+            label="Veículos"
+            icon={
+              <MaterialCommunityIcons
+                name="truck-outline"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
             onPress={() => {
               console.log("Motoristas");
               router.push({
@@ -261,16 +266,7 @@ export default function SideBar() {
                 },
               });
             }}
-          >
-            <MaterialCommunityIcons
-              name="truck-outline"
-              size={menuIconSize}
-              color={textMainColor}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Veículos
-            </Text>
-          </Pressable>
+          />
         </View>
 
         {/* Relatórios */}
@@ -280,48 +276,56 @@ export default function SideBar() {
           </Text>
 
           {/* PDF */}
-          <Pressable
-            style={(state: any) => [
-              globalStyles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+            labelStyle={styles.menuOptionLabel}
+            label="PDF"
+            icon={
+              <FontAwesome6
+                name="file-pdf"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
+            onPress={() => {
+              console.log("PDF");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "relatorios",
+                  subPage: "pdf",
                 },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
-            onPress={() => console.log("PDF")}
-          >
-            <FontAwesome6
-              name="file-pdf"
-              size={menuIconSize}
-              color={textMainColor}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              PDF
-            </Text>
-          </Pressable>
+              });
+            }}
+          />
 
           {/* Excel */}
-          <Pressable
-            style={(state: any) => [
-              globalStyles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
+          <MenuOptionButton
+            containerStyle={globalStyles.menuOption}
+            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+            labelStyle={styles.menuOptionLabel}
+            label="Excel"
+            icon={
+              <MaterialCommunityIcons
+                name="microsoft-excel"
+                size={menuIconSize}
+                color={textMainColor}
+              />
+            }
+            onPress={() => {
+              console.log("Excel");
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "relatorios",
+                  subPage: "excel",
                 },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
-            onPress={() => console.log("Excel")}
-          >
-            <MaterialCommunityIcons
-              name="microsoft-excel"
-              size={menuIconSize}
-              color={textMainColor}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Excel
-            </Text>
-          </Pressable>
+              });
+            }}
+          />
         </View>
 
         {/* <Pressable
@@ -351,7 +355,7 @@ export default function SideBar() {
           </Text>
         </Pressable> */}
         <Text style={styles.version} selectable={false}>
-          V0.6.0
+          V0.7.0
         </Text>
       </ScrollView>
     </View>
