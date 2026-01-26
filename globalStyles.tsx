@@ -24,26 +24,30 @@ export const getGlobalStyles = () => {
     formContainer: {
       justifyContent: "flex-start",
       flex: 1,
-      paddingHorizontal: 12,
-      gap: 40,
+      margin: 24,
+      gap: 40
     },
     formRow: {
       flexDirection: "row",
-      padding: 24,
       gap: 40,
       justifyContent: "space-evenly",
     },
     labelInputContainer: {
       flex: 1,
       gap: 5,
+      backgroundColor: "white",
+      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
+      padding: 12,
+      borderRadius: 10,
     },
     labelText: {
       fontWeight: 500,
       fontSize: 24,
     },
     inputText: {
+      backgroundColor: "white",
       borderWidth: 1,
-      borderColor: "#aaa",
+      borderColor: "#7c7c7c",
       borderRadius: 5,
       padding: 10,
       fontSize: 24,
