@@ -15,13 +15,14 @@ import {
   MaterialCommunityIcons,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MenuOptionButton } from "./MenuOptionButton";
 import { getGlobalStyles } from "../../globalStyles";
 
 export default function SideBar() {
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
+  const params = useLocalSearchParams();
 
   const globalStyles = getGlobalStyles();
 
@@ -54,6 +55,7 @@ export default function SideBar() {
       color: textMainColor,
       fontSize: 18,
       fontWeight: 600,
+      marginBottom: 5,
     },
     menuOptionLabel: {
       color: textMainColor,
@@ -134,16 +136,34 @@ export default function SideBar() {
 
           {/* Nova carga */}
           <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            containerStyle={[
+              globalStyles.menuOption,
+              {
+                backgroundColor:
+                  params.subPage === "novaCarga" ? textMainColor : colors.blue,
+              },
+            ]}
+            hoverStyle={[
+              params.subPage === "novaCarga"
+                ? {}
+                : { backgroundColor: "rgba(255,255,255,0.2)" },
+            ]}
             pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
+            labelStyle={[
+              styles.menuOptionLabel,
+              {
+                color:
+                  params.subPage === "novaCarga" ? colors.blue : textMainColor,
+              },
+            ]}
             label="Nova carga"
             icon={
               <MaterialIcons
                 name="add-circle-outline"
                 size={menuIconSize}
-                color={textMainColor}
+                color={
+                  params.subPage === "novaCarga" ? colors.blue : textMainColor
+                }
               />
             }
             onPress={() => {
@@ -160,16 +180,34 @@ export default function SideBar() {
 
           {/* Cargas */}
           <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+            containerStyle={[
+              globalStyles.menuOption,
+              {
+                backgroundColor:
+                  params.subPage === "cargas" ? textMainColor : colors.blue,
+              },
+            ]}
+            hoverStyle={[
+              params.subPage === "cargas"
+                ? {}
+                : { backgroundColor: "rgba(255,255,255,0.2)" },
+            ]}
             pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
+            labelStyle={[
+              styles.menuOptionLabel,
+              {
+                color:
+                  params.subPage === "cargas" ? colors.blue : textMainColor,
+              },
+            ]}
             label="Cargas"
             icon={
               <Feather
                 name="package"
                 size={menuIconSize}
-                color={textMainColor}
+                color={
+                  params.subPage === "cargas" ? colors.blue : textMainColor
+                }
               />
             }
             onPress={() =>
@@ -355,7 +393,7 @@ export default function SideBar() {
           </Text>
         </Pressable> */}
         <Text style={styles.version} selectable={false}>
-          V0.8.1
+          V0.8.2
         </Text>
       </ScrollView>
     </View>

@@ -50,7 +50,7 @@ export default function TopBar() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.userName}>
+      <Text style={styles.userName} selectable={false}>
         {(usuario && usuario.nome.trim().split(/\s+/)[0]) || "Carregando..."}
       </Text>
 
