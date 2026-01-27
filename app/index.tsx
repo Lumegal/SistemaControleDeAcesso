@@ -24,20 +24,9 @@ export default function Login() {
   const [senha, setSenha] = useState(" ");
   const [isSenhaVisible, setIsSenhaVisible] = useState<boolean>(false);
 
-  const [empresas, setEmpresas] = useState<IEmpresa[]>([]);
-
   useEffect(() => {
-    const getData = async () => {
-      try {
-        setEmpresas(await getAllEmpresa());
-        await logout();
-      } catch (erro: any) {
-        alert(erro.message);
-      }
-    };
-
-    getData();
-  }, []);
+    logout();
+  }, [logout]);
 
   const handleLogin = async () => {
     try {
@@ -120,7 +109,15 @@ export default function Login() {
 
         <TouchableOpacity
           style={[styles.button, { maxWidth: 300 }]}
-          onPress={() => router.push("/main")}
+          onPress={() =>
+            router.push({
+              pathname: "/main",
+              params: {
+                pageName: "operacoes",
+                subPage: "novaCarga",
+              },
+            })
+          }
         >
           <Text style={styles.buttonText}>Entrar sem login</Text>
         </TouchableOpacity>
