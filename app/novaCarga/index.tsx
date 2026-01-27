@@ -3,13 +3,21 @@ import { useState } from "react";
 import { Text, View, TextInput, StyleSheet, Pressable } from "react-native";
 import { FormTitle } from "../_components/FormTitle";
 import { getGlobalStyles } from "../../globalStyles";
+import { MenuOptionButton } from "../_components/MenuOptionButton";
 
 export default function NovaCarga() {
   const globalStyles = getGlobalStyles();
+  const now = new Date();
+  const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
 
+  const [chegada, setChegada] = useState(nowLocal);
   const [tipoOperacao, setTipoOperacao] = useState<
     "carregamento" | "descarregamento" | null
   >(null);
+
+  console.log(chegada);
 
   const checkboxSize: number = 24;
 
@@ -53,10 +61,17 @@ export default function NovaCarga() {
       />
       <View style={globalStyles.formContainer}>
         <View style={globalStyles.formRow}>
-          {/* <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>DATA</Text>
-            <TextInput style={styles.inputText} />
-          </View> */}
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText}>CHEGADA*</Text>
+            <input
+              value={chegada}
+              type="datetime-local"
+              style={globalStyles.inputText}
+              onChange={(data) => {
+                setChegada(data.target.value);
+              }}
+            />
+          </View>
 
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText}>EMPRESA*</Text>
@@ -81,7 +96,7 @@ export default function NovaCarga() {
           </View>
 
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>Nº DA NOTA FISCAL*</Text>
+            <Text style={globalStyles.labelText}>Nº DA NOTA FISCAL</Text>
             <TextInput style={globalStyles.inputText} />
           </View>
 
@@ -144,14 +159,22 @@ export default function NovaCarga() {
             { justifyContent: "flex-end", gap: 50 },
           ]}
         >
-          <Pressable
-            style={[globalStyles.button, { backgroundColor: "#4cad4c" }]}
-          >
-            <Text style={globalStyles.buttonText} selectable={false}>
-              Salvar
-            </Text>
-            <Feather name="check-circle" size={24} color="white" />
-          </Pressable>
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: "#4cad4c" },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Salvar
+                </Text>
+                <Feather name="check-circle" size={24} color="white" />
+              </View>
+            }
+            onPress={() => {}}
+          />
 
           {/* <Pressable style={[styles.button, { backgroundColor: "#DB2114" }]}>
             <Text style={styles.buttonText}>Cancelar</Text>

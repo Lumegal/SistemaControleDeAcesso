@@ -25,7 +25,7 @@ export const getGlobalStyles = () => {
       justifyContent: "flex-start",
       flex: 1,
       margin: 24,
-      gap: 40
+      gap: 40,
     },
     formRow: {
       flexDirection: "row",
@@ -65,6 +65,62 @@ export const getGlobalStyles = () => {
       color: "white",
       fontWeight: 600,
       fontSize: 20,
+    },
+
+    // Tabela
+    mainContainer: {
+      borderRadius: 5,
+      padding: 15,
+      flexDirection: "row",
+      gap: 20,
+      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
+      backgroundColor: "white",
+    },
+    dataLabelInputContainer: {
+      flex: 1,
+    },
+    dataLabelContainer: {
+      flexDirection: "row",
+      gap: 5,
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    dataLabelText: {
+      fontSize: 18,
+      fontWeight: 600,
+    },
+    tableHeader: {
+      flex: 1,
+      fontSize: 18,
+      fontWeight: 600,
+      textAlign: "center",
+    },
+    tableRegister: {
+      flexDirection: "row",
+      minHeight: 150,
+      borderBottomWidth: 1,
+      borderColor: "#ccc",
+    },
+    tableColumn: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    tableColumnText: {
+      fontSize: 22,
+      fontWeight: 400,
+    },
+    tableDataRow: {
+      flexDirection: "row",
+      flex: 1,
+      alignItems: "center",
+      padding: 8,
+      borderBottomWidth: 1,
+      borderColor: "#ccc",
+    },
+    tableDataRowText: {
+      flex: 1,
+      color: "black",
     },
   });
 };

@@ -37,27 +37,6 @@ export default function Cargas() {
   };
 
   const styles = StyleSheet.create({
-    mainContainer: {
-      borderRadius: 5,
-      padding: 15,
-      flexDirection: "row",
-      gap: 20,
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
-      backgroundColor: "white",
-    },
-    dataLabelInputContainer: {
-      flex: 1,
-    },
-    dataLabelContainer: {
-      flexDirection: "row",
-      gap: 5,
-      alignItems: "center",
-      marginBottom: 10,
-    },
-    dataLabelText: {
-      fontSize: 18,
-      fontWeight: 600,
-    },
     // dataInput: {
     //   borderWidth: 1,
     //   borderColor: "#949494",
@@ -85,39 +64,6 @@ export default function Cargas() {
       alignItems: "center",
       justifyContent: "center",
     },
-    tableHeader: {
-      flex: 1,
-      fontSize: 18,
-      fontWeight: 600,
-      textAlign: "center",
-    },
-    tableRegister: {
-      flexDirection: "row",
-      minHeight: 150,
-      borderBottomWidth: 1,
-      borderColor: "#ccc",
-    },
-    tableColumn: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    tableColumnText: {
-      fontSize: 22,
-      fontWeight: 400,
-    },
-    tableDataRow: {
-      flexDirection: "row",
-      flex: 1,
-      alignItems: "center",
-      padding: 8,
-      borderBottomWidth: 1,
-      borderColor: "#ccc",
-    },
-    tableDataRowText: {
-      flex: 1,
-      color: "black",
-    },
   });
   return (
     <>
@@ -126,21 +72,21 @@ export default function Cargas() {
         title="Cargas"
       />
       <View style={{ margin: 24, gap: 20, flex: 1 }}>
-        <View style={styles.mainContainer}>
-          <View style={styles.dataLabelInputContainer}>
-            <View style={styles.dataLabelContainer}>
+        <View style={globalStyles.mainContainer}>
+          <View style={globalStyles.dataLabelInputContainer}>
+            <View style={globalStyles.dataLabelContainer}>
               <FontAwesome name="calendar-o" size={24} color="black" />
-              <Text style={styles.dataLabelText} selectable={false}>
+              <Text style={globalStyles.dataLabelText} selectable={false}>
                 Data Inicial
               </Text>
             </View>
             <input type="datetime-local" style={dataInputStyle} />
           </View>
 
-          <View style={styles.dataLabelInputContainer}>
-            <View style={styles.dataLabelContainer}>
+          <View style={globalStyles.dataLabelInputContainer}>
+            <View style={globalStyles.dataLabelContainer}>
               <FontAwesome name="calendar-o" size={24} color="black" />
-              <Text style={styles.dataLabelText} selectable={false}>
+              <Text style={globalStyles.dataLabelText} selectable={false}>
                 Data Final
               </Text>
             </View>
@@ -189,7 +135,7 @@ export default function Cargas() {
         <View style={{ flex: 1 }}>
           <ScrollView
             style={[
-              styles.mainContainer,
+              globalStyles.mainContainer,
               {
                 flexDirection: "column",
                 padding: 0,
@@ -200,75 +146,75 @@ export default function Cargas() {
           >
             <View
               style={[
-                styles.mainContainer,
+                globalStyles.mainContainer,
                 { height: 70, alignItems: "center" },
               ]}
             >
-              <Text style={styles.tableHeader}>DATA</Text>
-              <Text style={styles.tableHeader}>HORÁRIOS</Text>
-              <Text style={styles.tableHeader}>EMPRESA</Text>
-              <Text style={styles.tableHeader}>PLACA</Text>
-              <Text style={styles.tableHeader}>MOTORISTA</Text>
-              <Text style={styles.tableHeader}>Nº NF</Text>
-              <Text style={styles.tableHeader}>C/D</Text>
-              <Text style={styles.tableHeader}>AÇÕES</Text>
+              <Text style={globalStyles.tableHeader}>DATA</Text>
+              <Text style={globalStyles.tableHeader}>HORÁRIOS</Text>
+              <Text style={globalStyles.tableHeader}>EMPRESA</Text>
+              <Text style={globalStyles.tableHeader}>PLACA</Text>
+              <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
+              <Text style={globalStyles.tableHeader}>Nº NF</Text>
+              <Text style={globalStyles.tableHeader}>C/D</Text>
+              <Text style={globalStyles.tableHeader}>AÇÕES</Text>
             </View>
 
             {registrosDemo.map((registro) => (
-              <View key={registro.id} style={styles.tableRegister}>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>{registro.data}</Text>
+              <View key={registro.id} style={globalStyles.tableRegister}>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>{registro.data}</Text>
                 </View>
                 <View
                   style={[
-                    styles.tableColumn,
+                    globalStyles.tableColumn,
                     {
                       alignItems: "stretch",
                     },
                   ]}
                 >
-                  <View style={[styles.tableDataRow]}>
+                  <View style={[globalStyles.tableDataRow]}>
                     <Text
-                      style={[styles.tableColumnText, styles.tableDataRowText]}
+                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
                     >
                       Chegada:
                     </Text>
                     <Text
                       style={[
-                        styles.tableColumnText,
-                        styles.tableDataRowText,
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
                         { textAlign: "right" },
                       ]}
                     >
                       {registro.horarios.chegada}
                     </Text>
                   </View>
-                  <View style={[styles.tableDataRow]}>
+                  <View style={[globalStyles.tableDataRow]}>
                     <Text
-                      style={[styles.tableColumnText, styles.tableDataRowText]}
+                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
                     >
                       Entrada:
                     </Text>
                     <Text
                       style={[
-                        styles.tableColumnText,
-                        styles.tableDataRowText,
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
                         { textAlign: "right" },
                       ]}
                     >
                       {registro.horarios.entrada}
                     </Text>
                   </View>
-                  <View style={[styles.tableDataRow]}>
+                  <View style={[globalStyles.tableDataRow, { borderBottomWidth: 0 }]}>
                     <Text
-                      style={[styles.tableColumnText, styles.tableDataRowText]}
+                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
                     >
                       Saída:
                     </Text>
                     <Text
                       style={[
-                        styles.tableColumnText,
-                        styles.tableDataRowText,
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
                         { textAlign: "right" },
                       ]}
                     >
@@ -276,26 +222,26 @@ export default function Cargas() {
                     </Text>
                   </View>
                 </View>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>{registro.empresa}</Text>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>{registro.empresa}</Text>
                 </View>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>{registro.placa}</Text>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>{registro.placa}</Text>
                 </View>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>
                     {registro.motorista}
                   </Text>
                 </View>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>{registro.nf}</Text>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>{registro.nf}</Text>
                 </View>
-                <View style={styles.tableColumn}>
-                  <Text style={styles.tableColumnText}>{registro.tipo}</Text>
+                <View style={globalStyles.tableColumn}>
+                  <Text style={globalStyles.tableColumnText}>{registro.tipo}</Text>
                 </View>
                 <View
                   style={[
-                    styles.tableColumn,
+                    globalStyles.tableColumn,
                     { flexDirection: "row", gap: 20 },
                   ]}
                 >
