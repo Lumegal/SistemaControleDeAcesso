@@ -11,7 +11,7 @@ interface MenuOptionButtonProps {
   containerStyle: StyleProp<ViewStyle>;
   hoverStyle?: StyleProp<ViewStyle>;
   pressedStyle?: StyleProp<ViewStyle>;
-  labelStyle: StyleProp<TextStyle>;
+  labelStyle?: StyleProp<TextStyle>;
   label: string | React.ReactNode;
   icon?: React.ReactNode;
   onPress: () => void;

@@ -1,8 +1,8 @@
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Text, View, TextInput, StyleSheet, Pressable } from "react-native";
-import { FormTitle } from "../_components/FormTitle";
-import { getGlobalStyles } from "../../globalStyles";
+import FormTitle from "../_components/FormTitle";
+import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import { MenuOptionButton } from "../_components/MenuOptionButton";
 
 export default function NovaCarga() {
@@ -16,8 +16,6 @@ export default function NovaCarga() {
   const [tipoOperacao, setTipoOperacao] = useState<
     "carregamento" | "descarregamento" | null
   >(null);
-
-  console.log(chegada);
 
   const checkboxSize: number = 24;
 
@@ -62,11 +60,13 @@ export default function NovaCarga() {
       <View style={globalStyles.formContainer}>
         <View style={globalStyles.formRow}>
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>CHEGADA*</Text>
+            <Text style={globalStyles.labelText} selectable={false}>
+              CHEGADA*
+            </Text>
             <input
               value={chegada}
               type="datetime-local"
-              style={globalStyles.inputText}
+              style={dataInputStyle}
               onChange={(data) => {
                 setChegada(data.target.value);
               }}
@@ -74,8 +74,10 @@ export default function NovaCarga() {
           </View>
 
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>EMPRESA*</Text>
-            <TextInput style={globalStyles.inputText} />
+            <Text style={globalStyles.labelText} selectable={false}>
+              EMPRESA*
+            </Text>
+            <TextInput style={globalStyles.input} />
           </View>
 
           {/* <View style={styles.labelInputContainer}>
@@ -84,20 +86,26 @@ export default function NovaCarga() {
           </View> */}
 
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>PLACA*</Text>
-            <TextInput style={globalStyles.inputText} />
+            <Text style={globalStyles.labelText} selectable={false}>
+              PLACA*
+            </Text>
+            <TextInput style={globalStyles.input} />
           </View>
         </View>
 
         <View style={globalStyles.formRow}>
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>MOTORISTA*</Text>
-            <TextInput style={globalStyles.inputText} />
+            <Text style={globalStyles.labelText} selectable={false}>
+              MOTORISTA*
+            </Text>
+            <TextInput style={globalStyles.input} />
           </View>
 
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>Nº DA NOTA FISCAL</Text>
-            <TextInput style={globalStyles.inputText} />
+            <Text style={globalStyles.labelText} selectable={false}>
+              Nº DA NOTA FISCAL
+            </Text>
+            <TextInput style={globalStyles.input} />
           </View>
 
           {/* <View style={styles.labelInputContainer}>
@@ -108,7 +116,7 @@ export default function NovaCarga() {
 
         <View style={globalStyles.formRow}>
           <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText}>
+            <Text style={globalStyles.labelText} selectable={false}>
               CARREGAMENTO / DESCARREGAMENTO*
             </Text>
 
@@ -128,7 +136,9 @@ export default function NovaCarga() {
                     <Feather name="check" size={checkboxSize} color="white" />
                   )}
                 </View>
-                <Text style={styles.checkboxLabel}>Carregamento</Text>
+                <Text style={styles.checkboxLabel} selectable={false}>
+                  Carregamento
+                </Text>
               </Pressable>
 
               {/* Descarregamento */}
@@ -147,7 +157,9 @@ export default function NovaCarga() {
                     <Feather name="check" size={checkboxSize} color="white" />
                   )}
                 </View>
-                <Text style={styles.checkboxLabel}>Descarregamento</Text>
+                <Text style={styles.checkboxLabel} selectable={false}>
+                  Descarregamento
+                </Text>
               </Pressable>
             </View>
           </View>

@@ -8,8 +8,6 @@ import {
 import { getGlobalStyles } from "../globalStyles";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/auth";
-import { getAllEmpresa } from "../services/empresa";
-import { IEmpresa } from "../interfaces/empresa";
 import { colors } from "../colors";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -20,13 +18,13 @@ export default function Login() {
   const globalStyles = getGlobalStyles();
   const { showLoading, hideLoading } = useLoading();
 
-  const [email, setEmail] = useState(" ");
-  const [senha, setSenha] = useState(" ");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [isSenhaVisible, setIsSenhaVisible] = useState<boolean>(false);
 
   useEffect(() => {
     logout();
-  }, [logout]);
+  }, []);
 
   const handleLogin = async () => {
     try {

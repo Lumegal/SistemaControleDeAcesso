@@ -5,10 +5,9 @@ import {
   View,
   TextInput,
   StyleSheet,
-  Pressable,
   ScrollView,
 } from "react-native";
-import { FormTitle } from "../_components/FormTitle";
+import FormTitle from "../_components/FormTitle";
 import { getGlobalStyles } from "../../globalStyles";
 import { MenuOptionButton } from "../_components/MenuOptionButton";
 
@@ -67,17 +66,17 @@ export default function NovaCarga() {
         <View style={globalStyles.formRow}>
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText}>NOME*</Text>
-            <TextInput style={globalStyles.inputText} />
+            <TextInput style={globalStyles.input} />
           </View>
 
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText}>RG/CPF*</Text>
-            <TextInput style={globalStyles.inputText} />
+            <TextInput style={globalStyles.input} />
           </View>
 
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText}>CELULAR</Text>
-            <TextInput style={globalStyles.inputText} />
+            <TextInput style={globalStyles.input} />
           </View>
         </View>
 
@@ -161,7 +160,6 @@ export default function NovaCarga() {
                       paddingVertical: 7,
                       borderRadius: 10,
                     }}
-                    labelStyle={{}}
                     label={<Feather name="edit" size={35} color="white" />}
                     onPress={() => {}}
                   />
@@ -172,7 +170,6 @@ export default function NovaCarga() {
                       paddingVertical: 8,
                       borderRadius: 10,
                     }}
-                    labelStyle={{}}
                     label={
                       <FontAwesome name="trash-o" size={37} color="white" />
                     }

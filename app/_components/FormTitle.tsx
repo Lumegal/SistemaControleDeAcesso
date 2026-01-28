@@ -7,7 +7,7 @@ interface FormTitleProps {
   titleStyle?: StyleProp<TextStyle>;
 }
 
-export function FormTitle({
+export default function FormTitle({
   icon,
   title,
   containerStyle,

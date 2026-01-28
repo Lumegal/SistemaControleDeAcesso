@@ -3,11 +3,11 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { FormTitle } from "../_components/FormTitle";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { MenuOptionButton } from "../_components/MenuOptionButton";
-import { getGlobalStyles } from "../../globalStyles";
+import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import { colors } from "../../colors";
+import FormTitle from "../_components/FormTitle";
 
 export default function Cargas() {
   const globalStyles = getGlobalStyles();
@@ -27,14 +27,6 @@ export default function Cargas() {
     nf: "123456789",
     tipo: "Carregamento",
   }));
-
-  const dataInputStyle = {
-    border: "1px solid #949494",
-    borderRadius: 10,
-    minHeight: 28,
-    padding: "10px",
-    fontSize: 20,
-  };
 
   const styles = StyleSheet.create({
     // dataInput: {
@@ -163,7 +155,9 @@ export default function Cargas() {
             {registrosDemo.map((registro) => (
               <View key={registro.id} style={globalStyles.tableRegister}>
                 <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>{registro.data}</Text>
+                  <Text style={globalStyles.tableColumnText}>
+                    {registro.data}
+                  </Text>
                 </View>
                 <View
                   style={[
@@ -175,7 +169,10 @@ export default function Cargas() {
                 >
                   <View style={[globalStyles.tableDataRow]}>
                     <Text
-                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
+                      style={[
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
+                      ]}
                     >
                       Chegada:
                     </Text>
@@ -191,7 +188,10 @@ export default function Cargas() {
                   </View>
                   <View style={[globalStyles.tableDataRow]}>
                     <Text
-                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
+                      style={[
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
+                      ]}
                     >
                       Entrada:
                     </Text>
@@ -205,9 +205,17 @@ export default function Cargas() {
                       {registro.horarios.entrada}
                     </Text>
                   </View>
-                  <View style={[globalStyles.tableDataRow, { borderBottomWidth: 0 }]}>
+                  <View
+                    style={[
+                      globalStyles.tableDataRow,
+                      { borderBottomWidth: 0 },
+                    ]}
+                  >
                     <Text
-                      style={[globalStyles.tableColumnText, globalStyles.tableDataRowText]}
+                      style={[
+                        globalStyles.tableColumnText,
+                        globalStyles.tableDataRowText,
+                      ]}
                     >
                       Saída:
                     </Text>
@@ -223,10 +231,14 @@ export default function Cargas() {
                   </View>
                 </View>
                 <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>{registro.empresa}</Text>
+                  <Text style={globalStyles.tableColumnText}>
+                    {registro.empresa}
+                  </Text>
                 </View>
                 <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>{registro.placa}</Text>
+                  <Text style={globalStyles.tableColumnText}>
+                    {registro.placa}
+                  </Text>
                 </View>
                 <View style={globalStyles.tableColumn}>
                   <Text style={globalStyles.tableColumnText}>
@@ -234,10 +246,14 @@ export default function Cargas() {
                   </Text>
                 </View>
                 <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>{registro.nf}</Text>
+                  <Text style={globalStyles.tableColumnText}>
+                    {registro.nf}
+                  </Text>
                 </View>
                 <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>{registro.tipo}</Text>
+                  <Text style={globalStyles.tableColumnText}>
+                    {registro.tipo}
+                  </Text>
                 </View>
                 <View
                   style={[
@@ -252,7 +268,6 @@ export default function Cargas() {
                       paddingVertical: 7,
                       borderRadius: 10,
                     }}
-                    labelStyle={{}}
                     label={<Feather name="edit" size={35} color="white" />}
                     onPress={() => {}}
                   />
@@ -263,7 +278,6 @@ export default function Cargas() {
                       paddingVertical: 8,
                       borderRadius: 10,
                     }}
-                    labelStyle={{}}
                     label={
                       <FontAwesome name="trash-o" size={37} color="white" />
                     }

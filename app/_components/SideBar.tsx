@@ -210,15 +210,16 @@ export default function SideBar() {
                 }
               />
             }
-            onPress={() =>
+            onPress={() => {
+              console.log("Cargas");
               router.push({
                 pathname: "/main",
                 params: {
                   pageName: "operacoes",
                   subPage: "cargas",
                 },
-              })
-            }
+              });
+            }}
           />
         </View>
 
@@ -393,7 +394,7 @@ export default function SideBar() {
           </Text>
         </Pressable> */}
         <Text style={styles.version} selectable={false}>
-          V0.8.3
+          V0.8.4
         </Text>
       </ScrollView>
     </View>

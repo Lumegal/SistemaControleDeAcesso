@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { FormTitle } from "../_components/FormTitle";
+import FormTitle from "../_components/FormTitle";
 
 export default function Veiculos() {
   return (

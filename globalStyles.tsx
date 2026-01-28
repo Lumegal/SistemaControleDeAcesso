@@ -35,6 +35,7 @@ export const getGlobalStyles = () => {
     labelInputContainer: {
       flex: 1,
       gap: 5,
+      justifyContent: "space-evenly",
       backgroundColor: "white",
       boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
       padding: 12,
@@ -44,13 +45,13 @@ export const getGlobalStyles = () => {
       fontWeight: 500,
       fontSize: 24,
     },
-    inputText: {
-      backgroundColor: "white",
+    input: {
       borderWidth: 1,
-      borderColor: "#7c7c7c",
-      borderRadius: 5,
+      borderRadius: 10,
+      borderColor: "#949494",
+      minHeight: 28,
       padding: 10,
-      fontSize: 24,
+      fontSize: 20,
     },
     button: {
       minWidth: 150,
@@ -123,4 +124,12 @@ export const getGlobalStyles = () => {
       color: "black",
     },
   });
+};
+
+export const dataInputStyle = {
+  border: "1px solid #949494",
+  borderRadius: 10,
+  minHeight: 28,
+  padding: "10px",
+  fontSize: 20,
 };
