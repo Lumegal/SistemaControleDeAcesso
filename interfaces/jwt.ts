@@ -2,5 +2,6 @@ export interface IJwtPayload {
   sub: number;
   email: string;
   nome: string;
-  exp: number
+  nivelDeAcesso: number;
+  exp: number;
 }

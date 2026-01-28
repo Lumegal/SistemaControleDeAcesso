@@ -14,7 +14,7 @@ import { router } from "expo-router";
 import { useLoading } from "../context/providers/loading";
 
 export default function Login() {
-  const { login, logout } = useAuth();
+  const { login, logout, usuario } = useAuth();
   const globalStyles = getGlobalStyles();
   const { showLoading, hideLoading } = useLoading();
 
@@ -29,15 +29,31 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       showLoading();
-      await login({ email, senha });
 
-      router.push({
-        pathname: "/main",
-        params: {
-          pageName: "operacoes",
-          subPage: "novaCarga",
-        },
-      });
+      const usuarioLogado = await login({ email, senha });
+
+      if (
+        usuarioLogado.nivelDeAcesso === 1 ||
+        usuarioLogado.nivelDeAcesso === 2
+      ) {
+        router.push({
+          pathname: "/main",
+          params: {
+            pageName: "operacoes",
+            subPage: "novaCarga",
+          },
+        });
+      }
+
+      if (usuarioLogado.nivelDeAcesso === 3) {
+        router.push({
+          pathname: "/main",
+          params: {
+            pageName: "operacoes",
+            subPage: "cargas",
+          },
+        });
+      }
     } catch (erro: any) {
       alert(erro.message);
     } finally {

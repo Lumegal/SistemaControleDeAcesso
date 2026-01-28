@@ -75,12 +75,12 @@ export default function TopBar() {
           },
         ]}
       >
-        <Pressable style={styles.option}>
+        {/* <Pressable style={styles.option}>
           <Text style={styles.optionText} selectable={false}>
             Meu perfil
           </Text>
           <FontAwesome6 name="user" size={24} color="black" />
-        </Pressable>
+        </Pressable> */}
 
         <Pressable
           style={(state: any) => [

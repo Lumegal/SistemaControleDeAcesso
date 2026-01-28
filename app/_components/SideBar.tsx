@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   ScrollView,
-  Pressable,
   Platform,
   Image,
 } from "react-native";
@@ -18,8 +17,10 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { MenuOptionButton } from "./MenuOptionButton";
 import { getGlobalStyles } from "../../globalStyles";
+import { useAuth } from "../../context/auth";
 
 export default function SideBar() {
+  const { usuario } = useAuth();
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
   const params = useLocalSearchParams();
@@ -87,7 +88,6 @@ export default function SideBar() {
       color: textMainColor,
       textAlign: "center",
       opacity: 0.7,
-      marginTop: "auto",
     },
   });
 
@@ -135,48 +135,54 @@ export default function SideBar() {
           </Text>
 
           {/* Nova carga */}
-          <MenuOptionButton
-            containerStyle={[
-              globalStyles.menuOption,
-              {
-                backgroundColor:
-                  params.subPage === "novaCarga" ? textMainColor : colors.blue,
-              },
-            ]}
-            hoverStyle={[
-              params.subPage === "novaCarga"
-                ? {}
-                : { backgroundColor: "rgba(255,255,255,0.2)" },
-            ]}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={[
-              styles.menuOptionLabel,
-              {
-                color:
-                  params.subPage === "novaCarga" ? colors.blue : textMainColor,
-              },
-            ]}
-            label="Nova carga"
-            icon={
-              <MaterialIcons
-                name="add-circle-outline"
-                size={menuIconSize}
-                color={
-                  params.subPage === "novaCarga" ? colors.blue : textMainColor
-                }
-              />
-            }
-            onPress={() => {
-              console.log("Nova carga");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "operacoes",
-                  subPage: "novaCarga",
+          {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+            <MenuOptionButton
+              containerStyle={[
+                globalStyles.menuOption,
+                {
+                  backgroundColor:
+                    params.subPage === "novaCarga"
+                      ? textMainColor
+                      : colors.blue,
                 },
-              });
-            }}
-          />
+              ]}
+              hoverStyle={[
+                params.subPage === "novaCarga"
+                  ? {}
+                  : { backgroundColor: "rgba(255,255,255,0.2)" },
+              ]}
+              pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+              labelStyle={[
+                styles.menuOptionLabel,
+                {
+                  color:
+                    params.subPage === "novaCarga"
+                      ? colors.blue
+                      : textMainColor,
+                },
+              ]}
+              label="Nova carga"
+              icon={
+                <MaterialIcons
+                  name="add-circle-outline"
+                  size={menuIconSize}
+                  color={
+                    params.subPage === "novaCarga" ? colors.blue : textMainColor
+                  }
+                />
+              }
+              onPress={() => {
+                console.log("Nova carga");
+                router.push({
+                  pathname: "/main",
+                  params: {
+                    pageName: "operacoes",
+                    subPage: "novaCarga",
+                  },
+                });
+              }}
+            />
+          )}
 
           {/* Cargas */}
           <MenuOptionButton
@@ -223,178 +229,168 @@ export default function SideBar() {
           />
         </View>
 
-        {/* Cadastros */}
-        <View style={styles.menuSection}>
-          <Text style={styles.menuSectionLabel} selectable={false}>
-            Cadastros
-          </Text>
+        {usuario?.nivelDeAcesso === 1 && (
+          <>
+            {/* Cadastros */}
+            <View style={styles.menuSection}>
+              <Text style={styles.menuSectionLabel} selectable={false}>
+                Cadastros
+              </Text>
 
-          {/* Motoristas */}
-          <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
-            label="Motoristas"
-            icon={
-              <FontAwesome
-                name="drivers-license-o"
-                size={menuIconSize}
-                color={textMainColor}
+              {/* Motoristas */}
+              <MenuOptionButton
+                containerStyle={globalStyles.menuOption}
+                hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                labelStyle={styles.menuOptionLabel}
+                label="Motoristas"
+                icon={
+                  <FontAwesome
+                    name="drivers-license-o"
+                    size={menuIconSize}
+                    color={textMainColor}
+                  />
+                }
+                onPress={() => {
+                  console.log("Motoristas");
+                  router.push({
+                    pathname: "/main",
+                    params: {
+                      pageName: "cadastros",
+                      subPage: "motoristas",
+                    },
+                  });
+                }}
               />
-            }
-            onPress={() => {
-              console.log("Motoristas");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "cadastros",
-                  subPage: "motoristas",
-                },
-              });
-            }}
-          />
 
-          {/* Clientes */}
-          <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
-            label="Clientes"
-            icon={
-              <MaterialCommunityIcons
-                name="office-building-outline"
-                size={menuIconSize}
-                color={textMainColor}
+              {/* Clientes */}
+              <MenuOptionButton
+                containerStyle={globalStyles.menuOption}
+                hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                labelStyle={styles.menuOptionLabel}
+                label="Clientes"
+                icon={
+                  <MaterialCommunityIcons
+                    name="office-building-outline"
+                    size={menuIconSize}
+                    color={textMainColor}
+                  />
+                }
+                onPress={() => {
+                  console.log("Clientes");
+                  router.push({
+                    pathname: "/main",
+                    params: {
+                      pageName: "cadastros",
+                      subPage: "clientes",
+                    },
+                  });
+                }}
               />
-            }
-            onPress={() => {
-              console.log("Clientes");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "cadastros",
-                  subPage: "clientes",
-                },
-              });
-            }}
-          />
 
-          {/* Veículos */}
-          <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
-            label="Veículos"
-            icon={
-              <MaterialCommunityIcons
-                name="truck-outline"
-                size={menuIconSize}
-                color={textMainColor}
+              {/* Veículos */}
+              <MenuOptionButton
+                containerStyle={globalStyles.menuOption}
+                hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                labelStyle={styles.menuOptionLabel}
+                label="Veículos"
+                icon={
+                  <MaterialCommunityIcons
+                    name="truck-outline"
+                    size={menuIconSize}
+                    color={textMainColor}
+                  />
+                }
+                onPress={() => {
+                  console.log("Motoristas");
+                  router.push({
+                    pathname: "/main",
+                    params: {
+                      pageName: "cadastros",
+                      subPage: "veiculos",
+                    },
+                  });
+                }}
               />
-            }
-            onPress={() => {
-              console.log("Motoristas");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "cadastros",
-                  subPage: "veiculos",
-                },
-              });
-            }}
-          />
-        </View>
+            </View>
 
-        {/* Relatórios */}
-        <View style={styles.menuSection}>
-          <Text style={styles.menuSectionLabel} selectable={false}>
-            Relatórios
-          </Text>
+            {/* Relatórios */}
+            <View style={styles.menuSection}>
+              <Text style={styles.menuSectionLabel} selectable={false}>
+                Relatórios
+              </Text>
 
-          {/* PDF */}
-          <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
-            label="PDF"
-            icon={
-              <FontAwesome6
-                name="file-pdf"
-                size={menuIconSize}
-                color={textMainColor}
+              {/* PDF */}
+              <MenuOptionButton
+                containerStyle={globalStyles.menuOption}
+                hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                labelStyle={styles.menuOptionLabel}
+                label="PDF"
+                icon={
+                  <FontAwesome6
+                    name="file-pdf"
+                    size={menuIconSize}
+                    color={textMainColor}
+                  />
+                }
+                onPress={() => {
+                  console.log("PDF");
+                  router.push({
+                    pathname: "/main",
+                    params: {
+                      pageName: "relatorios",
+                      subPage: "pdf",
+                    },
+                  });
+                }}
               />
-            }
-            onPress={() => {
-              console.log("PDF");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "relatorios",
-                  subPage: "pdf",
-                },
-              });
-            }}
-          />
 
-          {/* Excel */}
-          <MenuOptionButton
-            containerStyle={globalStyles.menuOption}
-            hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-            pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-            labelStyle={styles.menuOptionLabel}
-            label="Excel"
-            icon={
-              <MaterialCommunityIcons
-                name="microsoft-excel"
-                size={menuIconSize}
-                color={textMainColor}
+              {/* Excel */}
+              <MenuOptionButton
+                containerStyle={globalStyles.menuOption}
+                hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                labelStyle={styles.menuOptionLabel}
+                label="Excel"
+                icon={
+                  <MaterialCommunityIcons
+                    name="microsoft-excel"
+                    size={menuIconSize}
+                    color={textMainColor}
+                  />
+                }
+                onPress={() => {
+                  console.log("Excel");
+                  router.push({
+                    pathname: "/main",
+                    params: {
+                      pageName: "relatorios",
+                      subPage: "excel",
+                    },
+                  });
+                }}
               />
-            }
-            onPress={() => {
-              console.log("Excel");
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "relatorios",
-                  subPage: "excel",
-                },
-              });
-            }}
-          />
-        </View>
+            </View>
+          </>
+        )}
 
-        {/* <Pressable
-          style={(state: any) => [
-            styles.logoutButton,
-            Platform.OS === "web" &&
-              state.hovered && {
-                backgroundColor: "rgba(255, 0, 0, 0.8)",
-              },
-            state.pressed && { backgroundColor: "rgba(209, 25, 25, 0.8)" },
-          ]}
-          onPress={async () => {
-            try {
-              setCarregando(true);
-              await logout();
-              router.push("/");
-            } catch (erro: any) {
-              alert(erro.message);
-            } finally {
-              setCarregando(false);
-            }
-          }}
+        <Text
+          style={[styles.version, { marginTop: "auto" }]}
+          selectable={false}
         >
-          <Feather name="log-out" size={menuIconSize} style={styles.menuIcon} />
-          <Text style={styles.menuOptionLabel} selectable={false}>
-            Logout
-          </Text>
-        </Pressable> */}
+          {usuario?.nivelDeAcesso === 1
+            ? "ADM"
+            : usuario?.nivelDeAcesso === 2
+              ? "EDIT"
+              : usuario?.nivelDeAcesso === 3
+                ? "VIEW"
+                : ""}
+        </Text>
         <Text style={styles.version} selectable={false}>
-          V0.8.4
+          V0.9.0
         </Text>
       </ScrollView>
     </View>

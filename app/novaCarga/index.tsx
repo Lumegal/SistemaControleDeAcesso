@@ -80,11 +80,7 @@ export default function NovaCarga() {
             <TextInput style={globalStyles.input} />
           </View>
 
-          {/* <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>MARCA</Text>
-            <TextInput style={styles.inputText} />
-          </View> */}
-
+          {/* Placa */}
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText} selectable={false}>
               PLACA*
@@ -94,6 +90,7 @@ export default function NovaCarga() {
         </View>
 
         <View style={globalStyles.formRow}>
+          {/* Motorista */}
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText} selectable={false}>
               MOTORISTA*
@@ -101,6 +98,24 @@ export default function NovaCarga() {
             <TextInput style={globalStyles.input} />
           </View>
 
+          {/* RG/CPF */}
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText} selectable={false}>
+              RG/CPF*
+            </Text>
+            <TextInput style={globalStyles.input} />
+          </View>
+
+          {/* Celular */}
+          <View style={globalStyles.labelInputContainer}>
+            <Text style={globalStyles.labelText} selectable={false}>
+              CELULAR*
+            </Text>
+            <TextInput style={globalStyles.input} />
+          </View>
+        </View>
+
+        <View style={globalStyles.formRow}>
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText} selectable={false}>
               Nº DA NOTA FISCAL
@@ -108,13 +123,7 @@ export default function NovaCarga() {
             <TextInput style={globalStyles.input} />
           </View>
 
-          {/* <View style={styles.labelInputContainer}>
-            <Text style={styles.labelText}>Destino</Text>
-            <TextInput style={styles.inputText} />
-          </View> */}
-        </View>
-
-        <View style={globalStyles.formRow}>
+          {/* Carregamento/Descarregamento */}
           <View style={globalStyles.labelInputContainer}>
             <Text style={globalStyles.labelText} selectable={false}>
               CARREGAMENTO / DESCARREGAMENTO*

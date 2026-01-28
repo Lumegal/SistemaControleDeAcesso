@@ -14,14 +14,16 @@ import { IJwtPayload } from "../interfaces/jwt";
 interface IAuthContext {
   isAuthenticated: boolean;
   usuario: IJwtPayload | null;
-  login: (usuario: ILoginRequest) => Promise<void>;
+  login: (usuario: ILoginRequest) => Promise<IJwtPayload>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<IAuthContext>({
   isAuthenticated: false,
   usuario: null,
-  login: async () => {},
+  login: async (_usuario: ILoginRequest) => {
+    throw new Error("AuthProvider não encontrado");
+  },
   logout: async () => {},
 });
 
@@ -75,6 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     setUsuario(decoded);
     setIsAuthenticated(true);
+
+    return decoded;
   };
 
   const logout = async () => {
