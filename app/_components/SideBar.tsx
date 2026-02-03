@@ -390,7 +390,7 @@ export default function SideBar() {
                 : ""}
         </Text>
         <Text style={styles.version} selectable={false}>
-          V0.10.0
+          V0.10.1
         </Text>
       </ScrollView>
     </View>

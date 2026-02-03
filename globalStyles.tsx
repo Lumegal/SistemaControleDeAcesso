@@ -23,9 +23,12 @@ export const getGlobalStyles = () => {
     },
     formContainer: {
       justifyContent: "flex-start",
-      flex: 1,
       margin: 24,
+      padding: 24,
       gap: 40,
+      borderRadius: 10,
+      backgroundColor: "white",
+      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
     },
     formRow: {
       flexDirection: "row",
@@ -37,7 +40,6 @@ export const getGlobalStyles = () => {
       gap: 5,
       justifyContent: "space-evenly",
       backgroundColor: "white",
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
       padding: 12,
       borderRadius: 10,
     },
