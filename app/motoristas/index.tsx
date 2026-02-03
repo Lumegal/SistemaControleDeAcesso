@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import FormTitle from "../_components/FormTitle";
 import { getGlobalStyles } from "../../globalStyles";
-import { MenuOptionButton } from "../_components/MenuOptionButton";
+import MenuOptionButton from "../_components/MenuOptionButton";
 
 export default function NovaCarga() {
   const globalStyles = getGlobalStyles();

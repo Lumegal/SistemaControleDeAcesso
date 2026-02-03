@@ -4,29 +4,40 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { MenuOptionButton } from "../_components/MenuOptionButton";
+import MenuOptionButton from "../_components/MenuOptionButton";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import { colors } from "../../colors";
-import FormTitle from "../_components/FormTitle";
+import { useEffect, useState } from "react";
+import { ICarga } from "../../interfaces/carga";
+import { getCargas } from "../../services/cargas";
+import { useLoading } from "../../context/providers/loading";
 
 export default function Cargas() {
   const globalStyles = getGlobalStyles();
+  const [cargas, setCargas] = useState<ICarga[]>([]);
+  const { showLoading, hideLoading } = useLoading();
 
-  // Array só para demonstração, repetindo o mesmo registro 10 vezes
-  const registrosDemo = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    data: "01/01/2026",
-    horarios: {
-      chegada: "08:00",
-      entrada: "09:00",
-      saida: "10:00",
-    },
-    empresa: "Trópico",
-    placa: "ABC-1234",
-    motorista: "João Batista",
-    nf: "123456789",
-    tipo: "Carregamento",
-  }));
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        showLoading();
+        const resultado: ICarga[] = await getCargas();
+
+        const ordenado = resultado.sort(
+          (a, b) => b.chegada.getTime() - a.chegada.getTime(),
+        );
+
+        setCargas(ordenado);
+        console.log(ordenado);
+      } catch (erro: any) {
+        alert(erro.message);
+      } finally {
+        hideLoading();
+      }
+    };
+
+    getData();
+  }, []);
 
   const styles = StyleSheet.create({
     // dataInput: {
@@ -58,237 +69,235 @@ export default function Cargas() {
     },
   });
   return (
-    <>
-      <FormTitle
-        icon={<Feather name="package" size={40} color={"white"} />}
-        title="Cargas"
-      />
-      <View style={{ margin: 24, gap: 20, flex: 1 }}>
-        <View style={globalStyles.mainContainer}>
-          <View style={globalStyles.dataLabelInputContainer}>
-            <View style={globalStyles.dataLabelContainer}>
-              <FontAwesome name="calendar-o" size={24} color="black" />
-              <Text style={globalStyles.dataLabelText} selectable={false}>
-                Data Inicial
-              </Text>
-            </View>
-            <input type="datetime-local" style={dataInputStyle} />
+    <View style={{ margin: 24, gap: 20, flex: 1 }}>
+      <View style={globalStyles.mainContainer}>
+        <View style={globalStyles.dataLabelInputContainer}>
+          <View style={globalStyles.dataLabelContainer}>
+            <FontAwesome name="calendar-o" size={24} color="black" />
+            <Text style={globalStyles.dataLabelText} selectable={false}>
+              Data Inicial
+            </Text>
           </View>
-
-          <View style={globalStyles.dataLabelInputContainer}>
-            <View style={globalStyles.dataLabelContainer}>
-              <FontAwesome name="calendar-o" size={24} color="black" />
-              <Text style={globalStyles.dataLabelText} selectable={false}>
-                Data Final
-              </Text>
-            </View>
-            <input type="datetime-local" style={dataInputStyle} />
-          </View>
-
-          {/* Filtro */}
-          <MenuOptionButton
-            containerStyle={[
-              globalStyles.button,
-              styles.button,
-              styles.buttonFiltrar,
-            ]}
-            labelStyle={globalStyles.buttonText}
-            label={
-              <View style={styles.buttonLabel}>
-                <Feather name="filter" size={24} color="white" />
-                <Text>Filtrar</Text>
-              </View>
-            }
-            onPress={() => {}}
-          />
-
-          {/* Limpar filtro */}
-          <MenuOptionButton
-            containerStyle={[
-              globalStyles.button,
-              styles.button,
-              styles.buttonLimpar,
-            ]}
-            labelStyle={globalStyles.buttonText}
-            label={
-              <View style={styles.buttonLabel}>
-                <MaterialCommunityIcons
-                  name="cancel"
-                  size={24}
-                  color="#949494"
-                />
-                <Text style={{ color: "#949494" }}>Limpar</Text>
-              </View>
-            }
-            onPress={() => {}}
-          />
+          <input type="datetime-local" style={dataInputStyle} />
         </View>
 
-        <View style={{ flex: 1 }}>
-          <ScrollView
+        <View style={globalStyles.dataLabelInputContainer}>
+          <View style={globalStyles.dataLabelContainer}>
+            <FontAwesome name="calendar-o" size={24} color="black" />
+            <Text style={globalStyles.dataLabelText} selectable={false}>
+              Data Final
+            </Text>
+          </View>
+          <input type="datetime-local" style={dataInputStyle} />
+        </View>
+
+        {/* Filtro */}
+        <MenuOptionButton
+          containerStyle={[
+            globalStyles.button,
+            styles.button,
+            styles.buttonFiltrar,
+          ]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={styles.buttonLabel}>
+              <Feather name="filter" size={24} color="white" />
+              <Text>Filtrar</Text>
+            </View>
+          }
+          onPress={() => {}}
+        />
+
+        {/* Limpar filtro */}
+        <MenuOptionButton
+          containerStyle={[
+            globalStyles.button,
+            styles.button,
+            styles.buttonLimpar,
+          ]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={styles.buttonLabel}>
+              <MaterialCommunityIcons name="cancel" size={24} color="#949494" />
+              <Text style={{ color: "#949494" }}>Limpar</Text>
+            </View>
+          }
+          onPress={() => {}}
+        />
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          style={[
+            globalStyles.mainContainer,
+            {
+              flexDirection: "column",
+              padding: 0,
+              flexGrow: 0,
+            },
+          ]}
+          stickyHeaderIndices={[0]}
+        >
+          <View
             style={[
               globalStyles.mainContainer,
-              {
-                flexDirection: "column",
-                padding: 0,
-                flexGrow: 0,
-              },
+              { height: 70, alignItems: "center" },
             ]}
-            stickyHeaderIndices={[0]}
           >
-            <View
-              style={[
-                globalStyles.mainContainer,
-                { height: 70, alignItems: "center" },
-              ]}
-            >
-              <Text style={globalStyles.tableHeader}>DATA</Text>
-              <Text style={globalStyles.tableHeader}>HORÁRIOS</Text>
-              <Text style={globalStyles.tableHeader}>EMPRESA</Text>
-              <Text style={globalStyles.tableHeader}>PLACA</Text>
-              <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
-              <Text style={globalStyles.tableHeader}>Nº NF</Text>
-              <Text style={globalStyles.tableHeader}>C/D</Text>
-              <Text style={globalStyles.tableHeader}>AÇÕES</Text>
-            </View>
+            <Text style={globalStyles.tableHeader}>DATA</Text>
+            <Text style={globalStyles.tableHeader}>HORÁRIOS</Text>
+            <Text style={globalStyles.tableHeader}>EMPRESA</Text>
+            <Text style={globalStyles.tableHeader}>PLACA</Text>
+            <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
+            <Text style={globalStyles.tableHeader}>Nº NF</Text>
+            <Text style={globalStyles.tableHeader}>C/D</Text>
+            <Text style={globalStyles.tableHeader}>AÇÕES</Text>
+          </View>
 
-            {registrosDemo.map((registro) => (
-              <View key={registro.id} style={globalStyles.tableRegister}>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.data}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    globalStyles.tableColumn,
-                    {
-                      alignItems: "stretch",
-                    },
-                  ]}
-                >
-                  <View style={[globalStyles.tableDataRow]}>
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                      ]}
-                    >
-                      Chegada:
-                    </Text>
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                        { textAlign: "right" },
-                      ]}
-                    >
-                      {registro.horarios.chegada}
-                    </Text>
-                  </View>
-                  <View style={[globalStyles.tableDataRow]}>
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                      ]}
-                    >
-                      Entrada:
-                    </Text>
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                        { textAlign: "right" },
-                      ]}
-                    >
-                      {registro.horarios.entrada}
-                    </Text>
-                  </View>
-                  <View
+          {cargas.map((carga) => (
+            <View key={carga.id} style={globalStyles.tableRegister}>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>
+                  {carga.chegada.toLocaleDateString()}
+                </Text>
+              </View>
+              <View
+                style={[
+                  globalStyles.tableColumn,
+                  {
+                    alignItems: "stretch",
+                  },
+                ]}
+              >
+                <View style={[globalStyles.tableDataRow]}>
+                  <Text
                     style={[
-                      globalStyles.tableDataRow,
-                      { borderBottomWidth: 0 },
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
                     ]}
                   >
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                      ]}
-                    >
-                      Saída:
-                    </Text>
-                    <Text
-                      style={[
-                        globalStyles.tableColumnText,
-                        globalStyles.tableDataRowText,
-                        { textAlign: "right" },
-                      ]}
-                    >
-                      {registro.horarios.saida}
-                    </Text>
-                  </View>
-                </View>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.empresa}
+                    Chegada:
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
+                      { textAlign: "right" },
+                    ]}
+                  >
+                    {carga.chegada.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Text>
                 </View>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.placa}
+                <View style={[globalStyles.tableDataRow]}>
+                  <Text
+                    style={[
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
+                    ]}
+                  >
+                    Entrada:
                   </Text>
-                </View>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.motorista}
-                  </Text>
-                </View>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.nf}
-                  </Text>
-                </View>
-                <View style={globalStyles.tableColumn}>
-                  <Text style={globalStyles.tableColumnText}>
-                    {registro.tipo}
+                  <Text
+                    style={[
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
+                      { textAlign: "right" },
+                    ]}
+                  >
+                    {carga.entrada
+                      ? carga.entrada.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "--"}
                   </Text>
                 </View>
                 <View
-                  style={[
-                    globalStyles.tableColumn,
-                    { flexDirection: "row", gap: 20 },
-                  ]}
+                  style={[globalStyles.tableDataRow, { borderBottomWidth: 0 }]}
                 >
-                  <MenuOptionButton
-                    containerStyle={{
-                      backgroundColor: "#4CA64C",
-                      paddingHorizontal: 10,
-                      paddingVertical: 7,
-                      borderRadius: 10,
-                    }}
-                    label={<Feather name="edit" size={35} color="white" />}
-                    onPress={() => {}}
-                  />
-                  <MenuOptionButton
-                    containerStyle={{
-                      backgroundColor: "#FF4C4C",
-                      paddingHorizontal: 13,
-                      paddingVertical: 8,
-                      borderRadius: 10,
-                    }}
-                    label={
-                      <FontAwesome name="trash-o" size={37} color="white" />
-                    }
-                    onPress={() => {}}
-                  />
+                  <Text
+                    style={[
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
+                    ]}
+                  >
+                    Saída:
+                  </Text>
+                  <Text
+                    style={[
+                      globalStyles.tableColumnText,
+                      globalStyles.tableDataRowText,
+                      { textAlign: "right" },
+                    ]}
+                  >
+                    {carga.saida
+                      ? carga.saida.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "--"}
+                  </Text>
                 </View>
               </View>
-            ))}
-          </ScrollView>
-        </View>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>
+                  {carga.empresa}
+                </Text>
+              </View>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>{carga.placa}</Text>
+              </View>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>
+                  {carga.motorista}
+                </Text>
+              </View>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>
+                  {carga.numeroNotaFiscal ? carga.numeroNotaFiscal : "S/NF"}
+                </Text>
+              </View>
+              <View style={globalStyles.tableColumn}>
+                <Text style={globalStyles.tableColumnText}>
+                  {carga.tipoOperacao === 1
+                    ? "Carregamento"
+                    : "Descarregamento"}
+                </Text>
+              </View>
+              <View
+                style={[
+                  globalStyles.tableColumn,
+                  { flexDirection: "row", gap: 20 },
+                ]}
+              >
+                <MenuOptionButton
+                  containerStyle={{
+                    backgroundColor: "#4CA64C",
+                    paddingHorizontal: 10,
+                    paddingVertical: 7,
+                    borderRadius: 10,
+                  }}
+                  label={<Feather name="edit" size={35} color="white" />}
+                  onPress={() => {}}
+                />
+                <MenuOptionButton
+                  containerStyle={{
+                    backgroundColor: "#FF4C4C",
+                    paddingHorizontal: 13,
+                    paddingVertical: 8,
+                    borderRadius: 10,
+                  }}
+                  label={<FontAwesome name="trash-o" size={37} color="white" />}
+                  onPress={() => {}}
+                />
+              </View>
+            </View>
+          ))}
+        </ScrollView>
       </View>
-    </>
+    </View>
   );
 }

@@ -17,7 +17,7 @@ interface MenuOptionButtonProps {
   onPress: () => void;
 }
 
-export function MenuOptionButton({
+export default function MenuOptionButton({
   containerStyle,
   hoverStyle = { opacity: 0.7 },
   pressedStyle = { opacity: 0.5 },

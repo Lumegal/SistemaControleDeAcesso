@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
 import NovaCarga from "../novaCarga";
 import { useLocalSearchParams } from "expo-router";
@@ -8,10 +8,11 @@ import Cargas from "../cargas";
 import Motoristas from "../motoristas";
 import Clientes from "../clientes";
 import Veiculos from "../veiculos";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import FormTitle from "../_components/FormTitle";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
-  const styles = StyleSheet.create({});
   const params = useLocalSearchParams();
 
   return (
@@ -26,6 +27,27 @@ export default function Main() {
         <SideBar />
         <View style={{ flex: 8 }}>
           <TopBar />
+          {params.pageName === "operacoes" &&
+            params.subPage === "novaCarga" && (
+              <FormTitle
+                icon={
+                  <MaterialIcons
+                    name="add-circle-outline"
+                    size={40}
+                    color={"white"}
+                  />
+                }
+                title="Nova Carga"
+              />
+            )}
+
+          {params.pageName === "operacoes" && params.subPage === "cargas" && (
+            <FormTitle
+              icon={<Feather name="package" size={40} color={"white"} />}
+              title="Cargas"
+            />
+          )}
+
           {params.pageName === "operacoes" &&
             params.subPage === "novaCarga" && <NovaCarga />}
 

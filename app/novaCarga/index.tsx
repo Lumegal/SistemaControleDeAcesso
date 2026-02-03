@@ -1,9 +1,12 @@
-import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { Text, View, TextInput, StyleSheet, Pressable } from "react-native";
-import FormTitle from "../_components/FormTitle";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
-import { MenuOptionButton } from "../_components/MenuOptionButton";
+import MenuOptionButton from "../_components/MenuOptionButton";
+import { createNovaCarga } from "../../services/cargas";
+import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
+import { useLoading } from "../../context/providers/loading";
+import { router } from "expo-router";
 
 export default function NovaCarga() {
   const globalStyles = getGlobalStyles();
@@ -12,10 +15,25 @@ export default function NovaCarga() {
     .toISOString()
     .slice(0, 16);
 
-  const [chegada, setChegada] = useState(nowLocal);
-  const [tipoOperacao, setTipoOperacao] = useState<
-    "carregamento" | "descarregamento" | null
-  >(null);
+  const { showLoading, hideLoading } = useLoading();
+
+  const [form, setForm] = useState<INovaCargaForm>({
+    chegada: nowLocal,
+    empresa: "",
+    placa: "",
+    motorista: "",
+    rgCpf: "",
+    celular: "",
+    numeroNotaFiscal: "",
+    tipoOperacao: null,
+  });
+
+  const updateField = <K extends keyof INovaCargaForm>(
+    field: K,
+    value: INovaCargaForm[K],
+  ) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   const checkboxSize: number = 24;
 
@@ -50,158 +68,187 @@ export default function NovaCarga() {
   });
 
   return (
-    <>
-      <FormTitle
-        icon={
-          <MaterialIcons name="add-circle-outline" size={40} color={"white"} />
-        }
-        title="Nova Carga"
-      />
-      <View style={globalStyles.formContainer}>
-        <View style={globalStyles.formRow}>
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              CHEGADA*
-            </Text>
-            <input
-              value={chegada}
-              type="datetime-local"
-              style={dataInputStyle}
-              onChange={(data) => {
-                setChegada(data.target.value);
-              }}
-            />
-          </View>
-
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              EMPRESA*
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-
-          {/* Placa */}
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              PLACA*
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-        </View>
-
-        <View style={globalStyles.formRow}>
-          {/* Motorista */}
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              MOTORISTA*
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-
-          {/* RG/CPF */}
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              RG/CPF*
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-
-          {/* Celular */}
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              CELULAR*
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-        </View>
-
-        <View style={globalStyles.formRow}>
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              Nº DA NOTA FISCAL
-            </Text>
-            <TextInput style={globalStyles.input} />
-          </View>
-
-          {/* Carregamento/Descarregamento */}
-          <View style={globalStyles.labelInputContainer}>
-            <Text style={globalStyles.labelText} selectable={false}>
-              CARREGAMENTO / DESCARREGAMENTO*
-            </Text>
-
-            <View style={styles.checkboxRow}>
-              {/* Carregamento */}
-              <Pressable
-                style={styles.checkboxOption}
-                onPress={() => setTipoOperacao("carregamento")}
-              >
-                <View
-                  style={[
-                    styles.checkboxBox,
-                    tipoOperacao === "carregamento" && styles.checkboxChecked,
-                  ]}
-                >
-                  {tipoOperacao === "carregamento" && (
-                    <Feather name="check" size={checkboxSize} color="white" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel} selectable={false}>
-                  Carregamento
-                </Text>
-              </Pressable>
-
-              {/* Descarregamento */}
-              <Pressable
-                style={styles.checkboxOption}
-                onPress={() => setTipoOperacao("descarregamento")}
-              >
-                <View
-                  style={[
-                    styles.checkboxBox,
-                    tipoOperacao === "descarregamento" &&
-                      styles.checkboxChecked,
-                  ]}
-                >
-                  {tipoOperacao === "descarregamento" && (
-                    <Feather name="check" size={checkboxSize} color="white" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel} selectable={false}>
-                  Descarregamento
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-
-        <View
-          style={[
-            globalStyles.formRow,
-            { justifyContent: "flex-end", gap: 50 },
-          ]}
-        >
-          <MenuOptionButton
-            containerStyle={[
-              globalStyles.button,
-              { backgroundColor: "#4cad4c" },
-            ]}
-            labelStyle={globalStyles.buttonText}
-            label={
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <Text style={globalStyles.buttonText} selectable={false}>
-                  Salvar
-                </Text>
-                <Feather name="check-circle" size={24} color="white" />
-              </View>
-            }
-            onPress={() => {}}
+    <View style={globalStyles.formContainer}>
+      <View style={globalStyles.formRow}>
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            CHEGADA*
+          </Text>
+          <input
+            value={form.chegada}
+            type="datetime-local"
+            style={dataInputStyle}
+            onChange={(text) => updateField("chegada", text.target.value)}
           />
+        </View>
 
-          {/* <Pressable style={[styles.button, { backgroundColor: "#DB2114" }]}>
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </Pressable> */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            EMPRESA*
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("empresa", text)}
+          />
+        </View>
+
+        {/* Placa */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            PLACA*
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("placa", text)}
+          />
         </View>
       </View>
-    </>
+
+      <View style={globalStyles.formRow}>
+        {/* Motorista */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            MOTORISTA*
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("motorista", text)}
+          />
+        </View>
+
+        {/* RG/CPF */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            RG/CPF*
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("rgCpf", text)}
+          />
+        </View>
+
+        {/* Celular */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            CELULAR*
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("celular", text)}
+          />
+        </View>
+      </View>
+
+      <View style={globalStyles.formRow}>
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            Nº DA NOTA FISCAL
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            onChangeText={(text) => updateField("numeroNotaFiscal", text)}
+          />
+        </View>
+
+        {/* Carregamento/Descarregamento */}
+        <View style={globalStyles.labelInputContainer}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            CARREGAMENTO / DESCARREGAMENTO*
+          </Text>
+
+          <View style={styles.checkboxRow}>
+            {/* Carregamento */}
+            <Pressable
+              style={styles.checkboxOption}
+              onPress={() => updateField("tipoOperacao", "carregamento")}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  form.tipoOperacao === "carregamento" &&
+                    styles.checkboxChecked,
+                ]}
+              >
+                {form.tipoOperacao === "carregamento" && (
+                  <Feather name="check" size={checkboxSize} color="white" />
+                )}
+              </View>
+              <Text style={styles.checkboxLabel} selectable={false}>
+                Carregamento
+              </Text>
+            </Pressable>
+
+            {/* Descarregamento */}
+            <Pressable
+              style={styles.checkboxOption}
+              onPress={() => updateField("tipoOperacao", "descarregamento")}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  form.tipoOperacao === "descarregamento" &&
+                    styles.checkboxChecked,
+                ]}
+              >
+                {form.tipoOperacao === "descarregamento" && (
+                  <Feather name="check" size={checkboxSize} color="white" />
+                )}
+              </View>
+              <Text style={styles.checkboxLabel} selectable={false}>
+                Descarregamento
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+
+      <View
+        style={[globalStyles.formRow, { justifyContent: "flex-end", gap: 50 }]}
+      >
+        <MenuOptionButton
+          containerStyle={[globalStyles.button, { backgroundColor: "#4cad4c" }]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Text style={globalStyles.buttonText} selectable={false}>
+                Salvar
+              </Text>
+              <Feather name="check-circle" size={24} color="white" />
+            </View>
+          }
+          onPress={async () => {
+            try {
+              showLoading();
+              const carga: INovaCarga = {
+                chegada: new Date(form.chegada),
+                empresa: form.empresa,
+                placa: form.placa,
+                motorista: form.motorista,
+                rgCpf: form.rgCpf,
+                celular: form.celular,
+                numeroNotaFiscal: form.numeroNotaFiscal,
+                tipoOperacao: form.tipoOperacao === "carregamento" ? 1 : 2,
+              };
+
+              console.log(carga);
+              const resultado = await createNovaCarga(carga);
+              alert("Carga salva com sucesso!");
+
+              router.push({
+                pathname: "/main",
+                params: {
+                  pageName: "operacoes",
+                  subPage: "novaCarga",
+                },
+              });
+            } catch (erro: any) {
+              alert(erro.message);
+            } finally {
+              hideLoading();
+            }
+          }}
+        />
+      </View>
+    </View>
   );
 }

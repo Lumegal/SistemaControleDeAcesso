@@ -15,7 +15,7 @@ import {
   FontAwesome6,
 } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { MenuOptionButton } from "./MenuOptionButton";
+import MenuOptionButton from "./MenuOptionButton";
 import { getGlobalStyles } from "../../globalStyles";
 import { useAuth } from "../../context/auth";
 
@@ -390,7 +390,7 @@ export default function SideBar() {
                 : ""}
         </Text>
         <Text style={styles.version} selectable={false}>
-          V0.9.0
+          V0.10.0
         </Text>
       </ScrollView>
     </View>
