@@ -1,80 +1,128 @@
-import React, { useState } from "react";
-import { Alert, Modal, Pressable, Text, View, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Modal,
+  Text,
+  Pressable,
+  StyleSheet,
+  Animated,
+} from "react-native";
 
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: "#F194FF",
-  },
-  buttonClose: {
-    backgroundColor: "#2196F3",
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-  },
-});
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+}
 
-export default function EditModal() {
-  const [modalVisible, setModalVisible] = useState(false);
+export default function SimpleModal({
+  visible,
+  onClose,
+  title,
+  children,
+}: Props) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(50)).current;
+
+  const [internalVisible, setInternalVisible] = useState(visible);
+
+  useEffect(() => {
+    if (visible) {
+      setInternalVisible(true);
+
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY, {
+          toValue: 20,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setInternalVisible(false); // desmonta só depois
+      });
+    }
+  }, [visible]);
+
+  if (!internalVisible) return null;
+
   return (
-    <>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
+    <Modal transparent visible animationType="none">
+      <Animated.View
+        style={[
+          styles.backdrop,
+          {
+            opacity, // anima o fundo também
+          },
+        ]}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Hello World!</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={styles.textStyle}>Hide Modal</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-      <Pressable
-        style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.textStyle}>Show Modal</Text>
-      </Pressable>
-    </>
+        {/* clique fora fecha */}
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+
+        <Animated.View
+          style={[
+            styles.container,
+            {
+              opacity,
+              transform: [{ translateY }],
+            },
+          ]}
+        >
+          {title && <Text style={styles.title}>{title}</Text>}
+
+          {children}
+
+          <Pressable style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeText}>Fechar</Text>
+          </Pressable>
+        </Animated.View>
+      </Animated.View>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center", // vertical
+    alignItems: "center", // horizontal
+  },
+  container: {
+    width: "85%",
+    maxWidth: 500,
+    minHeight: 120,
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 8,
+    gap: 20,
+  },
+  title: {
+    fontSize: 28,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  closeButton: {
+    marginTop: 20,
+    alignSelf: "flex-end",
+  },
+  closeText: {
+    fontWeight: "bold",
+  },
+});

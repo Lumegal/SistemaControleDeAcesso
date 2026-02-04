@@ -29,7 +29,8 @@ export default function Main() {
           flexDirection: "row",
         }}
       >
-        {isSidebarVisible && <SideBar closeModal={showHideSideBarModal} />}
+        <SideBar visible={isSidebarVisible} closeModal={showHideSideBarModal} />
+
         <View style={{ flex: 8 }}>
           <TopBar openSideBar={showHideSideBarModal} />
 

@@ -4,8 +4,9 @@ import {
   Text,
   ScrollView,
   Platform,
-  Image,
   Pressable,
+  Animated,
+  Modal,
 } from "react-native";
 import { colors } from "../../colors";
 import {
@@ -14,24 +15,64 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
   FontAwesome6,
-  Entypo,
 } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import MenuOptionButton from "./MenuOptionButton";
 import { getGlobalStyles } from "../../globalStyles";
 import { useAuth } from "../../context/auth";
+import { useRef, useState, useEffect } from "react";
 
 type SideBarProps = {
+  visible: boolean;
   closeModal: () => void;
 };
 
-export default function SideBar({ closeModal }: SideBarProps) {
+export default function SideBar({ closeModal, visible }: SideBarProps) {
   const { usuario } = useAuth();
   const menuIconSize: number = 28;
   const textMainColor: string = "white";
   const params = useLocalSearchParams();
 
   const globalStyles = getGlobalStyles();
+
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(-100)).current;
+
+  const [internalVisible, setInternalVisible] = useState(visible);
+
+  useEffect(() => {
+    if (visible) {
+      setInternalVisible(true);
+
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateX, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateX, {
+          toValue: -100,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setInternalVisible(false); // desmonta só depois
+      });
+    }
+  }, [visible]);
 
   const styles = StyleSheet.create({
     sideBar: {
@@ -40,6 +81,12 @@ export default function SideBar({ closeModal }: SideBarProps) {
       width: "20%",
       height: "100%",
       backgroundColor: colors.blue,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.6)",
+      justifyContent: "center", // vertical
+      alignItems: "flex-start", // horizontal
     },
     logo: {
       width: "100%",
@@ -99,27 +146,38 @@ export default function SideBar({ closeModal }: SideBarProps) {
     },
   });
 
+  if (!internalVisible) return null;
+
   return (
-    <>
-      <Pressable
-        style={{
-          position: "absolute",
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
-          width: "100%",
-          height: "100%",
-          zIndex: 998,
-        }}
-        onPress={closeModal}
-      />
-      <View style={styles.sideBar}>
-        {/* <View style={styles.logo}>
+    <Modal transparent visible={internalVisible} animationType="none">
+      <Animated.View
+        style={[
+          styles.backdrop,
+          {
+            opacity, // anima o fundo também
+          },
+        ]}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
+        <Animated.View
+          style={[
+            styles.sideBar,
+            {
+              opacity,
+              transform: [{ translateX }],
+            },
+          ]}
+        >
+          {/* <View style={styles.logo}>
         <Image
           source={require("../../assets/Logo-Lumegal-Site.jpg")}
           resizeMode="contain"
           style={styles.logoImage}
         />
       </View> */}
-        <Pressable
+
+          {/* Botao de fechar */}
+          {/* <Pressable
           onPress={closeModal}
           style={{
             flexDirection: "row",
@@ -134,10 +192,11 @@ export default function SideBar({ closeModal }: SideBarProps) {
           <Text style={{ fontSize: 20, fontWeight: 600 }} selectable={false}>
             FECHAR
           </Text>
-        </Pressable>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          {/* Principal */}
-          {/* <View style={styles.menuSection}>
+        </Pressable> */}
+
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            {/* Principal */}
+            {/* <View style={styles.menuSection}>
           <Text style={styles.menuSectionLabel} selectable={false}>
             Principal
           </Text>
@@ -163,26 +222,76 @@ export default function SideBar({ closeModal }: SideBarProps) {
           </Pressable>
         </View> */}
 
-          {/* Operações */}
-          <View style={styles.menuSection}>
-            <Text style={styles.menuSectionLabel} selectable={false}>
-              Operações
-            </Text>
+            {/* Operações */}
+            <View style={styles.menuSection}>
+              <Text style={styles.menuSectionLabel} selectable={false}>
+                Operações
+              </Text>
 
-            {/* Nova carga */}
-            {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+              {/* Nova carga */}
+              {(usuario?.nivelDeAcesso === 1 ||
+                usuario?.nivelDeAcesso === 2) && (
+                <MenuOptionButton
+                  containerStyle={[
+                    globalStyles.menuOption,
+                    {
+                      backgroundColor:
+                        params.subPage === "novaCarga"
+                          ? textMainColor
+                          : colors.blue,
+                    },
+                  ]}
+                  hoverStyle={[
+                    params.subPage === "novaCarga"
+                      ? {}
+                      : { backgroundColor: "rgba(255,255,255,0.2)" },
+                  ]}
+                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                  labelStyle={[
+                    styles.menuOptionLabel,
+                    {
+                      color:
+                        params.subPage === "novaCarga"
+                          ? colors.blue
+                          : textMainColor,
+                    },
+                  ]}
+                  label="Nova carga"
+                  icon={
+                    <MaterialIcons
+                      name="add-circle-outline"
+                      size={menuIconSize}
+                      color={
+                        params.subPage === "novaCarga"
+                          ? colors.blue
+                          : textMainColor
+                      }
+                    />
+                  }
+                  onPress={() => {
+                    console.log("Nova carga");
+                    router.push({
+                      pathname: "/main",
+                      params: {
+                        pageName: "operacoes",
+                        subPage: "novaCarga",
+                      },
+                    });
+                  }}
+                />
+              )}
+
+              {/* Cargas */}
               <MenuOptionButton
                 containerStyle={[
                   globalStyles.menuOption,
                   {
                     backgroundColor:
-                      params.subPage === "novaCarga"
-                        ? textMainColor
-                        : colors.blue,
+                      params.subPage === "cargas" ? textMainColor : colors.blue,
                   },
                 ]}
                 hoverStyle={[
-                  params.subPage === "novaCarga"
+                  params.subPage === "cargas"
                     ? {}
                     : { backgroundColor: "rgba(255,255,255,0.2)" },
                 ]}
@@ -191,246 +300,198 @@ export default function SideBar({ closeModal }: SideBarProps) {
                   styles.menuOptionLabel,
                   {
                     color:
-                      params.subPage === "novaCarga"
-                        ? colors.blue
-                        : textMainColor,
+                      params.subPage === "cargas" ? colors.blue : textMainColor,
                   },
                 ]}
-                label="Nova carga"
+                label="Cargas"
                 icon={
-                  <MaterialIcons
-                    name="add-circle-outline"
+                  <Feather
+                    name="package"
                     size={menuIconSize}
                     color={
-                      params.subPage === "novaCarga"
-                        ? colors.blue
-                        : textMainColor
+                      params.subPage === "cargas" ? colors.blue : textMainColor
                     }
                   />
                 }
                 onPress={() => {
-                  console.log("Nova carga");
+                  console.log("Cargas");
                   router.push({
                     pathname: "/main",
                     params: {
                       pageName: "operacoes",
-                      subPage: "novaCarga",
+                      subPage: "cargas",
                     },
                   });
                 }}
               />
+            </View>
+
+            {usuario?.nivelDeAcesso === 1 && (
+              <>
+                {/* Cadastros */}
+                <View style={styles.menuSection}>
+                  <Text style={styles.menuSectionLabel} selectable={false}>
+                    Cadastros
+                  </Text>
+
+                  {/* Motoristas */}
+                  <MenuOptionButton
+                    containerStyle={globalStyles.menuOption}
+                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    labelStyle={styles.menuOptionLabel}
+                    label="Motoristas"
+                    icon={
+                      <FontAwesome
+                        name="drivers-license-o"
+                        size={menuIconSize}
+                        color={textMainColor}
+                      />
+                    }
+                    onPress={() => {
+                      console.log("Motoristas");
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "cadastros",
+                          subPage: "motoristas",
+                        },
+                      });
+                    }}
+                  />
+
+                  {/* Clientes */}
+                  <MenuOptionButton
+                    containerStyle={globalStyles.menuOption}
+                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    labelStyle={styles.menuOptionLabel}
+                    label="Clientes"
+                    icon={
+                      <MaterialCommunityIcons
+                        name="office-building-outline"
+                        size={menuIconSize}
+                        color={textMainColor}
+                      />
+                    }
+                    onPress={() => {
+                      console.log("Clientes");
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "cadastros",
+                          subPage: "clientes",
+                        },
+                      });
+                    }}
+                  />
+
+                  {/* Veículos */}
+                  <MenuOptionButton
+                    containerStyle={globalStyles.menuOption}
+                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    labelStyle={styles.menuOptionLabel}
+                    label="Veículos"
+                    icon={
+                      <MaterialCommunityIcons
+                        name="truck-outline"
+                        size={menuIconSize}
+                        color={textMainColor}
+                      />
+                    }
+                    onPress={() => {
+                      console.log("Motoristas");
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "cadastros",
+                          subPage: "veiculos",
+                        },
+                      });
+                    }}
+                  />
+                </View>
+
+                {/* Relatórios */}
+                <View style={styles.menuSection}>
+                  <Text style={styles.menuSectionLabel} selectable={false}>
+                    Relatórios
+                  </Text>
+
+                  {/* PDF */}
+                  <MenuOptionButton
+                    containerStyle={globalStyles.menuOption}
+                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    labelStyle={styles.menuOptionLabel}
+                    label="PDF"
+                    icon={
+                      <FontAwesome6
+                        name="file-pdf"
+                        size={menuIconSize}
+                        color={textMainColor}
+                      />
+                    }
+                    onPress={() => {
+                      console.log("PDF");
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "relatorios",
+                          subPage: "pdf",
+                        },
+                      });
+                    }}
+                  />
+
+                  {/* Excel */}
+                  <MenuOptionButton
+                    containerStyle={globalStyles.menuOption}
+                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    labelStyle={styles.menuOptionLabel}
+                    label="Excel"
+                    icon={
+                      <MaterialCommunityIcons
+                        name="microsoft-excel"
+                        size={menuIconSize}
+                        color={textMainColor}
+                      />
+                    }
+                    onPress={() => {
+                      console.log("Excel");
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "relatorios",
+                          subPage: "excel",
+                        },
+                      });
+                    }}
+                  />
+                </View>
+              </>
             )}
 
-            {/* Cargas */}
-            <MenuOptionButton
-              containerStyle={[
-                globalStyles.menuOption,
-                {
-                  backgroundColor:
-                    params.subPage === "cargas" ? textMainColor : colors.blue,
-                },
-              ]}
-              hoverStyle={[
-                params.subPage === "cargas"
-                  ? {}
-                  : { backgroundColor: "rgba(255,255,255,0.2)" },
-              ]}
-              pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-              labelStyle={[
-                styles.menuOptionLabel,
-                {
-                  color:
-                    params.subPage === "cargas" ? colors.blue : textMainColor,
-                },
-              ]}
-              label="Cargas"
-              icon={
-                <Feather
-                  name="package"
-                  size={menuIconSize}
-                  color={
-                    params.subPage === "cargas" ? colors.blue : textMainColor
-                  }
-                />
-              }
-              onPress={() => {
-                console.log("Cargas");
-                router.push({
-                  pathname: "/main",
-                  params: {
-                    pageName: "operacoes",
-                    subPage: "cargas",
-                  },
-                });
-              }}
-            />
-          </View>
-
-          {usuario?.nivelDeAcesso === 1 && (
-            <>
-              {/* Cadastros */}
-              <View style={styles.menuSection}>
-                <Text style={styles.menuSectionLabel} selectable={false}>
-                  Cadastros
-                </Text>
-
-                {/* Motoristas */}
-                <MenuOptionButton
-                  containerStyle={globalStyles.menuOption}
-                  hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={styles.menuOptionLabel}
-                  label="Motoristas"
-                  icon={
-                    <FontAwesome
-                      name="drivers-license-o"
-                      size={menuIconSize}
-                      color={textMainColor}
-                    />
-                  }
-                  onPress={() => {
-                    console.log("Motoristas");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "cadastros",
-                        subPage: "motoristas",
-                      },
-                    });
-                  }}
-                />
-
-                {/* Clientes */}
-                <MenuOptionButton
-                  containerStyle={globalStyles.menuOption}
-                  hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={styles.menuOptionLabel}
-                  label="Clientes"
-                  icon={
-                    <MaterialCommunityIcons
-                      name="office-building-outline"
-                      size={menuIconSize}
-                      color={textMainColor}
-                    />
-                  }
-                  onPress={() => {
-                    console.log("Clientes");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "cadastros",
-                        subPage: "clientes",
-                      },
-                    });
-                  }}
-                />
-
-                {/* Veículos */}
-                <MenuOptionButton
-                  containerStyle={globalStyles.menuOption}
-                  hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={styles.menuOptionLabel}
-                  label="Veículos"
-                  icon={
-                    <MaterialCommunityIcons
-                      name="truck-outline"
-                      size={menuIconSize}
-                      color={textMainColor}
-                    />
-                  }
-                  onPress={() => {
-                    console.log("Motoristas");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "cadastros",
-                        subPage: "veiculos",
-                      },
-                    });
-                  }}
-                />
-              </View>
-
-              {/* Relatórios */}
-              <View style={styles.menuSection}>
-                <Text style={styles.menuSectionLabel} selectable={false}>
-                  Relatórios
-                </Text>
-
-                {/* PDF */}
-                <MenuOptionButton
-                  containerStyle={globalStyles.menuOption}
-                  hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={styles.menuOptionLabel}
-                  label="PDF"
-                  icon={
-                    <FontAwesome6
-                      name="file-pdf"
-                      size={menuIconSize}
-                      color={textMainColor}
-                    />
-                  }
-                  onPress={() => {
-                    console.log("PDF");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "relatorios",
-                        subPage: "pdf",
-                      },
-                    });
-                  }}
-                />
-
-                {/* Excel */}
-                <MenuOptionButton
-                  containerStyle={globalStyles.menuOption}
-                  hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={styles.menuOptionLabel}
-                  label="Excel"
-                  icon={
-                    <MaterialCommunityIcons
-                      name="microsoft-excel"
-                      size={menuIconSize}
-                      color={textMainColor}
-                    />
-                  }
-                  onPress={() => {
-                    console.log("Excel");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "relatorios",
-                        subPage: "excel",
-                      },
-                    });
-                  }}
-                />
-              </View>
-            </>
-          )}
-
-          <Text
-            style={[styles.version, { marginTop: "auto" }]}
-            selectable={false}
-          >
-            {usuario?.nivelDeAcesso === 1
-              ? "ADM"
-              : usuario?.nivelDeAcesso === 2
-                ? "EDIT"
-                : usuario?.nivelDeAcesso === 3
-                  ? "VIEW"
-                  : ""}
-          </Text>
-          <Text style={styles.version} selectable={false}>
-            V0.11.0
-          </Text>
-        </ScrollView>
-      </View>
-    </>
+            <Text
+              style={[styles.version, { marginTop: "auto" }]}
+              selectable={false}
+            >
+              {usuario?.nivelDeAcesso === 1
+                ? "ADM"
+                : usuario?.nivelDeAcesso === 2
+                  ? "EDIT"
+                  : usuario?.nivelDeAcesso === 3
+                    ? "VIEW"
+                    : ""}
+            </Text>
+            <Text style={styles.version} selectable={false}>
+              V0.12.0
+            </Text>
+          </ScrollView>
+        </Animated.View>
+      </Animated.View>
+    </Modal>
   );
 }
