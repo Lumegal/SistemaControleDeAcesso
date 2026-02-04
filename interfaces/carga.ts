@@ -33,5 +33,5 @@ export interface INovaCargaForm {
   rgCpf: string;
   celular: string;
   numeroNotaFiscal: string;
-  tipoOperacao: "carregamento" | "descarregamento" | null;
+  tipoOperacao: number;
 }

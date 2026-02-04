@@ -25,7 +25,7 @@ export default function NovaCarga() {
     rgCpf: "",
     celular: "",
     numeroNotaFiscal: "",
-    tipoOperacao: null,
+    tipoOperacao: 0,
   });
 
   const updateField = <K extends keyof INovaCargaForm>(
@@ -34,6 +34,8 @@ export default function NovaCarga() {
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  console.log(form.tipoOperacao);
 
   const checkboxSize: number = 24;
 
@@ -160,16 +162,15 @@ export default function NovaCarga() {
             {/* Carregamento */}
             <Pressable
               style={styles.checkboxOption}
-              onPress={() => updateField("tipoOperacao", "carregamento")}
+              onPress={() => updateField("tipoOperacao", 1)}
             >
               <View
                 style={[
                   styles.checkboxBox,
-                  form.tipoOperacao === "carregamento" &&
-                    styles.checkboxChecked,
+                  form.tipoOperacao === 1 && styles.checkboxChecked,
                 ]}
               >
-                {form.tipoOperacao === "carregamento" && (
+                {form.tipoOperacao === 1 && (
                   <Feather name="check" size={checkboxSize} color="white" />
                 )}
               </View>
@@ -181,16 +182,15 @@ export default function NovaCarga() {
             {/* Descarregamento */}
             <Pressable
               style={styles.checkboxOption}
-              onPress={() => updateField("tipoOperacao", "descarregamento")}
+              onPress={() => updateField("tipoOperacao", 2)}
             >
               <View
                 style={[
                   styles.checkboxBox,
-                  form.tipoOperacao === "descarregamento" &&
-                    styles.checkboxChecked,
+                  form.tipoOperacao === 2 && styles.checkboxChecked,
                 ]}
               >
-                {form.tipoOperacao === "descarregamento" && (
+                {form.tipoOperacao === 2 && (
                   <Feather name="check" size={checkboxSize} color="white" />
                 )}
               </View>
@@ -227,7 +227,7 @@ export default function NovaCarga() {
                 rgCpf: form.rgCpf,
                 celular: form.celular,
                 numeroNotaFiscal: form.numeroNotaFiscal,
-                tipoOperacao: form.tipoOperacao === "carregamento" ? 1 : 2,
+                tipoOperacao: form.tipoOperacao,
               };
 
               console.log(carga);

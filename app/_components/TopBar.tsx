@@ -7,15 +7,27 @@ import {
   Animated,
   Platform,
 } from "react-native";
-import { Entypo, Feather, FontAwesome6 } from "@expo/vector-icons";
+import {
+  Entypo,
+  Feather,
+  FontAwesome6,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useAuth } from "../../context/auth";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useLoading } from "../../context/providers/loading";
+import FormTitle from "./FormTitle";
+import { colors } from "../../colors";
 
-export default function TopBar() {
+type TopBarProps = {
+  openSideBar: () => void;
+}
+
+export default function TopBar({openSideBar}: TopBarProps) {
   const { showLoading, hideLoading } = useLoading();
   const { usuario, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const params = useLocalSearchParams();
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-10)).current;
@@ -50,17 +62,41 @@ export default function TopBar() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.userName} selectable={false}>
-        {(usuario && usuario.nome.trim().split(/\s+/)[0]) || "Carregando..."}
-      </Text>
+      <Pressable style={[styles.titleContainer]} onPress={openSideBar}>
+        <Entypo name="menu" size={40} color="white" />
+        {params.pageName === "operacoes" && params.subPage === "novaCarga" && (
+          <>
+            <MaterialIcons
+              name="add-circle-outline"
+              size={40}
+              color={"white"}
+            />
+            <Text style={[styles.title]} selectable={false}>
+              {"Nova Carga"}
+            </Text>
+          </>
+        )}
+
+        {params.pageName === "operacoes" && params.subPage === "cargas" && (
+          <>
+            <Feather name="package" size={40} color={"white"} />
+            <Text style={[styles.title]} selectable={false}>
+              {"Cargas"}
+            </Text>
+          </>
+        )}
+      </Pressable>
 
       <Pressable
         style={styles.userButton}
         onPress={() => setMenuOpen((prev) => !prev)}
       >
-        <FontAwesome6 name="user-circle" size={42} color="black" />
+        <Text style={styles.userName} selectable={false}>
+          {(usuario && usuario.nome.trim().split(/\s+/)[0]) || "Carregando..."}
+        </Text>
+        <FontAwesome6 name="user-circle" size={42} color="white" />
         <Animated.View style={{ transform: [{ rotate }] }}>
-          <Entypo name="chevron-down" size={24} color="black" />
+          <Entypo name="chevron-down" size={24} color="white" />
         </Animated.View>
       </Pressable>
 
@@ -79,7 +115,7 @@ export default function TopBar() {
           <Text style={styles.optionText} selectable={false}>
             Meu perfil
           </Text>
-          <FontAwesome6 name="user" size={24} color="black" />
+          <FontAwesome6 name="user" size={24} color="white" />
         </Pressable> */}
 
         <Pressable
@@ -119,17 +155,29 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     height: "10%",
-    backgroundColor: "white",
+    backgroundColor: colors.lightBlue,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
-    paddingHorizontal: 48,
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
     gap: 20,
     zIndex: 10,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  title: {
+    color: "white",
+    fontWeight: "500",
+    fontSize: 24,
   },
   userName: {
     fontSize: 24,
     fontWeight: "500",
+    color: "white",
   },
   userButton: {
     flexDirection: "row",

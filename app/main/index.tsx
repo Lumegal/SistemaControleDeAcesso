@@ -8,12 +8,17 @@ import Cargas from "../cargas";
 import Motoristas from "../motoristas";
 import Clientes from "../clientes";
 import Veiculos from "../veiculos";
-import { Feather, MaterialIcons } from "@expo/vector-icons";
-import FormTitle from "../_components/FormTitle";
+import { useState } from "react";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
   const params = useLocalSearchParams();
+
+  const [isSidebarVisible, setIsSideBarVisible] = useState<boolean>(false);
+
+  const showHideSideBarModal = () => {
+    setIsSideBarVisible(!isSidebarVisible);
+  };
 
   return (
     <View style={globalStyles.background}>
@@ -24,29 +29,9 @@ export default function Main() {
           flexDirection: "row",
         }}
       >
-        <SideBar />
+        {isSidebarVisible && <SideBar closeModal={showHideSideBarModal} />}
         <View style={{ flex: 8 }}>
-          <TopBar />
-          {params.pageName === "operacoes" &&
-            params.subPage === "novaCarga" && (
-              <FormTitle
-                icon={
-                  <MaterialIcons
-                    name="add-circle-outline"
-                    size={40}
-                    color={"white"}
-                  />
-                }
-                title="Nova Carga"
-              />
-            )}
-
-          {params.pageName === "operacoes" && params.subPage === "cargas" && (
-            <FormTitle
-              icon={<Feather name="package" size={40} color={"white"} />}
-              title="Cargas"
-            />
-          )}
+          <TopBar openSideBar={showHideSideBarModal} />
 
           {params.pageName === "operacoes" &&
             params.subPage === "novaCarga" && <NovaCarga />}

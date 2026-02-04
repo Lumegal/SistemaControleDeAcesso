@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { ICarga } from "../../interfaces/carga";
 import { getCargas } from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
+import EditModal from "../_components/editModal";
 
 export default function Cargas() {
   const globalStyles = getGlobalStyles();
@@ -70,6 +71,7 @@ export default function Cargas() {
   });
   return (
     <View style={{ margin: 24, gap: 20, flex: 1 }}>
+      {/* <EditModal /> */}
       <View style={globalStyles.mainContainer}>
         <View style={globalStyles.dataLabelInputContainer}>
           <View style={globalStyles.dataLabelContainer}>
