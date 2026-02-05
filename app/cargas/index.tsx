@@ -13,6 +13,7 @@ import { getCargas, updateCarga } from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
 import EditModal from "../_components/EditModal";
 import { useAuth } from "../../context/auth";
+import { socket } from "../../services/httpclient";
 
 export default function Cargas() {
   const { usuario } = useAuth();
@@ -33,8 +34,7 @@ export default function Cargas() {
       showLoading();
       const resultado: ICarga[] = await getCargas();
 
-      const ordemDescrescente = resultado.reverse();
-
+      const ordemDescrescente = [...resultado].sort((a, b) => b.id - a.id);
       setCargas(ordemDescrescente);
     } catch (erro: any) {
       alert(erro.message);
@@ -45,6 +45,21 @@ export default function Cargas() {
 
   useEffect(() => {
     getData();
+
+    const handleCargaAtualizada = () => {
+      getData();
+    };
+
+    socket.on("cargaAtualizada", handleCargaAtualizada);
+
+    socket.on("connect_error", (err) => {
+      console.log("Erro", err.message);
+    });
+
+    return () => {
+      socket.off("cargaAtualizada", handleCargaAtualizada);
+      socket.off("connect_error");
+    };
   }, []);
 
   const styles = StyleSheet.create({
@@ -430,8 +445,7 @@ export default function Cargas() {
                 },
                 cargaSelecionada.id,
               );
-
-              await getData();
+              hideLoading();
               setIsEditModalVisible(false);
 
               alert("Horário atualizado com sucesso!");

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { io } from "socket.io-client";
 
 export async function httpClient(endpoint: string, options: RequestInit) {
   const token = await AsyncStorage.getItem("token");
@@ -13,7 +14,7 @@ export async function httpClient(endpoint: string, options: RequestInit) {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
-    }
+    },
   );
 
   const data = await response.json();
@@ -29,3 +30,5 @@ export async function httpClient(endpoint: string, options: RequestInit) {
 
   return data;
 }
+
+export const socket = io(process.env.EXPO_PUBLIC_BACKEND_API_URL);
