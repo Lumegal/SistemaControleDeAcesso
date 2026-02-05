@@ -1,15 +1,10 @@
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
-import {
-  Text,
-  View,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { Text, View, TextInput, StyleSheet, ScrollView } from "react-native";
 import FormTitle from "../_components/FormTitle";
 import { getGlobalStyles } from "../../globalStyles";
 import MenuOptionButton from "../_components/MenuOptionButton";
+import { colors } from "../../colors";
 
 export default function NovaCarga() {
   const globalStyles = getGlobalStyles();
@@ -22,37 +17,7 @@ export default function NovaCarga() {
     celular: "(19) 99999-9999",
   }));
 
-  const checkboxSize: number = 24;
-
-  const styles = StyleSheet.create({
-    checkboxRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 20,
-      marginTop: 5,
-    },
-    checkboxOption: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    checkboxBox: {
-      width: checkboxSize,
-      height: checkboxSize,
-      borderWidth: 2,
-      borderColor: "#555",
-      borderRadius: 4,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    checkboxChecked: {
-      backgroundColor: "#5789f3",
-      borderColor: "#5789f3",
-    },
-    checkboxLabel: {
-      fontSize: checkboxSize,
-    },
-  });
+  const styles = StyleSheet.create({});
 
   return (
     <>
@@ -89,7 +54,7 @@ export default function NovaCarga() {
           <MenuOptionButton
             containerStyle={[
               globalStyles.button,
-              { backgroundColor: "#4cad4c" },
+              { backgroundColor: colors.green },
             ]}
             labelStyle={globalStyles.buttonText}
             label={
@@ -165,7 +130,7 @@ export default function NovaCarga() {
                   />
                   <MenuOptionButton
                     containerStyle={{
-                      backgroundColor: "#FF4C4C",
+                      backgroundColor: colors.red,
                       paddingHorizontal: 13,
                       paddingVertical: 8,
                       borderRadius: 10,

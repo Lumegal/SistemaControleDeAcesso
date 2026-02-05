@@ -8,37 +8,42 @@ import MenuOptionButton from "../_components/MenuOptionButton";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import { colors } from "../../colors";
 import { useEffect, useState } from "react";
-import { ICarga } from "../../interfaces/carga";
-import { getCargas } from "../../services/cargas";
+import { ICarga, IUpdateCargaForm } from "../../interfaces/carga";
+import { getCargas, updateCarga } from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
 import EditModal from "../_components/EditModal";
+import { useAuth } from "../../context/auth";
 
 export default function Cargas() {
+  const { usuario } = useAuth();
   const globalStyles = getGlobalStyles();
   const [cargas, setCargas] = useState<ICarga[]>([]);
   const [cargaSelecionada, setCargaSelecionada] = useState<ICarga>();
   const { showLoading, hideLoading } = useLoading();
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
 
+  const [horarios, setHorarios] = useState<IUpdateCargaForm>({
+    chegada: "",
+    entrada: "",
+    saida: "",
+  });
+
+  const getData = async () => {
+    try {
+      showLoading();
+      const resultado: ICarga[] = await getCargas();
+
+      const ordemDescrescente = resultado.reverse();
+
+      setCargas(ordemDescrescente);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
   useEffect(() => {
-    const getData = async () => {
-      try {
-        showLoading();
-        const resultado: ICarga[] = await getCargas();
-
-        const ordenado = resultado.sort(
-          (a, b) => b.chegada.getTime() - a.chegada.getTime(),
-        );
-
-        setCargas(ordenado);
-        console.log(ordenado);
-      } catch (erro: any) {
-        alert(erro.message);
-      } finally {
-        hideLoading();
-      }
-    };
-
     getData();
   }, []);
 
@@ -160,7 +165,10 @@ export default function Cargas() {
               <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
               <Text style={globalStyles.tableHeader}>Nº NF</Text>
               <Text style={globalStyles.tableHeader}>C/D</Text>
-              <Text style={globalStyles.tableHeader}>AÇÕES</Text>
+              {(usuario?.nivelDeAcesso === 1 ||
+                usuario?.nivelDeAcesso === 2) && (
+                <Text style={globalStyles.tableHeader}>AÇÕES</Text>
+              )}
             </View>
 
             {cargas.map((carga) => (
@@ -281,38 +289,62 @@ export default function Cargas() {
                       : "Descarregamento"}
                   </Text>
                 </View>
-                <View
-                  style={[
-                    globalStyles.tableColumn,
-                    { flexDirection: "row", gap: 20 },
-                  ]}
-                >
-                  <MenuOptionButton
-                    containerStyle={{
-                      backgroundColor: "#4CA64C",
-                      paddingHorizontal: 10,
-                      paddingVertical: 7,
-                      borderRadius: 10,
-                    }}
-                    label={<Feather name="edit" size={35} color="white" />}
-                    onPress={() => {
-                      setCargaSelecionada(carga);
-                      setIsEditModalVisible(true);
-                    }}
-                  />
-                  <MenuOptionButton
-                    containerStyle={{
-                      backgroundColor: "#FF4C4C",
-                      paddingHorizontal: 13,
-                      paddingVertical: 8,
-                      borderRadius: 10,
-                    }}
-                    label={
-                      <FontAwesome name="trash-o" size={37} color="white" />
-                    }
-                    onPress={() => {}}
-                  />
-                </View>
+
+                {(usuario?.nivelDeAcesso === 1 ||
+                  usuario?.nivelDeAcesso === 2) && (
+                  <View
+                    style={[
+                      globalStyles.tableColumn,
+                      { flexDirection: "row", gap: 20 },
+                    ]}
+                  >
+                    <MenuOptionButton
+                      containerStyle={{
+                        backgroundColor: "#4CA64C",
+                        paddingHorizontal: 10,
+                        paddingVertical: 7,
+                        borderRadius: 10,
+                      }}
+                      label={<Feather name="edit" size={35} color="white" />}
+                      onPress={() => {
+                        setCargaSelecionada(carga);
+
+                        setHorarios({
+                          chegada: carga.chegada.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }),
+                          entrada: carga.entrada
+                            ? carga.entrada.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "",
+                          saida: carga.saida
+                            ? carga.saida.toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "",
+                        });
+
+                        setIsEditModalVisible(true);
+                      }}
+                    />
+                    <MenuOptionButton
+                      containerStyle={{
+                        backgroundColor: colors.red,
+                        paddingHorizontal: 13,
+                        paddingVertical: 8,
+                        borderRadius: 10,
+                      }}
+                      label={
+                        <FontAwesome name="trash-o" size={37} color="white" />
+                      }
+                      onPress={() => {}}
+                    />
+                  </View>
+                )}
               </View>
             ))}
           </ScrollView>
@@ -329,23 +361,100 @@ export default function Cargas() {
         <input
           type="time"
           style={dataInputStyle}
-          defaultValue={cargaSelecionada?.chegada.toLocaleTimeString()}
+          value={horarios.chegada}
+          onChange={(e) =>
+            setHorarios((prev) => ({
+              ...prev,
+              chegada: e.target.value,
+            }))
+          }
         />
 
         <Text style={globalStyles.labelText}>Entrada</Text>
         <input
           type="time"
           style={dataInputStyle}
-          defaultValue={cargaSelecionada?.entrada?.toLocaleTimeString()}
+          value={horarios.entrada}
+          onChange={(e) =>
+            setHorarios((prev) => ({
+              ...prev,
+              entrada: e.target.value,
+            }))
+          }
         />
 
         <Text style={globalStyles.labelText}>Saída</Text>
         <input
           type="time"
           style={dataInputStyle}
-          defaultValue={cargaSelecionada?.saida?.toLocaleTimeString()}
+          value={horarios.saida}
+          onChange={(e) =>
+            setHorarios((prev) => ({
+              ...prev,
+              saida: e.target.value,
+            }))
+          }
+        />
+
+        <MenuOptionButton
+          containerStyle={[
+            globalStyles.button,
+            { backgroundColor: colors.green },
+          ]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Text style={globalStyles.buttonText} selectable={false}>
+                Salvar
+              </Text>
+              <Feather name="check-circle" size={24} color="white" />
+            </View>
+          }
+          onPress={async () => {
+            try {
+              showLoading();
+              if (!cargaSelecionada) return;
+
+              const resultado = await updateCarga(
+                {
+                  chegada: juntarDataHora(
+                    cargaSelecionada.chegada,
+                    horarios.chegada,
+                  ),
+                  entrada: horarios.entrada
+                    ? juntarDataHora(cargaSelecionada.chegada, horarios.entrada)
+                    : null,
+                  saida: horarios.saida
+                    ? juntarDataHora(cargaSelecionada.chegada, horarios.saida)
+                    : null,
+                },
+                cargaSelecionada.id,
+              );
+
+              await getData();
+              setIsEditModalVisible(false);
+
+              alert("Horário atualizado com sucesso!");
+            } catch (erro: any) {
+              alert(erro.message);
+            } finally {
+              hideLoading();
+            }
+          }}
         />
       </EditModal>
     </>
   );
+}
+
+function juntarDataHora(dataBase: Date, hora: string) {
+  const [h, m] = hora.split(":").map(Number);
+
+  const nova = new Date(dataBase);
+  nova.setHours(h);
+  nova.setMinutes(m);
+  nova.setSeconds(0);
+  nova.setMilliseconds(0);
+
+  return nova;
 }

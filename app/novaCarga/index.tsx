@@ -7,6 +7,7 @@ import { createNovaCarga } from "../../services/cargas";
 import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
 import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
+import { colors } from "../../colors";
 
 export default function NovaCarga() {
   const globalStyles = getGlobalStyles();
@@ -35,8 +36,6 @@ export default function NovaCarga() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  console.log(form.tipoOperacao);
-
   const checkboxSize: number = 24;
 
   const styles = StyleSheet.create({
@@ -61,8 +60,8 @@ export default function NovaCarga() {
       justifyContent: "center",
     },
     checkboxChecked: {
-      backgroundColor: "#5789f3",
-      borderColor: "#5789f3",
+      backgroundColor: colors.lightBlue,
+      borderColor: colors.lightBlue,
     },
     checkboxLabel: {
       fontSize: checkboxSize,
@@ -206,7 +205,10 @@ export default function NovaCarga() {
         style={[globalStyles.formRow, { justifyContent: "flex-end", gap: 50 }]}
       >
         <MenuOptionButton
-          containerStyle={[globalStyles.button, { backgroundColor: "#4cad4c" }]}
+          containerStyle={[
+            globalStyles.button,
+            { backgroundColor: colors.green },
+          ]}
           labelStyle={globalStyles.buttonText}
           label={
             <View style={{ flexDirection: "row", gap: 10 }}>
@@ -230,7 +232,6 @@ export default function NovaCarga() {
                 tipoOperacao: form.tipoOperacao,
               };
 
-              console.log(carga);
               const resultado = await createNovaCarga(carga);
               alert("Carga salva com sucesso!");
 

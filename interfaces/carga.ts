@@ -35,3 +35,15 @@ export interface INovaCargaForm {
   numeroNotaFiscal: string;
   tipoOperacao: number;
 }
+
+export interface IUpdateCarga {
+  chegada: Date;
+  entrada?: Date | null;
+  saida?: Date | null;
+}
+
+export interface IUpdateCargaForm {
+  chegada: string;
+  entrada: string;
+  saida: string;
+}

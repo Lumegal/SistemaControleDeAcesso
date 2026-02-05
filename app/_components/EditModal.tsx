@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -5,7 +6,11 @@ import {
   Pressable,
   StyleSheet,
   Animated,
+  View,
 } from "react-native";
+import MenuOptionButton from "./MenuOptionButton";
+import { getGlobalStyles } from "../../globalStyles";
+import { colors } from "../../colors";
 
 interface Props {
   visible: boolean;
@@ -24,6 +29,7 @@ export default function SimpleModal({
   const translateY = useRef(new Animated.Value(50)).current;
 
   const [internalVisible, setInternalVisible] = useState(visible);
+  const globalStyles = getGlobalStyles();
 
   useEffect(() => {
     if (visible) {
@@ -87,9 +93,22 @@ export default function SimpleModal({
 
           {children}
 
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeText}>Fechar</Text>
-          </Pressable>
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.red },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Fechar
+                </Text>
+                <Feather name="check-circle" size={24} color="white" />
+              </View>
+            }
+            onPress={onClose}
+          />
         </Animated.View>
       </Animated.View>
     </Modal>

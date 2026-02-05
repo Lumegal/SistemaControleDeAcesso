@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
+import { colors } from "../../colors";
 
 interface FormTitleProps {
   icon: React.ReactNode;
@@ -25,7 +26,7 @@ export default function FormTitle({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#5789f3",
+    backgroundColor: colors.lightBlue,
     height: "10%",
     flexDirection: "row",
     alignItems: "center",
