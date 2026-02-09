@@ -27,3 +27,9 @@ export async function updateCarga(carga: IUpdateCarga, id: number) {
     body: JSON.stringify(carga),
   });
 }
+
+export async function deleteCarga(id: number) {
+  return await httpClient(`/cargas/${id}`, {
+    method: "DELETE",
+  });
+}

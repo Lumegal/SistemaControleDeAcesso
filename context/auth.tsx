@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usuario, setUsuario] = useState<IJwtPayload | null>(null);
 
-  // 🔎 Valida token ao iniciar o app
+  // Valida token ao iniciar o app
   useEffect(() => {
     async function carregarSessao() {
       try {

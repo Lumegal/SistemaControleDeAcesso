@@ -17,6 +17,7 @@ interface Props {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  closeButtonColor?: string;
 }
 
 export default function SimpleModal({
@@ -24,6 +25,7 @@ export default function SimpleModal({
   onClose,
   title,
   children,
+  closeButtonColor = colors.red,
 }: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(50)).current;
@@ -96,7 +98,7 @@ export default function SimpleModal({
           <MenuOptionButton
             containerStyle={[
               globalStyles.button,
-              { backgroundColor: colors.red },
+              { backgroundColor: closeButtonColor },
             ]}
             labelStyle={globalStyles.buttonText}
             label={

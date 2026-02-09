@@ -14,7 +14,7 @@ import { router } from "expo-router";
 import { useLoading } from "../context/providers/loading";
 
 export default function Login() {
-  const { login, logout, usuario } = useAuth();
+  const { login, logout } = useAuth();
   const globalStyles = getGlobalStyles();
   const { showLoading, hideLoading } = useLoading();
 

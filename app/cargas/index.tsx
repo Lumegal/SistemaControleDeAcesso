@@ -9,9 +9,10 @@ import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import { colors } from "../../colors";
 import { useEffect, useState } from "react";
 import { ICarga, IUpdateCargaForm } from "../../interfaces/carga";
-import { getCargas, updateCarga } from "../../services/cargas";
+import { deleteCarga, getCargas, updateCarga } from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
-import EditModal from "../_components/EditModal";
+import EditModal from "../_components/SimpleModal";
+import DeleteModal from "../_components/SimpleModal";
 import { useAuth } from "../../context/auth";
 import { socket } from "../../services/httpclient";
 
@@ -22,6 +23,8 @@ export default function Cargas() {
   const [cargaSelecionada, setCargaSelecionada] = useState<ICarga>();
   const { showLoading, hideLoading } = useLoading();
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] =
+    useState<boolean>(false);
 
   const [horarios, setHorarios] = useState<IUpdateCargaForm>({
     chegada: "",
@@ -34,7 +37,10 @@ export default function Cargas() {
       showLoading();
       const resultado: ICarga[] = await getCargas();
 
-      const ordemDescrescente = [...resultado].sort((a, b) => b.id - a.id);
+      const ordemDescrescente = [...resultado].sort(
+        (a, b) => new Date(b.chegada).getTime() - new Date(a.chegada).getTime(),
+      );
+
       setCargas(ordemDescrescente);
     } catch (erro: any) {
       alert(erro.message);
@@ -61,6 +67,22 @@ export default function Cargas() {
       socket.off("connect_error");
     };
   }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      showLoading();
+      const resultado = await deleteCarga(id);
+
+      hideLoading();
+      setIsDeleteModalVisible(false);
+
+      alert("Carga excluída com sucesso!");
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
 
   const styles = StyleSheet.create({
     // dataInput: {
@@ -356,7 +378,10 @@ export default function Cargas() {
                       label={
                         <FontAwesome name="trash-o" size={37} color="white" />
                       }
-                      onPress={() => {}}
+                      onPress={() => {
+                        setCargaSelecionada(carga);
+                        setIsDeleteModalVisible(true);
+                      }}
                     />
                   </View>
                 )}
@@ -457,6 +482,48 @@ export default function Cargas() {
           }}
         />
       </EditModal>
+
+      <DeleteModal
+        visible={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        title="Excluir carga?"
+        closeButtonColor="#949494"
+      >
+        <>
+          <Text
+            style={{ fontSize: 26, fontWeight: "400", textAlign: "center" }}
+          >
+            Tem certeza que deseja excluir a carga da empresa{" "}
+            <Text style={{ fontWeight: "700" }}>
+              {cargaSelecionada?.empresa}
+            </Text>
+            {" ?\n\n"}
+            chegada:{" "}
+            <Text style={{ fontWeight: "700" }}>
+              {cargaSelecionada?.chegada.toLocaleDateString()}
+            </Text>
+          </Text>
+
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.red },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Excluir
+                </Text>
+                <Feather name="check-circle" size={24} color="white" />
+              </View>
+            }
+            onPress={async () => {
+              if (cargaSelecionada) handleDelete(cargaSelecionada.id);
+            }}
+          />
+        </>
+      </DeleteModal>
     </>
   );
 }
