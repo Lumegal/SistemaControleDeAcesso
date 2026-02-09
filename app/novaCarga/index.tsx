@@ -1,6 +1,13 @@
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
-import { Text, View, TextInput, StyleSheet, Pressable } from "react-native";
+import { useMemo, useState } from "react";
+import {
+  Text,
+  View,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  Platform,
+} from "react-native";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import MenuOptionButton from "../_components/MenuOptionButton";
 import { createNovaCarga } from "../../services/cargas";
@@ -8,13 +15,49 @@ import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
 import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
 import { colors } from "../../colors";
+import { MaskedTextInput } from "react-native-mask-text";
+
+const checkboxSize: number = 24;
+
+const styles = StyleSheet.create({
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+    marginTop: 5,
+  },
+  checkboxOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkboxBox: {
+    width: checkboxSize,
+    height: checkboxSize,
+    borderWidth: 2,
+    borderColor: "#555",
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: colors.lightBlue,
+    borderColor: colors.lightBlue,
+  },
+  checkboxLabel: {
+    fontSize: checkboxSize,
+  },
+});
 
 export default function NovaCarga() {
-  const globalStyles = getGlobalStyles();
-  const now = new Date();
-  const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
+  const globalStyles = useMemo(() => getGlobalStyles(), []);
+
+  const nowLocal = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  }, []);
 
   const { showLoading, hideLoading } = useLoading();
 
@@ -36,38 +79,6 @@ export default function NovaCarga() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const checkboxSize: number = 24;
-
-  const styles = StyleSheet.create({
-    checkboxRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 20,
-      marginTop: 5,
-    },
-    checkboxOption: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-    },
-    checkboxBox: {
-      width: checkboxSize,
-      height: checkboxSize,
-      borderWidth: 2,
-      borderColor: "#555",
-      borderRadius: 4,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    checkboxChecked: {
-      backgroundColor: colors.lightBlue,
-      borderColor: colors.lightBlue,
-    },
-    checkboxLabel: {
-      fontSize: checkboxSize,
-    },
-  });
-
   return (
     <View style={globalStyles.formContainer}>
       <View style={globalStyles.formRow}>
@@ -76,9 +87,9 @@ export default function NovaCarga() {
             CHEGADA*
           </Text>
           <input
-            value={form.chegada}
             type="datetime-local"
             style={dataInputStyle}
+            value={form.chegada}
             onChange={(text) => updateField("chegada", text.target.value)}
           />
         </View>
@@ -89,6 +100,7 @@ export default function NovaCarga() {
           </Text>
           <TextInput
             style={globalStyles.input}
+            value={form.empresa}
             onChangeText={(text) => updateField("empresa", text)}
           />
         </View>
@@ -98,9 +110,13 @@ export default function NovaCarga() {
           <Text style={globalStyles.labelText} selectable={false}>
             PLACA*
           </Text>
-          <TextInput
+          <MaskedTextInput
             style={globalStyles.input}
-            onChangeText={(text) => updateField("placa", text)}
+            placeholder="AAA-9999"
+            placeholderTextColor={colors.gray}
+            mask="AAA-SSSS" // A - Qualquer letra / 9 - Qualquer número / S - Qualquer letra ou número
+            value={form.placa}
+            onChangeText={(text) => updateField("placa", text.toUpperCase())}
           />
         </View>
       </View>
@@ -113,6 +129,7 @@ export default function NovaCarga() {
           </Text>
           <TextInput
             style={globalStyles.input}
+            value={form.motorista}
             onChangeText={(text) => updateField("motorista", text)}
           />
         </View>
@@ -124,6 +141,7 @@ export default function NovaCarga() {
           </Text>
           <TextInput
             style={globalStyles.input}
+            value={form.rgCpf}
             onChangeText={(text) => updateField("rgCpf", text)}
           />
         </View>
@@ -133,8 +151,13 @@ export default function NovaCarga() {
           <Text style={globalStyles.labelText} selectable={false}>
             CELULAR*
           </Text>
-          <TextInput
+          <MaskedTextInput
+            placeholder="(99) 99999-9999"
+            placeholderTextColor={colors.gray}
             style={globalStyles.input}
+            mask="(99) 99999-9999"
+            keyboardType={Platform.OS === "web" ? "default" : "numeric"}
+            value={form.celular}
             onChangeText={(text) => updateField("celular", text)}
           />
         </View>
@@ -147,6 +170,7 @@ export default function NovaCarga() {
           </Text>
           <TextInput
             style={globalStyles.input}
+            value={form.numeroNotaFiscal}
             onChangeText={(text) => updateField("numeroNotaFiscal", text)}
           />
         </View>
