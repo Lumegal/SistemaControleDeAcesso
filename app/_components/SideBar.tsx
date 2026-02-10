@@ -487,7 +487,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     : ""}
             </Text>
             <Text style={styles.version} selectable={false}>
-              V0.17.1
+              V0.18.0
             </Text>
           </ScrollView>
         </Animated.View>

@@ -90,23 +90,51 @@ export default function NovaCarga() {
   const [empresaQuery, setEmpresaQuery] = useState("");
   const [showEmpresaDropdown, setShowEmpresaDropdown] = useState(false);
 
-  const [motoristas, setMotoristas] = useState<IMotorista[]>();
-  const [motoristaQuery, setMotoristaQuery] = useState("");
-  const [showMotoristaDropdown, setShowMotoristaDropdown] = useState(false);
-
   const [placas, setPlacas] = useState<IPlaca[]>();
   const [placasQuery, setPlacasQuery] = useState("");
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
 
+  const [motoristas, setMotoristas] = useState<IMotorista[]>();
+  const [motoristaQuery, setMotoristaQuery] = useState("");
+
+  const [allRgCpf, setAllRgCpf] = useState<string[]>([]);
+  const [allRgCpfQuery, setAllRgCpfQuery] = useState("");
+  const [showAllRgCpfDropdown, setShowAllRgCpfDropdown] = useState(false);
+
   useEffect(() => {
     const getData = async () => {
-      const getEmpresas: IEmpresa[] = await getAllEmpresas();
-      const getMotoristas = await getAllMotoristas();
-      const getPlacas = await getAllPlacas();
+      try {
+        showLoading();
+        const getEmpresas: IEmpresa[] = await getAllEmpresas();
 
-      setEmpresas(getEmpresas);
-      setMotoristas(getMotoristas);
-      setPlacas(getPlacas);
+        const ordemAlfabeticaEmpresas = [...getEmpresas].sort((a, b) =>
+          a.nome.localeCompare(b.nome),
+        );
+
+        setEmpresas(ordemAlfabeticaEmpresas);
+
+        const getMotoristas = await getAllMotoristas();
+
+        setAllRgCpf(getMotoristas.map((m) => m.rgCpf));
+
+        const ordemAlfabeticaMotoristas = [...getMotoristas].sort((a, b) =>
+          a.nome.localeCompare(b.nome),
+        );
+
+        setMotoristas(ordemAlfabeticaMotoristas);
+
+        const getPlacas = await getAllPlacas();
+
+        const ordemAlfabeticaPlacas = [...getPlacas].sort((a, b) =>
+          a.placa.localeCompare(b.placa),
+        );
+
+        setPlacas(ordemAlfabeticaPlacas);
+      } catch (erro: any) {
+        alert(erro.message);
+      } finally {
+        hideLoading();
+      }
     };
 
     getData();
@@ -120,6 +148,14 @@ export default function NovaCarga() {
     );
   }, [empresaQuery, empresas]);
 
+  const placasFiltrados = useMemo(() => {
+    if (!placasQuery) return placas ?? [];
+
+    return placas?.filter((m) =>
+      m.placa.toLowerCase().includes(placasQuery.toLowerCase()),
+    );
+  }, [placasQuery, placas]);
+
   const motoristasFiltrados = useMemo(() => {
     if (!motoristaQuery) return motoristas ?? [];
 
@@ -128,13 +164,13 @@ export default function NovaCarga() {
     );
   }, [motoristaQuery, motoristas]);
 
-  const placasFiltrados = useMemo(() => {
-    if (!placasQuery) return placas ?? [];
+  const allRgCpfFiltradas = useMemo(() => {
+    if (!allRgCpfQuery) return allRgCpf ?? [];
 
-    return placas?.filter((m) =>
-      m.placa.toLowerCase().includes(placasQuery.toLowerCase()),
+    return allRgCpf?.filter((e) =>
+      e.toLowerCase().includes(allRgCpfQuery.toLowerCase()),
     );
-  }, [placasQuery, placas]);
+  }, [allRgCpfQuery, allRgCpf]);
 
   const createCarga = async () => {
     try {
@@ -189,8 +225,6 @@ export default function NovaCarga() {
       hideLoading();
     }
   };
-
-  const importCSV = async (cargas: INovaCarga[]) => {};
 
   return (
     <View style={globalStyles.formContainer}>
@@ -325,27 +359,29 @@ export default function NovaCarga() {
       </View>
 
       <View style={[globalStyles.formRow, { zIndex: 998 }]}>
-        {/* Motorista */}
+        {/* RG/CPF */}
         <View style={globalStyles.labelInputContainer}>
-          <Text style={globalStyles.labelText}>MOTORISTA*</Text>
+          <Text style={globalStyles.labelText} selectable={false}>
+            RG/CPF*
+          </Text>
 
           <TextInput
             style={globalStyles.input}
-            value={motoristaQuery}
+            value={allRgCpfQuery}
             onChangeText={(text) => {
-              setMotoristaQuery(text);
-              updateField("motorista", text);
-              setShowMotoristaDropdown(true);
+              setAllRgCpfQuery(text);
+              updateField("rgCpf", text);
+              setShowAllRgCpfDropdown(true);
             }}
-            onFocus={() => setShowMotoristaDropdown(true)}
+            onFocus={() => setShowAllRgCpfDropdown(true)}
             onBlur={() => {
-              setTimeout(() => setShowMotoristaDropdown(false), 100);
+              setTimeout(() => setShowAllRgCpfDropdown(false), 100);
             }}
           />
 
-          {showMotoristaDropdown &&
-            motoristasFiltrados &&
-            motoristasFiltrados.length > 0 && (
+          {showAllRgCpfDropdown &&
+            allRgCpfFiltradas &&
+            allRgCpfFiltradas.length > 0 && (
               <View
                 style={{
                   borderWidth: 1,
@@ -363,21 +399,29 @@ export default function NovaCarga() {
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
                 >
-                  {motoristasFiltrados.map((motorista) => (
+                  {allRgCpfFiltradas.map((rg) => (
                     <Pressable
-                      key={motorista.id}
+                      key={rg}
                       style={{ padding: 10 }}
                       onPress={() => {
-                        updateField("motorista", motorista.nome);
-                        setMotoristaQuery(motorista.nome);
-                        updateField("rgCpf", motorista.rgCpf);
-                        updateField("celular", motorista.celular || "");
-                        if (motorista.celular)
-                          updateField("celular", motorista.celular);
-                        setShowMotoristaDropdown(false);
+                        setAllRgCpfQuery(rg);
+                        updateField("rgCpf", rg);
+
+                        // encontrar motorista pelo RG
+                        const motorista = motoristas?.find(
+                          (m) => m.rgCpf === rg,
+                        );
+
+                        if (motorista) {
+                          updateField("motorista", motorista.nome);
+                          setMotoristaQuery(motorista.nome);
+                          updateField("celular", motorista.celular ?? "");
+                        }
+
+                        setShowAllRgCpfDropdown(false);
                       }}
                     >
-                      <Text>{motorista.nome}</Text>
+                      <Text>{rg}</Text>
                     </Pressable>
                   ))}
                 </ScrollView>
@@ -385,15 +429,17 @@ export default function NovaCarga() {
             )}
         </View>
 
-        {/* RG/CPF */}
+        {/* Motorista */}
         <View style={globalStyles.labelInputContainer}>
-          <Text style={globalStyles.labelText} selectable={false}>
-            RG/CPF*
-          </Text>
+          <Text style={globalStyles.labelText}>MOTORISTA*</Text>
+
           <TextInput
             style={globalStyles.input}
-            value={form.rgCpf}
-            onChangeText={(text) => updateField("rgCpf", text)}
+            value={motoristaQuery}
+            onChangeText={(text) => {
+              setMotoristaQuery(text);
+              updateField("motorista", text);
+            }}
           />
         </View>
 
