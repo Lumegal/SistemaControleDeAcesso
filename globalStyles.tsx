@@ -113,6 +113,7 @@ export const getGlobalStyles = () => {
     tableColumnText: {
       fontSize: 22,
       fontWeight: 400,
+      textAlign: "center",
     },
     tableDataRow: {
       flexDirection: "row",

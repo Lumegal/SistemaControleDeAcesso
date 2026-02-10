@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Pressable,
   Platform,
+  ScrollView,
 } from "react-native";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
 import MenuOptionButton from "../_components/MenuOptionButton";
@@ -106,10 +107,6 @@ export default function NovaCarga() {
       setEmpresas(getEmpresas);
       setMotoristas(getMotoristas);
       setPlacas(getPlacas);
-
-      console.log(getEmpresas);
-      console.log(getMotoristas);
-      console.log(getPlacas);
     };
 
     getData();
@@ -139,9 +136,66 @@ export default function NovaCarga() {
     );
   }, [placasQuery, placas]);
 
+  const createCarga = async () => {
+    try {
+      showLoading();
+      const carga: INovaCarga = {
+        chegada: new Date(form.chegada),
+        empresa: form.empresa,
+        placa: form.placa,
+        motorista: form.motorista,
+        rgCpf: form.rgCpf,
+        celular: form.celular,
+        numeroNotaFiscal: form.numeroNotaFiscal,
+        tipoOperacao: form.tipoOperacao,
+      };
+
+      const empresa: ICreateEmpresa = {
+        nome: form.empresa,
+        ativo: true,
+      };
+
+      const motorista: ICreateMotorista = {
+        nome: form.motorista,
+        rgCpf: form.rgCpf,
+        celular: form.celular,
+      };
+
+      const placa: ICreatePlaca = {
+        placa: form.placa,
+      };
+
+      const resultado = await createNovaCarga(carga);
+      alert("create carga");
+
+      await createEmpresa(empresa);
+      alert("create empresa");
+      await createMotorista(motorista);
+      alert("create motorista");
+      await createPlaca(placa);
+      alert("create placa");
+      alert("Carga salva com sucesso!");
+
+      router.push({
+        pathname: "/main",
+        params: {
+          pageName: "operacoes",
+          subPage: "novaCarga",
+        },
+      });
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const importCSV = async (cargas: INovaCarga[]) => {};
+
   return (
     <View style={globalStyles.formContainer}>
       <View style={[globalStyles.formRow, { zIndex: 999 }]}>
+        {/* Chegada */}
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText} selectable={false}>
             CHEGADA*
@@ -154,6 +208,7 @@ export default function NovaCarga() {
           />
         </View>
 
+        {/* Empresa */}
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText}>EMPRESA*</Text>
 
@@ -180,26 +235,31 @@ export default function NovaCarga() {
                   borderColor: "#ccc",
                   borderRadius: 8,
                   backgroundColor: "white",
-                  maxHeight: 150,
                   position: "absolute",
                   top: 95,
                   width: "95%",
                   zIndex: 999,
+                  maxHeight: 180,
                 }}
               >
-                {empresasFiltradas.map((empresa) => (
-                  <Pressable
-                    key={empresa.id}
-                    style={{ padding: 10 }}
-                    onPress={() => {
-                      updateField("empresa", empresa.nome);
-                      setEmpresaQuery(empresa.nome);
-                      setShowEmpresaDropdown(false);
-                    }}
-                  >
-                    <Text>{empresa.nome}</Text>
-                  </Pressable>
-                ))}
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                >
+                  {empresasFiltradas.map((empresa) => (
+                    <Pressable
+                      key={empresa.id}
+                      style={{ padding: 10 }}
+                      onPress={() => {
+                        updateField("empresa", empresa.nome);
+                        setEmpresaQuery(empresa.nome);
+                        setShowEmpresaDropdown(false);
+                      }}
+                    >
+                      <Text>{empresa.nome}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </View>
             )}
         </View>
@@ -208,12 +268,15 @@ export default function NovaCarga() {
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText}>PLACA*</Text>
 
-          <TextInput
+          <MaskedTextInput
             style={globalStyles.input}
             value={placasQuery}
+            placeholder="AAA-****"
+            placeholderTextColor={colors.gray}
+            mask="AAA-SSSS"
             onChangeText={(text) => {
-              setPlacasQuery(text);
-              updateField("placa", text);
+              setPlacasQuery(text.toUpperCase());
+              updateField("placa", text.toUpperCase());
               setShowPlacasDropdown(true);
             }}
             onFocus={() => setShowPlacasDropdown(true)}
@@ -231,26 +294,31 @@ export default function NovaCarga() {
                   borderColor: "#ccc",
                   borderRadius: 8,
                   backgroundColor: "white",
-                  maxHeight: 150,
                   position: "absolute",
                   top: 95,
                   width: "95%",
                   zIndex: 999,
+                  maxHeight: 180,
                 }}
               >
-                {placasFiltrados.map((placa) => (
-                  <Pressable
-                    key={placa.id}
-                    style={{ padding: 10 }}
-                    onPress={() => {
-                      updateField("placa", placa.placa);
-                      setPlacasQuery(placa.placa);
-                      setShowPlacasDropdown(false);
-                    }}
-                  >
-                    <Text>{placa.placa}</Text>
-                  </Pressable>
-                ))}
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                >
+                  {placasFiltrados.map((placa) => (
+                    <Pressable
+                      key={placa.id}
+                      style={{ padding: 10 }}
+                      onPress={() => {
+                        updateField("placa", placa.placa);
+                        setPlacasQuery(placa.placa);
+                        setShowPlacasDropdown(false);
+                      }}
+                    >
+                      <Text>{placa.placa}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </View>
             )}
         </View>
@@ -284,29 +352,35 @@ export default function NovaCarga() {
                   borderColor: "#ccc",
                   borderRadius: 8,
                   backgroundColor: "white",
-                  maxHeight: 150,
                   position: "absolute",
                   top: 95,
                   width: "95%",
                   zIndex: 999,
+                  maxHeight: 180,
                 }}
               >
-                {motoristasFiltrados.map((motorista) => (
-                  <Pressable
-                    key={motorista.id}
-                    style={{ padding: 10 }}
-                    onPress={() => {
-                      updateField("motorista", motorista.nome);
-                      setMotoristaQuery(motorista.nome);
-                      updateField("rgCpf", motorista.rgCpf);
-                      if (motorista.celular)
-                        updateField("celular", motorista.celular);
-                      setShowMotoristaDropdown(false);
-                    }}
-                  >
-                    <Text>{motorista.nome}</Text>
-                  </Pressable>
-                ))}
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                >
+                  {motoristasFiltrados.map((motorista) => (
+                    <Pressable
+                      key={motorista.id}
+                      style={{ padding: 10 }}
+                      onPress={() => {
+                        updateField("motorista", motorista.nome);
+                        setMotoristaQuery(motorista.nome);
+                        updateField("rgCpf", motorista.rgCpf);
+                        updateField("celular", motorista.celular || "");
+                        if (motorista.celular)
+                          updateField("celular", motorista.celular);
+                        setShowMotoristaDropdown(false);
+                      }}
+                    >
+                      <Text>{motorista.nome}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
               </View>
             )}
         </View>
@@ -341,6 +415,7 @@ export default function NovaCarga() {
       </View>
 
       <View style={globalStyles.formRow}>
+        {/* Nº Nota Fiscal */}
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText} selectable={false}>
             Nº DA NOTA FISCAL
@@ -419,59 +494,7 @@ export default function NovaCarga() {
               <Feather name="check-circle" size={24} color="white" />
             </View>
           }
-          onPress={async () => {
-            try {
-              showLoading();
-              const carga: INovaCarga = {
-                chegada: new Date(form.chegada),
-                empresa: form.empresa,
-                placa: form.placa,
-                motorista: form.motorista,
-                rgCpf: form.rgCpf,
-                celular: form.celular,
-                numeroNotaFiscal: form.numeroNotaFiscal,
-                tipoOperacao: form.tipoOperacao,
-              };
-
-              const empresa: ICreateEmpresa = {
-                nome: form.empresa,
-                ativo: true,
-              };
-
-              const motorista: ICreateMotorista = {
-                nome: form.motorista,
-                rgCpf: form.rgCpf,
-                celular: form.celular,
-              };
-
-              const placa: ICreatePlaca = {
-                placa: form.placa,
-              };
-
-              const resultado = await createNovaCarga(carga);
-              alert("create carga");
-
-              await createEmpresa(empresa);
-              alert("create empresa");
-              await createMotorista(motorista);
-              alert("create motorista");
-              await createPlaca(placa);
-              alert("create placa");
-              alert("Carga salva com sucesso!");
-
-              router.push({
-                pathname: "/main",
-                params: {
-                  pageName: "operacoes",
-                  subPage: "novaCarga",
-                },
-              });
-            } catch (erro: any) {
-              alert(erro.message);
-            } finally {
-              hideLoading();
-            }
-          }}
+          onPress={async () => createCarga()}
         />
       </View>
     </View>

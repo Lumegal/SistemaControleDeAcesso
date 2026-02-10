@@ -228,6 +228,7 @@ export default function Cargas() {
                       style={[
                         globalStyles.tableColumnText,
                         globalStyles.tableDataRowText,
+                        { textAlign: "left" },
                       ]}
                     >
                       Chegada:
@@ -250,6 +251,7 @@ export default function Cargas() {
                       style={[
                         globalStyles.tableColumnText,
                         globalStyles.tableDataRowText,
+                        { textAlign: "left" },
                       ]}
                     >
                       Entrada:
@@ -279,6 +281,7 @@ export default function Cargas() {
                       style={[
                         globalStyles.tableColumnText,
                         globalStyles.tableDataRowText,
+                        { textAlign: "left" },
                       ]}
                     >
                       Saída:
