@@ -1,4 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
+import { colors } from "./colors";
 
 export const getGlobalStyles = () => {
   return StyleSheet.create({
@@ -50,7 +51,7 @@ export const getGlobalStyles = () => {
     input: {
       borderWidth: 1,
       borderRadius: 10,
-      borderColor: "#949494",
+      borderColor: colors.gray,
       minHeight: 28,
       padding: 10,
       fontSize: 20,

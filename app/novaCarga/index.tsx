@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Text,
   View,
@@ -16,6 +16,12 @@ import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
 import { colors } from "../../colors";
 import { MaskedTextInput } from "react-native-mask-text";
+import { createMotorista, getAllMotoristas } from "../../services/motorista";
+import { ICreateMotorista, IMotorista } from "../../interfaces/motorista";
+import { ICreatePlaca, IPlaca } from "../../interfaces/placa";
+import { createPlaca, getAllPlacas } from "../../services/placa";
+import { ICreateEmpresa, IEmpresa } from "../../interfaces/empresa";
+import { createEmpresa, getAllEmpresas } from "../../services/empresa";
 
 const checkboxSize: number = 24;
 
@@ -79,9 +85,63 @@ export default function NovaCarga() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const [empresas, setEmpresas] = useState<IEmpresa[]>();
+  const [empresaQuery, setEmpresaQuery] = useState("");
+  const [showEmpresaDropdown, setShowEmpresaDropdown] = useState(false);
+
+  const [motoristas, setMotoristas] = useState<IMotorista[]>();
+  const [motoristaQuery, setMotoristaQuery] = useState("");
+  const [showMotoristaDropdown, setShowMotoristaDropdown] = useState(false);
+
+  const [placas, setPlacas] = useState<IPlaca[]>();
+  const [placasQuery, setPlacasQuery] = useState("");
+  const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      const getEmpresas: IEmpresa[] = await getAllEmpresas();
+      const getMotoristas = await getAllMotoristas();
+      const getPlacas = await getAllPlacas();
+
+      setEmpresas(getEmpresas);
+      setMotoristas(getMotoristas);
+      setPlacas(getPlacas);
+
+      console.log(getEmpresas);
+      console.log(getMotoristas);
+      console.log(getPlacas);
+    };
+
+    getData();
+  }, []);
+
+  const empresasFiltradas = useMemo(() => {
+    if (!empresaQuery) return empresas ?? [];
+
+    return empresas?.filter((e) =>
+      e.nome.toLowerCase().includes(empresaQuery.toLowerCase()),
+    );
+  }, [empresaQuery, empresas]);
+
+  const motoristasFiltrados = useMemo(() => {
+    if (!motoristaQuery) return motoristas ?? [];
+
+    return motoristas?.filter((m) =>
+      m.nome.toLowerCase().includes(motoristaQuery.toLowerCase()),
+    );
+  }, [motoristaQuery, motoristas]);
+
+  const placasFiltrados = useMemo(() => {
+    if (!placasQuery) return placas ?? [];
+
+    return placas?.filter((m) =>
+      m.placa.toLowerCase().includes(placasQuery.toLowerCase()),
+    );
+  }, [placasQuery, placas]);
+
   return (
     <View style={globalStyles.formContainer}>
-      <View style={globalStyles.formRow}>
+      <View style={[globalStyles.formRow, { zIndex: 999 }]}>
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText} selectable={false}>
             CHEGADA*
@@ -95,43 +155,160 @@ export default function NovaCarga() {
         </View>
 
         <View style={globalStyles.labelInputContainer}>
-          <Text style={globalStyles.labelText} selectable={false}>
-            EMPRESA*
-          </Text>
+          <Text style={globalStyles.labelText}>EMPRESA*</Text>
+
           <TextInput
             style={globalStyles.input}
-            value={form.empresa}
-            onChangeText={(text) => updateField("empresa", text)}
+            value={empresaQuery}
+            onChangeText={(text) => {
+              setEmpresaQuery(text);
+              updateField("empresa", text);
+              setShowEmpresaDropdown(true);
+            }}
+            onFocus={() => setShowEmpresaDropdown(true)}
+            onBlur={() => {
+              setTimeout(() => setShowEmpresaDropdown(false), 100);
+            }}
           />
+
+          {showEmpresaDropdown &&
+            empresasFiltradas &&
+            empresasFiltradas.length > 0 && (
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 8,
+                  backgroundColor: "white",
+                  maxHeight: 150,
+                  position: "absolute",
+                  top: 95,
+                  width: "95%",
+                  zIndex: 999,
+                }}
+              >
+                {empresasFiltradas.map((empresa) => (
+                  <Pressable
+                    key={empresa.id}
+                    style={{ padding: 10 }}
+                    onPress={() => {
+                      updateField("empresa", empresa.nome);
+                      setEmpresaQuery(empresa.nome);
+                      setShowEmpresaDropdown(false);
+                    }}
+                  >
+                    <Text>{empresa.nome}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
         </View>
 
         {/* Placa */}
         <View style={globalStyles.labelInputContainer}>
-          <Text style={globalStyles.labelText} selectable={false}>
-            PLACA*
-          </Text>
-          <MaskedTextInput
+          <Text style={globalStyles.labelText}>PLACA*</Text>
+
+          <TextInput
             style={globalStyles.input}
-            placeholder="AAA-9999"
-            placeholderTextColor={colors.gray}
-            mask="AAA-SSSS" // A - Qualquer letra / 9 - Qualquer número / S - Qualquer letra ou número
-            value={form.placa}
-            onChangeText={(text) => updateField("placa", text.toUpperCase())}
+            value={placasQuery}
+            onChangeText={(text) => {
+              setPlacasQuery(text);
+              updateField("placa", text);
+              setShowPlacasDropdown(true);
+            }}
+            onFocus={() => setShowPlacasDropdown(true)}
+            onBlur={() => {
+              setTimeout(() => setShowPlacasDropdown(false), 100);
+            }}
           />
+
+          {showPlacasDropdown &&
+            placasFiltrados &&
+            placasFiltrados.length > 0 && (
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 8,
+                  backgroundColor: "white",
+                  maxHeight: 150,
+                  position: "absolute",
+                  top: 95,
+                  width: "95%",
+                  zIndex: 999,
+                }}
+              >
+                {placasFiltrados.map((placa) => (
+                  <Pressable
+                    key={placa.id}
+                    style={{ padding: 10 }}
+                    onPress={() => {
+                      updateField("placa", placa.placa);
+                      setPlacasQuery(placa.placa);
+                      setShowPlacasDropdown(false);
+                    }}
+                  >
+                    <Text>{placa.placa}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
         </View>
       </View>
 
-      <View style={globalStyles.formRow}>
+      <View style={[globalStyles.formRow, { zIndex: 998 }]}>
         {/* Motorista */}
         <View style={globalStyles.labelInputContainer}>
-          <Text style={globalStyles.labelText} selectable={false}>
-            MOTORISTA*
-          </Text>
+          <Text style={globalStyles.labelText}>MOTORISTA*</Text>
+
           <TextInput
             style={globalStyles.input}
-            value={form.motorista}
-            onChangeText={(text) => updateField("motorista", text)}
+            value={motoristaQuery}
+            onChangeText={(text) => {
+              setMotoristaQuery(text);
+              updateField("motorista", text);
+              setShowMotoristaDropdown(true);
+            }}
+            onFocus={() => setShowMotoristaDropdown(true)}
+            onBlur={() => {
+              setTimeout(() => setShowMotoristaDropdown(false), 100);
+            }}
           />
+
+          {showMotoristaDropdown &&
+            motoristasFiltrados &&
+            motoristasFiltrados.length > 0 && (
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#ccc",
+                  borderRadius: 8,
+                  backgroundColor: "white",
+                  maxHeight: 150,
+                  position: "absolute",
+                  top: 95,
+                  width: "95%",
+                  zIndex: 999,
+                }}
+              >
+                {motoristasFiltrados.map((motorista) => (
+                  <Pressable
+                    key={motorista.id}
+                    style={{ padding: 10 }}
+                    onPress={() => {
+                      updateField("motorista", motorista.nome);
+                      setMotoristaQuery(motorista.nome);
+                      updateField("rgCpf", motorista.rgCpf);
+                      if (motorista.celular)
+                        updateField("celular", motorista.celular);
+                      setShowMotoristaDropdown(false);
+                    }}
+                  >
+                    <Text>{motorista.nome}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
         </View>
 
         {/* RG/CPF */}
@@ -149,7 +326,7 @@ export default function NovaCarga() {
         {/* Celular */}
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText} selectable={false}>
-            CELULAR*
+            CELULAR
           </Text>
           <MaskedTextInput
             placeholder="(99) 99999-9999"
@@ -256,7 +433,30 @@ export default function NovaCarga() {
                 tipoOperacao: form.tipoOperacao,
               };
 
+              const empresa: ICreateEmpresa = {
+                nome: form.empresa,
+                ativo: true,
+              };
+
+              const motorista: ICreateMotorista = {
+                nome: form.motorista,
+                rgCpf: form.rgCpf,
+                celular: form.celular,
+              };
+
+              const placa: ICreatePlaca = {
+                placa: form.placa,
+              };
+
               const resultado = await createNovaCarga(carga);
+              alert("create carga");
+
+              await createEmpresa(empresa);
+              alert("create empresa");
+              await createMotorista(motorista);
+              alert("create motorista");
+              await createPlaca(placa);
+              alert("create placa");
               alert("Carga salva com sucesso!");
 
               router.push({

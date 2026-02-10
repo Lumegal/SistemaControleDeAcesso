@@ -103,7 +103,7 @@ export default function Cargas() {
     },
     buttonLimpar: {
       borderWidth: 2,
-      borderColor: "#949494",
+      borderColor: colors.gray,
       alignSelf: "flex-end",
     },
     buttonLabel: {
@@ -168,9 +168,9 @@ export default function Cargas() {
                 <MaterialCommunityIcons
                   name="cancel"
                   size={24}
-                  color="#949494"
+                  color={colors.gray}
                 />
-                <Text style={{ color: "#949494" }}>Limpar</Text>
+                <Text style={{ color: colors.gray }}>Limpar</Text>
               </View>
             }
             onPress={() => {}}
@@ -487,7 +487,7 @@ export default function Cargas() {
         visible={isDeleteModalVisible}
         onClose={() => setIsDeleteModalVisible(false)}
         title="Excluir carga?"
-        closeButtonColor="#949494"
+        closeButtonColor={colors.gray}
       >
         <>
           <Text
