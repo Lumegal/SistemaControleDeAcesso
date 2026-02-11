@@ -156,14 +156,6 @@ export default function NovaCarga() {
     );
   }, [placasQuery, placas]);
 
-  const motoristasFiltrados = useMemo(() => {
-    if (!motoristaQuery) return motoristas ?? [];
-
-    return motoristas?.filter((m) =>
-      m.nome.toLowerCase().includes(motoristaQuery.toLowerCase()),
-    );
-  }, [motoristaQuery, motoristas]);
-
   const allRgCpfFiltradas = useMemo(() => {
     if (!allRgCpfQuery) return allRgCpf ?? [];
 
@@ -202,14 +194,10 @@ export default function NovaCarga() {
       };
 
       const resultado = await createNovaCarga(carga);
-      alert("create carga");
 
       await createEmpresa(empresa);
-      alert("create empresa");
       await createMotorista(motorista);
-      alert("create motorista");
       await createPlaca(placa);
-      alert("create placa");
       alert("Carga salva com sucesso!");
 
       router.push({
@@ -399,29 +387,32 @@ export default function NovaCarga() {
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
                 >
-                  {allRgCpfFiltradas.map((rg) => (
+                  {allRgCpfFiltradas.map((rgCpf) => (
                     <Pressable
-                      key={rg}
+                      key={rgCpf}
                       style={{ padding: 10 }}
                       onPress={() => {
-                        setAllRgCpfQuery(rg);
-                        updateField("rgCpf", rg);
+                        setAllRgCpfQuery(rgCpf);
+                        updateField("rgCpf", rgCpf);
 
                         // encontrar motorista pelo RG
                         const motorista = motoristas?.find(
-                          (m) => m.rgCpf === rg,
+                          (m) => m.rgCpf === rgCpf,
                         );
 
                         if (motorista) {
                           updateField("motorista", motorista.nome);
                           setMotoristaQuery(motorista.nome);
-                          updateField("celular", motorista.celular ?? "");
+                          updateField(
+                            "celular",
+                            motorista.celular || "",
+                          );
                         }
 
                         setShowAllRgCpfDropdown(false);
                       }}
                     >
-                      <Text>{rg}</Text>
+                      <Text>{rgCpf}</Text>
                     </Pressable>
                   ))}
                 </ScrollView>

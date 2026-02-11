@@ -47,3 +47,10 @@ export interface IUpdateCargaForm {
   entrada: string;
   saida: string;
 }
+
+export type ICargaFormatada = ICarga & {
+  chegadaDataStr: string;
+  chegadaHoraStr: string;
+  entradaHoraStr: string;
+  saidaHoraStr: string;
+};
