@@ -74,7 +74,7 @@ export const getGlobalStyles = () => {
     // Tabela
     mainContainer: {
       borderRadius: 5,
-      padding: 15,
+      padding: 14,
       flexDirection: "row",
       gap: 20,
       boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
@@ -100,6 +100,7 @@ export const getGlobalStyles = () => {
       textAlign: "center",
     },
     tableRegister: {
+      paddingHorizontal: 7,
       flexDirection: "row",
       minHeight: 150,
       borderBottomWidth: 1,
@@ -109,23 +110,25 @@ export const getGlobalStyles = () => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      margin: 6,
     },
     tableColumnText: {
       fontSize: 22,
       fontWeight: 400,
       textAlign: "center",
+      paddingHorizontal: 6,
     },
     tableDataRow: {
       flexDirection: "row",
       flex: 1,
       alignItems: "center",
-      padding: 8,
       borderBottomWidth: 1,
       borderColor: "#ccc",
     },
     tableDataRowText: {
       flex: 1,
       color: "black",
+      fontSize: 20
     },
   });
 };

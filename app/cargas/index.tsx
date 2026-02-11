@@ -12,8 +12,14 @@ import {
   ICarga,
   IUpdateCargaForm,
   ICargaFormatada,
+  INovaCarga,
 } from "../../interfaces/carga";
-import { deleteCarga, getCargas, updateCarga } from "../../services/cargas";
+import {
+  createNovaCarga,
+  deleteCarga,
+  getCargas,
+  updateCarga,
+} from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
 import EditModal from "../_components/SimpleModal";
 import DeleteModal from "../_components/SimpleModal";
@@ -21,6 +27,8 @@ import { useAuth } from "../../context/auth";
 import { socket } from "../../services/httpclient";
 import { IJwtPayload } from "../../interfaces/jwt";
 import React from "react";
+
+const widthIdColumn: number = 0.6;
 
 function formatarCarga(carga: ICarga): ICargaFormatada {
   const chegadaDate = new Date(carga.chegada);
@@ -64,11 +72,15 @@ const renderTableHeader = (
     <View
       style={[globalStyles.mainContainer, { height: 70, alignItems: "center" }]}
     >
+      <Text style={[globalStyles.tableHeader, { flex: widthIdColumn }]}>
+        ID
+      </Text>
       <Text style={globalStyles.tableHeader}>DATA</Text>
       <Text style={globalStyles.tableHeader}>HORÁRIOS</Text>
       <Text style={globalStyles.tableHeader}>EMPRESA</Text>
       <Text style={globalStyles.tableHeader}>PLACA</Text>
       <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
+      <Text style={globalStyles.tableHeader}>CELULAR</Text>
       <Text style={globalStyles.tableHeader}>Nº NF</Text>
       <Text style={globalStyles.tableHeader}>C/D</Text>
       {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
@@ -94,6 +106,9 @@ const CargaRow = React.memo(
   }) => {
     return (
       <View style={globalStyles.tableRegister}>
+        <View style={[globalStyles.tableColumn, { flex: widthIdColumn }]}>
+          <Text style={globalStyles.tableColumnText}>{carga.id}</Text>
+        </View>
         <View style={globalStyles.tableColumn}>
           <Text style={globalStyles.tableColumnText}>
             {carga.chegadaDataStr}
@@ -178,6 +193,9 @@ const CargaRow = React.memo(
           <Text style={globalStyles.tableColumnText}>{carga.motorista}</Text>
         </View>
         <View style={globalStyles.tableColumn}>
+          <Text style={globalStyles.tableColumnText}>{carga.celular}</Text>
+        </View>
+        <View style={globalStyles.tableColumn}>
           <Text
             style={globalStyles.tableColumnText}
             numberOfLines={10}
@@ -188,7 +206,7 @@ const CargaRow = React.memo(
           </Text>
         </View>
         <View style={globalStyles.tableColumn}>
-          <Text style={globalStyles.tableColumnText}>
+          <Text style={[globalStyles.tableColumnText, { fontSize: 20 }]}>
             {carga.tipoOperacao === 1 ? "Carregamento" : "Descarregamento"}
           </Text>
         </View>
@@ -272,9 +290,7 @@ export default function Cargas() {
       showLoading();
       const resultado: ICarga[] = await getCargas();
 
-      const ordemDescrescente = [...resultado].sort(
-        (a, b) => new Date(b.chegada).getTime() - new Date(a.chegada).getTime(),
-      );
+      const ordemDescrescente = [...resultado].sort((a, b) => b.id - a.id);
 
       const formatadas = ordemDescrescente.map(formatarCarga);
 
@@ -349,6 +365,65 @@ export default function Cargas() {
       setIsDeleteModalVisible(false);
 
       alert("Carga excluída com sucesso!");
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const atualizarCarga = async () => {
+    try {
+      showLoading();
+      if (!cargaSelecionada) return;
+
+      const resultado = await updateCarga(
+        {
+          chegada: juntarDataHora(cargaSelecionada.chegada, horarios.chegada),
+          entrada: horarios.entrada
+            ? juntarDataHora(cargaSelecionada.chegada, horarios.entrada)
+            : null,
+          saida: horarios.saida
+            ? juntarDataHora(cargaSelecionada.chegada, horarios.saida)
+            : null,
+        },
+        cargaSelecionada.id,
+      );
+      hideLoading();
+      setIsEditModalVisible(false);
+
+      alert("Horário atualizado com sucesso!");
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const vaiCarregar = async () => {
+    try {
+      showLoading();
+      if (!cargaSelecionada) return;
+
+      const carga: INovaCarga = {
+        chegada: juntarDataHora(cargaSelecionada.chegada, horarios.saida),
+        entrada: juntarDataHora(cargaSelecionada.chegada, horarios.saida),
+        empresa: cargaSelecionada.empresa,
+        placa: cargaSelecionada.placa,
+        motorista: cargaSelecionada.motorista,
+        rgCpf: cargaSelecionada.rgCpf,
+        celular: cargaSelecionada.celular,
+        tipoOperacao: 1,
+      };
+
+      await atualizarCarga();
+
+      const resultado = await createNovaCarga(carga);
+
+      hideLoading();
+      setIsEditModalVisible(false);
+
+      alert("Novo carregamento criado com sucesso!");
     } catch (erro: any) {
       alert(erro.message);
     } finally {
@@ -449,6 +524,7 @@ export default function Cargas() {
           />
         </View>
       </View>
+
       {/* <EditModal /> */}
       {isEditModalVisible && (
         <EditModal
@@ -472,7 +548,11 @@ export default function Cargas() {
           <Text style={globalStyles.labelText}>Entrada</Text>
           <input
             type="time"
-            style={dataInputStyle}
+            style={{
+              ...dataInputStyle,
+              ...(!horarios.chegada && { opacity: 0.6, cursor: "not-allowed" }),
+            }}
+            disabled={horarios.chegada == ""}
             value={horarios.entrada}
             onChange={(e) =>
               setHorarios((prev) => ({
@@ -485,7 +565,11 @@ export default function Cargas() {
           <Text style={globalStyles.labelText}>Saída</Text>
           <input
             type="time"
-            style={dataInputStyle}
+            style={{
+              ...dataInputStyle,
+              ...(!horarios.entrada && { opacity: 0.6, cursor: "not-allowed" }),
+            }}
+            disabled={horarios.entrada == ""}
             value={horarios.saida}
             onChange={(e) =>
               setHorarios((prev) => ({
@@ -495,6 +579,7 @@ export default function Cargas() {
             }
           />
 
+          {/* Salvar */}
           <MenuOptionButton
             containerStyle={[
               globalStyles.button,
@@ -502,49 +587,55 @@ export default function Cargas() {
             ]}
             labelStyle={globalStyles.buttonText}
             label={
-              <View style={{ flexDirection: "row", gap: 10 }}>
+              <View
+                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+              >
                 <Text style={globalStyles.buttonText} selectable={false}>
                   Salvar
                 </Text>
-                <Feather name="check-circle" size={24} color="white" />
+                <Feather
+                  name="check-circle"
+                  size={24}
+                  color="white"
+                  style={{ marginBottom: -2 }}
+                />
               </View>
             }
-            onPress={async () => {
-              try {
-                showLoading();
-                if (!cargaSelecionada) return;
-
-                const resultado = await updateCarga(
-                  {
-                    chegada: juntarDataHora(
-                      cargaSelecionada.chegada,
-                      horarios.chegada,
-                    ),
-                    entrada: horarios.entrada
-                      ? juntarDataHora(
-                          cargaSelecionada.chegada,
-                          horarios.entrada,
-                        )
-                      : null,
-                    saida: horarios.saida
-                      ? juntarDataHora(cargaSelecionada.chegada, horarios.saida)
-                      : null,
-                  },
-                  cargaSelecionada.id,
-                );
-                hideLoading();
-                setIsEditModalVisible(false);
-
-                alert("Horário atualizado com sucesso!");
-              } catch (erro: any) {
-                alert(erro.message);
-              } finally {
-                hideLoading();
-              }
-            }}
+            onPress={async () => atualizarCarga()}
           />
+
+          {/* Vai carregar */}
+          {cargaSelecionada?.tipoOperacao === 2 && (
+            <MenuOptionButton
+              enabled={
+                !!(horarios.chegada && horarios.entrada && horarios.saida)
+              }
+              containerStyle={[
+                globalStyles.button,
+                { backgroundColor: colors.lightBlue },
+              ]}
+              labelStyle={globalStyles.buttonText}
+              label={
+                <View
+                  style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+                >
+                  <Text style={globalStyles.buttonText} selectable={false}>
+                    Vai carregar
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="truck-cargo-container"
+                    size={30}
+                    color="white"
+                    style={{ marginBottom: -5 }}
+                  />
+                </View>
+              }
+              onPress={async () => vaiCarregar()}
+            />
+          )}
         </EditModal>
       )}
+
       {isDeleteModalVisible && (
         <DeleteModal
           visible={isDeleteModalVisible}

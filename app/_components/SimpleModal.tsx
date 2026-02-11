@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -102,11 +102,18 @@ export default function SimpleModal({
             ]}
             labelStyle={globalStyles.buttonText}
             label={
-              <View style={{ flexDirection: "row", gap: 10 }}>
+              <View
+                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+              >
                 <Text style={globalStyles.buttonText} selectable={false}>
                   Fechar
                 </Text>
-                <Feather name="check-circle" size={24} color="white" />
+                <AntDesign
+                  name="close-circle"
+                  size={24}
+                  color="white"
+                  style={{ marginBottom: -3 }}
+                />
               </View>
             }
             onPress={onClose}

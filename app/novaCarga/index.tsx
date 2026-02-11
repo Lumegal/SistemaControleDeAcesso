@@ -16,7 +16,6 @@ import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
 import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
 import { colors } from "../../colors";
-import { MaskedTextInput } from "react-native-mask-text";
 import { createMotorista, getAllMotoristas } from "../../services/motorista";
 import { ICreateMotorista, IMotorista } from "../../interfaces/motorista";
 import { ICreatePlaca, IPlaca } from "../../interfaces/placa";
@@ -87,18 +86,15 @@ export default function NovaCarga() {
   };
 
   const [empresas, setEmpresas] = useState<IEmpresa[]>();
-  const [empresaQuery, setEmpresaQuery] = useState("");
   const [showEmpresaDropdown, setShowEmpresaDropdown] = useState(false);
 
   const [placas, setPlacas] = useState<IPlaca[]>();
-  const [placasQuery, setPlacasQuery] = useState("");
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
 
   const [motoristas, setMotoristas] = useState<IMotorista[]>();
   const [motoristaQuery, setMotoristaQuery] = useState("");
 
   const [allRgCpf, setAllRgCpf] = useState<string[]>([]);
-  const [allRgCpfQuery, setAllRgCpfQuery] = useState("");
   const [showAllRgCpfDropdown, setShowAllRgCpfDropdown] = useState(false);
 
   useEffect(() => {
@@ -141,56 +137,56 @@ export default function NovaCarga() {
   }, []);
 
   const empresasFiltradas = useMemo(() => {
-    if (!empresaQuery) return empresas ?? [];
+    if (!form.empresa) return empresas ?? [];
 
     return empresas?.filter((e) =>
-      e.nome.toLowerCase().includes(empresaQuery.toLowerCase()),
+      e.nome.toLowerCase().includes(form.empresa.toLowerCase()),
     );
-  }, [empresaQuery, empresas]);
+  }, [form.empresa, empresas]);
 
   const placasFiltrados = useMemo(() => {
-    if (!placasQuery) return placas ?? [];
+    if (!form.placa) return placas ?? [];
 
     return placas?.filter((m) =>
-      m.placa.toLowerCase().includes(placasQuery.toLowerCase()),
+      m.placa.toLowerCase().includes(form.placa.toLowerCase()),
     );
-  }, [placasQuery, placas]);
+  }, [form.placa, placas]);
 
   const allRgCpfFiltradas = useMemo(() => {
-    if (!allRgCpfQuery) return allRgCpf ?? [];
+    if (!form.rgCpf) return allRgCpf ?? [];
 
     return allRgCpf?.filter((e) =>
-      e.toLowerCase().includes(allRgCpfQuery.toLowerCase()),
+      e.toLowerCase().includes(form.rgCpf.toLowerCase()),
     );
-  }, [allRgCpfQuery, allRgCpf]);
+  }, [form.rgCpf, allRgCpf]);
 
   const createCarga = async () => {
     try {
       showLoading();
       const carga: INovaCarga = {
         chegada: new Date(form.chegada),
-        empresa: form.empresa,
-        placa: form.placa,
-        motorista: form.motorista,
-        rgCpf: form.rgCpf,
+        empresa: form.empresa.toUpperCase(),
+        placa: form.placa.toUpperCase(),
+        motorista: form.motorista.toUpperCase(),
+        rgCpf: form.rgCpf.toUpperCase(),
         celular: form.celular,
-        numeroNotaFiscal: form.numeroNotaFiscal,
+        numeroNotaFiscal: form.numeroNotaFiscal.toUpperCase(),
         tipoOperacao: form.tipoOperacao,
       };
 
       const empresa: ICreateEmpresa = {
-        nome: form.empresa,
+        nome: form.empresa.toUpperCase(),
         ativo: true,
       };
 
       const motorista: ICreateMotorista = {
-        nome: form.motorista,
-        rgCpf: form.rgCpf,
+        nome: form.motorista.toUpperCase(),
+        rgCpf: form.rgCpf.toUpperCase(),
         celular: form.celular,
       };
 
       const placa: ICreatePlaca = {
-        placa: form.placa,
+        placa: form.placa.toUpperCase(),
       };
 
       const resultado = await createNovaCarga(carga);
@@ -236,11 +232,9 @@ export default function NovaCarga() {
 
           <TextInput
             style={globalStyles.input}
-            value={empresaQuery}
+            value={form.empresa}
             onChangeText={(text) => {
-              setEmpresaQuery(text);
-              updateField("empresa", text);
-              setShowEmpresaDropdown(true);
+              updateField("empresa", text.toLocaleUpperCase());
             }}
             onFocus={() => setShowEmpresaDropdown(true)}
             onBlur={() => {
@@ -274,7 +268,6 @@ export default function NovaCarga() {
                       style={{ padding: 10 }}
                       onPress={() => {
                         updateField("empresa", empresa.nome);
-                        setEmpresaQuery(empresa.nome);
                         setShowEmpresaDropdown(false);
                       }}
                     >
@@ -290,16 +283,31 @@ export default function NovaCarga() {
         <View style={globalStyles.labelInputContainer}>
           <Text style={globalStyles.labelText}>PLACA*</Text>
 
-          <MaskedTextInput
+          <TextInput
             style={globalStyles.input}
-            value={placasQuery}
+            value={form.placa}
             placeholder="AAA-****"
             placeholderTextColor={colors.gray}
-            mask="AAA-SSSS"
+            maxLength={8}
             onChangeText={(text) => {
-              setPlacasQuery(text.toUpperCase());
-              updateField("placa", text.toUpperCase());
-              setShowPlacasDropdown(true);
+              let value = text.toUpperCase();
+
+              // remove tudo que não for letra ou número
+              value = value.replace(/[^A-Z0-9]/g, "");
+
+              // primeiras 3 só letras
+              const letras = value.slice(0, 3).replace(/[^A-Z]/g, "");
+
+              // resto letras ou números
+              const resto = value.slice(3, 7);
+
+              let formatado = letras;
+
+              if (resto.length > 0) {
+                formatado += "-" + resto;
+              }
+
+              updateField("placa", formatado);
             }}
             onFocus={() => setShowPlacasDropdown(true)}
             onBlur={() => {
@@ -333,7 +341,6 @@ export default function NovaCarga() {
                       style={{ padding: 10 }}
                       onPress={() => {
                         updateField("placa", placa.placa);
-                        setPlacasQuery(placa.placa);
                         setShowPlacasDropdown(false);
                       }}
                     >
@@ -355,11 +362,9 @@ export default function NovaCarga() {
 
           <TextInput
             style={globalStyles.input}
-            value={allRgCpfQuery}
+            value={form.rgCpf}
             onChangeText={(text) => {
-              setAllRgCpfQuery(text);
-              updateField("rgCpf", text);
-              setShowAllRgCpfDropdown(true);
+              updateField("rgCpf", text.toLocaleUpperCase());
             }}
             onFocus={() => setShowAllRgCpfDropdown(true)}
             onBlur={() => {
@@ -392,7 +397,6 @@ export default function NovaCarga() {
                       key={rgCpf}
                       style={{ padding: 10 }}
                       onPress={() => {
-                        setAllRgCpfQuery(rgCpf);
                         updateField("rgCpf", rgCpf);
 
                         // encontrar motorista pelo RG
@@ -403,10 +407,7 @@ export default function NovaCarga() {
                         if (motorista) {
                           updateField("motorista", motorista.nome);
                           setMotoristaQuery(motorista.nome);
-                          updateField(
-                            "celular",
-                            motorista.celular || "",
-                          );
+                          updateField("celular", motorista.celular || "");
                         }
 
                         setShowAllRgCpfDropdown(false);
@@ -428,8 +429,8 @@ export default function NovaCarga() {
             style={globalStyles.input}
             value={motoristaQuery}
             onChangeText={(text) => {
-              setMotoristaQuery(text);
-              updateField("motorista", text);
+              setMotoristaQuery(text.toLocaleUpperCase());
+              updateField("motorista", text.toLocaleUpperCase());
             }}
           />
         </View>
@@ -439,14 +440,33 @@ export default function NovaCarga() {
           <Text style={globalStyles.labelText} selectable={false}>
             CELULAR
           </Text>
-          <MaskedTextInput
+          <TextInput
             placeholder="(99) 99999-9999"
             placeholderTextColor={colors.gray}
             style={globalStyles.input}
-            mask="(99) 99999-9999"
             keyboardType={Platform.OS === "web" ? "default" : "numeric"}
             value={form.celular}
-            onChangeText={(text) => updateField("celular", text)}
+            maxLength={15}
+            onChangeText={(text) => {
+              // só números
+              let value = text.replace(/\D/g, "");
+
+              // limita a 11 dígitos
+              value = value.slice(0, 11);
+
+              // formatação
+              if (value.length > 0) {
+                value = value.replace(/^(\d{0,2})/, "($1");
+              }
+              if (value.length >= 3) {
+                value = value.replace(/^\((\d{2})(\d)/, "($1) $2");
+              }
+              if (value.length >= 10) {
+                value = value.replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+              }
+
+              updateField("celular", value);
+            }}
           />
         </View>
       </View>
@@ -460,7 +480,9 @@ export default function NovaCarga() {
           <TextInput
             style={globalStyles.input}
             value={form.numeroNotaFiscal}
-            onChangeText={(text) => updateField("numeroNotaFiscal", text)}
+            onChangeText={(text) =>
+              updateField("numeroNotaFiscal", text.toLocaleUpperCase())
+            }
           />
         </View>
 

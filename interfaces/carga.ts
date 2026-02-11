@@ -15,12 +15,13 @@ export interface ICarga {
 // formato do backend
 export interface INovaCarga {
   chegada: Date;
+  entrada?: Date;
   empresa: string;
   placa: string;
   motorista: string;
   rgCpf: string;
   celular: string;
-  numeroNotaFiscal: string;
+  numeroNotaFiscal?: string;
   tipoOperacao: number;
 }
 

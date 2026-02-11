@@ -15,6 +15,7 @@ interface MenuOptionButtonProps {
   label: string | React.ReactNode;
   icon?: React.ReactNode;
   onPress: () => void;
+  enabled?: boolean;
 }
 
 export default function MenuOptionButton({
@@ -25,15 +26,18 @@ export default function MenuOptionButton({
   label,
   icon,
   onPress,
+  enabled = true,
 }: MenuOptionButtonProps) {
   return (
     <Pressable
+      disabled={!enabled}
       style={(state: any) => [
         containerStyle,
-        Platform.OS === "web" && state.hovered && hoverStyle,
-        state.pressed && pressedStyle,
+        !enabled && { opacity: 0.5, cursor: "not-allowed" },
+        enabled && Platform.OS === "web" && state.hovered && hoverStyle,
+        enabled && state.pressed && pressedStyle,
       ]}
-      onPress={onPress}
+      onPress={enabled ? onPress : undefined}
     >
       {icon}
       <Text style={labelStyle} selectable={false}>
