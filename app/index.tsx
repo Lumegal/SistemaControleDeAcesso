@@ -121,7 +121,7 @@ export default function Login() {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[styles.button, { maxWidth: 300 }]}
           onPress={() =>
             router.push({
@@ -134,7 +134,7 @@ export default function Login() {
           }
         >
           <Text style={styles.buttonText}>Entrar sem login</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
