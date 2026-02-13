@@ -211,7 +211,12 @@ export default function NovaCarga() {
   };
 
   return (
-    <View style={globalStyles.formContainer}>
+    <View
+      style={[
+        globalStyles.mainContainer,
+        { flexDirection: "column", margin: 24, padding: 24 },
+      ]}
+    >
       <View style={[globalStyles.formRow, { zIndex: 999 }]}>
         {/* Chegada */}
         <View style={globalStyles.labelInputContainer}>
@@ -473,7 +478,7 @@ export default function NovaCarga() {
 
       <View style={globalStyles.formRow}>
         {/* Nº Nota Fiscal */}
-        <View style={globalStyles.labelInputContainer}>
+        <View style={[globalStyles.labelInputContainer, { flex: 2.1 }]}>
           <Text style={globalStyles.labelText} selectable={false}>
             Nº DA NOTA FISCAL
           </Text>

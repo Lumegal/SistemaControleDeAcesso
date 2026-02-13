@@ -260,6 +260,11 @@ const CargaRow = React.memo(
 );
 
 const styles = StyleSheet.create({
+  dataHorarioContainer: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 20,
+  },
   button: {
     minWidth: 130,
     maxHeight: 50,
@@ -323,7 +328,9 @@ export default function Cargas() {
 
   // Filtros
   const [dataInicial, setDataInicial] = useState("");
+  const [horarioInicial, setHorarioInicial] = useState("00:00");
   const [dataFinal, setDataFinal] = useState("");
+  const [horarioFinal, setHorarioFinal] = useState("23:59");
   const [id, setId] = useState<string>("");
   const [empresa, setEmpresa] = useState<string>("");
   const [rgCpf, setRgCpf] = useState<string>("");
@@ -354,15 +361,20 @@ export default function Cargas() {
   const filtrar = () => {
     let resultado = [...cargas];
 
-    const inicio = dataInicial ? new Date(dataInicial) : null;
-    const fim = dataFinal ? new Date(dataFinal) : null;
-
     resultado = resultado.filter((c) => {
-      const chegada = new Date(c.chegada);
-
       // PERÍODO
-      if (inicio && chegada < inicio) return false;
-      if (fim && chegada > fim) return false;
+      const inicio =
+        dataInicial && horarioInicial
+          ? juntarDataHora(parseDateLocal(dataInicial), horarioInicial)
+          : null;
+
+      const fim =
+        dataFinal && horarioFinal
+          ? juntarDataHora(parseDateLocal(dataFinal), horarioFinal)
+          : null;
+
+      if (inicio && c.chegada < inicio) return false;
+      if (fim && c.chegada > fim) return false;
 
       // ID
       if (id && !c.id.toString().includes(id.trim())) return false;
@@ -400,6 +412,8 @@ export default function Cargas() {
   const limparFiltro = () => {
     setDataInicial("");
     setDataFinal("");
+    setHorarioInicial("00:00");
+    setHorarioFinal("23:59");
     setId("");
     setEmpresa("");
     setRgCpf("");
@@ -432,6 +446,8 @@ export default function Cargas() {
   }, [
     dataInicial,
     dataFinal,
+    horarioInicial,
+    horarioFinal,
     id,
     empresa,
     rgCpf,
@@ -576,34 +592,66 @@ export default function Cargas() {
         <View style={globalStyles.mainContainer}>
           <View style={globalStyles.filtroContainer}>
             <View style={globalStyles.filtroContainerRow}>
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <FontAwesome name="calendar-o" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Data Inicial
-                  </Text>
+              <View style={styles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Inicial
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={dataInicial}
+                    onChange={(e) => setDataInicial(e.target.value)}
+                  />
                 </View>
-                <input
-                  type="datetime-local"
-                  style={dataInputStyle}
-                  value={dataInicial}
-                  onChange={(e) => setDataInicial(e.target.value)}
-                />
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário de chegada
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={horarioInicial}
+                    onChange={(e) => setHorarioInicial(e.target.value)}
+                  />
+                </View>
               </View>
 
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <FontAwesome name="calendar-o" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Data Final
-                  </Text>
+              <View style={styles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Final
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={dataFinal}
+                    onChange={(e) => setDataFinal(e.target.value)}
+                  />
                 </View>
-                <input
-                  type="datetime-local"
-                  style={dataInputStyle}
-                  value={dataFinal}
-                  onChange={(e) => setDataFinal(e.target.value)}
-                />
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário final
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={horarioFinal}
+                    onChange={(e) => setHorarioFinal(e.target.value)}
+                  />
+                </View>
               </View>
             </View>
 
@@ -782,34 +830,32 @@ export default function Cargas() {
           </View>
         </View>
 
-        <View style={{ flex: 1 }}>
-          <FlatList
-            data={cargasFiltradas}
-            keyExtractor={(item) => item.id.toString()}
-            ListHeaderComponent={() => tableHeader}
-            initialNumToRender={5}
-            maxToRenderPerBatch={5}
-            windowSize={5}
-            removeClippedSubviews
-            renderItem={({ item }) => (
-              <CargaRow
-                carga={item}
-                usuario={usuario}
-                globalStyles={globalStyles}
-                onEdit={handleEdit}
-                onDelete={handleDeletePress}
-              />
-            )}
-            style={[
-              globalStyles.mainContainer,
-              {
-                flexDirection: "column",
-                padding: 0,
-                flexGrow: 0,
-              },
-            ]}
-          />
-        </View>
+        <FlatList
+          data={cargasFiltradas}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={() => tableHeader}
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          removeClippedSubviews
+          renderItem={({ item }) => (
+            <CargaRow
+              carga={item}
+              usuario={usuario}
+              globalStyles={globalStyles}
+              onEdit={handleEdit}
+              onDelete={handleDeletePress}
+            />
+          )}
+          style={[
+            globalStyles.mainContainer,
+            {
+              flexDirection: "column",
+              padding: 0,
+              flexGrow: 0,
+            },
+          ]}
+        />
       </View>
 
       {/* <EditModal /> */}
@@ -980,4 +1026,9 @@ function juntarDataHora(dataBase: Date, hora: string) {
   nova.setMilliseconds(0);
 
   return nova;
+}
+
+function parseDateLocal(dateStr: string) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
 }
