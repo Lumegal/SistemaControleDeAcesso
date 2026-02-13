@@ -80,6 +80,17 @@ export const getGlobalStyles = () => {
       boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
       backgroundColor: "white",
     },
+    filtroContainer: {
+      flex: 1,
+      flexDirection: "column",
+      gap: 30,
+    },
+    filtroContainerRow: {
+      borderRadius: 5,
+      flexDirection: "row",
+      gap: 20,
+      backgroundColor: "white",
+    },
     dataLabelInputContainer: {
       flex: 1,
     },
@@ -110,7 +121,7 @@ export const getGlobalStyles = () => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      margin: 6,
+      padding: 6,
     },
     tableColumnText: {
       fontSize: 22,
@@ -128,7 +139,7 @@ export const getGlobalStyles = () => {
     tableDataRowText: {
       flex: 1,
       color: "black",
-      fontSize: 20
+      fontSize: 20,
     },
   });
 };
