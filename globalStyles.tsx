@@ -41,7 +41,7 @@ export const getGlobalStyles = () => {
       gap: 5,
       justifyContent: "space-evenly",
       backgroundColor: "white",
-      padding: 12,
+      margin: 12,
       borderRadius: 10,
     },
     labelText: {
@@ -145,6 +145,7 @@ export const getGlobalStyles = () => {
 };
 
 export const dataInputStyle = {
+  flex: 1,
   border: "1px solid #949494",
   borderRadius: 10,
   minHeight: 28,
