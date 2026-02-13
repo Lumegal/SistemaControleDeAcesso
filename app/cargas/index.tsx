@@ -11,6 +11,7 @@ import {
   StyleSheet,
   FlatList,
   TextInput,
+  Pressable,
 } from "react-native";
 import MenuOptionButton from "../_components/MenuOptionButton";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
@@ -276,12 +277,49 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  tipoOperacaoFiltroContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 40,
+  },
+  radioLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.lightBlue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioFill: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.lightBlue,
+  },
 });
 
 export default function Cargas() {
   const { usuario } = useAuth();
   const globalStyles = useMemo(() => getGlobalStyles(), []);
   const { showLoading, hideLoading } = useLoading();
+
+  const [cargas, setCargas] = useState<ICargaFormatada[]>([]);
+  const [cargaSelecionada, setCargaSelecionada] = useState<ICarga>();
+  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] =
+    useState<boolean>(false);
+
+  const [horarios, setHorarios] = useState<IUpdateCargaForm>({
+    chegada: "",
+    entrada: "",
+    saida: "",
+  });
 
   // Filtros
   const [dataInicial, setDataInicial] = useState("");
@@ -291,6 +329,27 @@ export default function Cargas() {
   const [rgCpf, setRgCpf] = useState<string>("");
   const [numeroNotaFiscal, setNumeroNotaFiscal] = useState("");
   const [cargasFiltradas, setCargasFiltradas] = useState<ICargaFormatada[]>([]);
+  // 0 = todos, 1 = carregamento, 2 = descarregamento
+  const [tipoOperacaoFiltro, setTipoOperacaoFiltro] = useState<0 | 1 | 2>(0);
+  const temFiltroAtivo = useMemo(() => {
+    return (
+      dataInicial !== "" ||
+      dataFinal !== "" ||
+      id.trim() !== "" ||
+      empresa.trim() !== "" ||
+      rgCpf.trim() !== "" ||
+      numeroNotaFiscal.trim() !== "" ||
+      tipoOperacaoFiltro !== 0
+    );
+  }, [
+    dataInicial,
+    dataFinal,
+    id,
+    empresa,
+    rgCpf,
+    numeroNotaFiscal,
+    tipoOperacaoFiltro,
+  ]);
 
   const filtrar = () => {
     let resultado = [...cargas];
@@ -328,6 +387,10 @@ export default function Cargas() {
       )
         return false;
 
+      // TIPO OPERAÇÃO
+      if (tipoOperacaoFiltro !== 0 && c.tipoOperacao !== tipoOperacaoFiltro)
+        return false;
+
       return true;
     });
 
@@ -341,20 +404,10 @@ export default function Cargas() {
     setEmpresa("");
     setRgCpf("");
     setNumeroNotaFiscal("");
+    setTipoOperacaoFiltro(0);
+
     setCargasFiltradas(cargas);
   };
-
-  const [cargas, setCargas] = useState<ICargaFormatada[]>([]);
-  const [cargaSelecionada, setCargaSelecionada] = useState<ICarga>();
-  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] =
-    useState<boolean>(false);
-
-  const [horarios, setHorarios] = useState<IUpdateCargaForm>({
-    chegada: "",
-    entrada: "",
-    saida: "",
-  });
 
   const getData = useCallback(async () => {
     try {
@@ -376,7 +429,16 @@ export default function Cargas() {
 
   useEffect(() => {
     filtrar();
-  }, [dataInicial, dataFinal, id, empresa, rgCpf, numeroNotaFiscal, cargas]);
+  }, [
+    dataInicial,
+    dataFinal,
+    id,
+    empresa,
+    rgCpf,
+    numeroNotaFiscal,
+    tipoOperacaoFiltro,
+    cargas,
+  ]);
 
   useEffect(() => {
     getData();
@@ -492,9 +554,9 @@ export default function Cargas() {
         tipoOperacao: 1,
       };
 
-      await atualizarCarga();
-
       const resultado = await createNovaCarga(carga);
+
+      await atualizarCarga();
 
       hideLoading();
       setIsEditModalVisible(false);
@@ -611,15 +673,89 @@ export default function Cargas() {
             <View
               style={[
                 globalStyles.filtroContainerRow,
-                { justifyContent: "flex-end", marginTop: -10 },
+                { justifyContent: "space-between", marginTop: -10 },
               ]}
             >
+              <View style={styles.tipoOperacaoFiltroContainer}>
+                {/* TODOS */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() => setTipoOperacaoFiltro(0)}
+                >
+                  <View style={styles.radioButton}>
+                    {tipoOperacaoFiltro === 0 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      tipoOperacaoFiltro === 0
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Todos
+                  </Text>
+                </Pressable>
+
+                {/* CARREGAMENTO */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() => setTipoOperacaoFiltro(1)}
+                >
+                  <View style={styles.radioButton}>
+                    {tipoOperacaoFiltro === 1 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      tipoOperacaoFiltro === 1
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Carregamento
+                  </Text>
+                </Pressable>
+
+                {/* DESCARREGAMENTO */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() => setTipoOperacaoFiltro(2)}
+                >
+                  <View style={styles.radioButton}>
+                    {tipoOperacaoFiltro === 2 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      tipoOperacaoFiltro === 2
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Descarregamento
+                  </Text>
+                </Pressable>
+              </View>
+
               {/* Limpar filtro */}
               <MenuOptionButton
                 containerStyle={[
                   globalStyles.button,
                   styles.button,
-                  styles.buttonLimpar,
+                  {
+                    borderWidth: temFiltroAtivo ? 3 : 2,
+                    borderColor: temFiltroAtivo ? colors.red : colors.gray,
+                  },
                 ]}
                 labelStyle={globalStyles.buttonText}
                 label={
@@ -627,9 +763,17 @@ export default function Cargas() {
                     <MaterialCommunityIcons
                       name="cancel"
                       size={24}
-                      color={colors.gray}
+                      color={temFiltroAtivo ? colors.red : colors.gray}
                     />
-                    <Text style={{ color: colors.gray }}>Limpar filtro</Text>
+                    <Text
+                      style={
+                        temFiltroAtivo
+                          ? { color: colors.red, fontWeight: 700 }
+                          : { color: colors.gray }
+                      }
+                    >
+                      Limpar filtro
+                    </Text>
                   </View>
                 }
                 onPress={limparFiltro}
