@@ -16,12 +16,20 @@ import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
 import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
 import { colors } from "../../colors";
-import { createMotorista, getAllMotoristas } from "../../services/motorista";
-import { ICreateMotorista, IMotorista } from "../../interfaces/motorista";
-import { ICreatePlaca, IPlaca } from "../../interfaces/placa";
-import { createPlaca, getAllPlacas } from "../../services/placa";
-import { ICreateEmpresa, IEmpresa } from "../../interfaces/empresa";
-import { createEmpresa, getAllEmpresas } from "../../services/empresa";
+import {
+  createMotorista,
+  getAllMotoristas,
+  getMotoristaPorRgCpf,
+} from "../../services/motorista";
+import { IMotorista } from "../../interfaces/motorista";
+import { IPlaca } from "../../interfaces/placa";
+import { createPlaca, getAllPlacas, getPlaca } from "../../services/placa";
+import { IEmpresa } from "../../interfaces/empresa";
+import {
+  createEmpresa,
+  getAllEmpresas,
+  getEmpresa,
+} from "../../services/empresa";
 
 const checkboxSize: number = 24;
 
@@ -92,7 +100,7 @@ export default function NovaCarga() {
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
 
   const [motoristas, setMotoristas] = useState<IMotorista[]>();
-  const [motoristaQuery, setMotoristaQuery] = useState("");
+  const [motorista, setMotorista] = useState("");
 
   const [allRgCpf, setAllRgCpf] = useState<string[]>([]);
   const [showAllRgCpfDropdown, setShowAllRgCpfDropdown] = useState(false);
@@ -160,40 +168,101 @@ export default function NovaCarga() {
     );
   }, [form.rgCpf, allRgCpf]);
 
+  const [errors, setErrors] = useState<{
+    empresa?: string;
+    placa?: string;
+    motorista?: string;
+    rgCpf?: string;
+    chegada?: string;
+    tipoOperacao?: string;
+  }>({
+    empresa: " ",
+    placa: " ",
+    motorista: " ",
+    rgCpf: " ",
+    chegada: " ",
+    tipoOperacao: " ",
+  });
+
+  const validarFormulario = () => {
+    const novosErros: typeof errors = {};
+
+    if (!form.chegada) novosErros.chegada = "Data de chegada é obrigatória.";
+    else novosErros.chegada = " ";
+
+    if (!form.empresa.trim())
+      novosErros.empresa = "Nome da empresa é obrigatório.";
+    else novosErros.empresa = " ";
+
+    if (!form.placa.trim()) novosErros.placa = "Placa é obrigatória.";
+    else novosErros.placa = " ";
+
+    if (!form.rgCpf.trim())
+      novosErros.rgCpf = "RG ou CPF do motorista é obrigatório.";
+    else novosErros.rgCpf = " ";
+
+    if (!form.motorista.trim())
+      novosErros.motorista = "Nome do motorista é obrigatório.";
+    else novosErros.motorista = " ";
+
+    if (form.tipoOperacao === 0)
+      novosErros.tipoOperacao = "Selecione a operação.";
+
+    setErrors(novosErros);
+
+    return Object.keys(novosErros).length === 0;
+  };
+
   const createCarga = async () => {
     try {
       showLoading();
+      if (!validarFormulario()) return;
+
+      // ===== EMPRESA =====
+      let empresa = await getEmpresa(form.empresa.trim().toUpperCase());
+
+      if (!empresa) {
+        empresa = await createEmpresa({
+          nome: form.empresa.trim().toUpperCase(),
+          ativo: true,
+        });
+        console.log(empresa);
+      }
+
+      // ===== MOTORISTA =====
+      let motorista = await getMotoristaPorRgCpf(
+        form.rgCpf.trim().toUpperCase(),
+      );
+
+      if (!motorista) {
+        motorista = await createMotorista({
+          nome: form.motorista.trim().toUpperCase(),
+          rgCpf: form.rgCpf.trim().toUpperCase(),
+          celular: form.celular,
+        });
+      }
+
+      // ===== PLACA =====
+      let placa = await getPlaca(form.placa.trim().toUpperCase());
+
+      if (!placa) {
+        placa = await createPlaca({
+          placa: form.placa.trim().toUpperCase(),
+        });
+      }
+
+      // ===== CARGA =====
       const carga: INovaCarga = {
         chegada: new Date(form.chegada),
-        empresa: form.empresa.toUpperCase(),
-        placa: form.placa.toUpperCase(),
-        motorista: form.motorista.toUpperCase(),
-        rgCpf: form.rgCpf.toUpperCase(),
-        celular: form.celular,
-        numeroNotaFiscal: form.numeroNotaFiscal.toUpperCase(),
+        empresaId: empresa.id,
+        motoristaId: motorista.id,
+        placaId: placa.id,
+        numeroNotaFiscal: form.numeroNotaFiscal?.trim().toUpperCase(),
         tipoOperacao: form.tipoOperacao,
       };
 
-      const empresa: ICreateEmpresa = {
-        nome: form.empresa.toUpperCase(),
-        ativo: true,
-      };
+      await createNovaCarga(carga);
 
-      const motorista: ICreateMotorista = {
-        nome: form.motorista.toUpperCase(),
-        rgCpf: form.rgCpf.toUpperCase(),
-        celular: form.celular,
-      };
-
-      const placa: ICreatePlaca = {
-        placa: form.placa.toUpperCase(),
-      };
-
-      const resultado = await createNovaCarga(carga);
-
-      await createEmpresa(empresa);
-      await createMotorista(motorista);
-      await createPlaca(placa);
       alert("Carga salva com sucesso!");
 
       router.push({
@@ -204,7 +273,9 @@ export default function NovaCarga() {
         },
       });
     } catch (erro: any) {
+      if (erro.message === "Empresa não encontrada") alert("aqui ó");
       alert(erro.message);
+      console.warn(erro.message);
     } finally {
       hideLoading();
     }
@@ -229,6 +300,9 @@ export default function NovaCarga() {
             value={form.chegada}
             onChange={(text) => updateField("chegada", text.target.value)}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.chegada}
+          </Text>
         </View>
 
         {/* Empresa */}
@@ -239,13 +313,16 @@ export default function NovaCarga() {
             style={globalStyles.input}
             value={form.empresa}
             onChangeText={(text) => {
-              updateField("empresa", text.toLocaleUpperCase());
+              updateField("empresa", text.toUpperCase());
             }}
             onFocus={() => setShowEmpresaDropdown(true)}
             onBlur={() => {
               setTimeout(() => setShowEmpresaDropdown(false), 100);
             }}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.empresa}
+          </Text>
 
           {showEmpresaDropdown &&
             empresasFiltradas &&
@@ -319,6 +396,9 @@ export default function NovaCarga() {
               setTimeout(() => setShowPlacasDropdown(false), 100);
             }}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.placa}
+          </Text>
 
           {showPlacasDropdown &&
             placasFiltrados &&
@@ -369,13 +449,16 @@ export default function NovaCarga() {
             style={globalStyles.input}
             value={form.rgCpf}
             onChangeText={(text) => {
-              updateField("rgCpf", text.toLocaleUpperCase());
+              updateField("rgCpf", text.toUpperCase());
             }}
             onFocus={() => setShowAllRgCpfDropdown(true)}
             onBlur={() => {
               setTimeout(() => setShowAllRgCpfDropdown(false), 100);
             }}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.rgCpf}
+          </Text>
 
           {showAllRgCpfDropdown &&
             allRgCpfFiltradas &&
@@ -411,7 +494,7 @@ export default function NovaCarga() {
 
                         if (motorista) {
                           updateField("motorista", motorista.nome);
-                          setMotoristaQuery(motorista.nome);
+                          setMotorista(motorista.nome);
                           updateField("celular", motorista.celular || "");
                         }
 
@@ -432,12 +515,15 @@ export default function NovaCarga() {
 
           <TextInput
             style={globalStyles.input}
-            value={motoristaQuery}
+            value={motorista}
             onChangeText={(text) => {
-              setMotoristaQuery(text.toLocaleUpperCase());
-              updateField("motorista", text.toLocaleUpperCase());
+              setMotorista(text.toUpperCase());
+              updateField("motorista", text.toUpperCase());
             }}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.motorista}
+          </Text>
         </View>
 
         {/* Celular */}
@@ -473,6 +559,9 @@ export default function NovaCarga() {
               updateField("celular", value);
             }}
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {" "}
+          </Text>
         </View>
       </View>
 
@@ -486,9 +575,12 @@ export default function NovaCarga() {
             style={globalStyles.input}
             value={form.numeroNotaFiscal}
             onChangeText={(text) =>
-              updateField("numeroNotaFiscal", text.toLocaleUpperCase())
+              updateField("numeroNotaFiscal", text.toUpperCase())
             }
           />
+          <Text style={globalStyles.errorText} selectable={false}>
+            {" "}
+          </Text>
         </View>
 
         {/* Carregamento/Descarregamento */}
@@ -538,6 +630,9 @@ export default function NovaCarga() {
               </Text>
             </Pressable>
           </View>
+          <Text style={globalStyles.errorText} selectable={false}>
+            {errors.tipoOperacao}
+          </Text>
         </View>
       </View>
 

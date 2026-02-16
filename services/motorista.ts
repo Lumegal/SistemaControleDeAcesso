@@ -7,6 +7,12 @@ export async function getAllMotoristas(): Promise<IMotorista[]> {
   });
 }
 
+export async function getMotoristaPorRgCpf(rgCpf: string): Promise<IMotorista> {
+  return await httpClient(`/motorista/buscaRgCpf/${rgCpf}`, {
+    method: "GET",
+  });
+}
+
 export async function createMotorista(motorista: ICreateMotorista) {
   return await httpClient("/motorista", {
     method: "POST",

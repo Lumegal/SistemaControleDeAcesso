@@ -5,8 +5,6 @@ import { io } from "socket.io-client";
 export async function httpClient(endpoint: string, options: RequestInit) {
   const token = await AsyncStorage.getItem("token");
 
-  console.log(`api url: ${process.env.EXPO_PUBLIC_BACKEND_API_URL}${endpoint}`);
-
   const response = await fetch(
     `${process.env.EXPO_PUBLIC_BACKEND_API_URL}${endpoint}`,
     {
@@ -19,14 +17,18 @@ export async function httpClient(endpoint: string, options: RequestInit) {
     },
   );
 
-  const data = await response.json();
+  // Lê como texto primeiro
+  const text = await response.text();
+
+  // Se não tiver nada, vira null
+  const data = text ? JSON.parse(text) : null;
 
   if (!response.ok) {
     if (response.status === 403) {
       router.push("/");
       throw new Error("Sessão expirada. Faça login novamente.");
     } else {
-      throw new Error(data.message || "Erro na requisição");
+      throw new Error(data?.message || "Erro na requisição");
     }
   }
 

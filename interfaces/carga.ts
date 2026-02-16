@@ -1,13 +1,15 @@
+import { IEmpresa } from "./empresa";
+import { IMotorista } from "./motorista";
+import { IPlaca } from "./placa";
+
 export interface ICarga {
   id: number;
   chegada: Date;
   entrada: Date | null;
   saida: Date | null;
-  empresa: string;
-  placa: string;
-  motorista: string;
-  rgCpf: string;
-  celular: string;
+  empresa: IEmpresa;
+  placa: IPlaca;
+  motorista: IMotorista;
   numeroNotaFiscal: string;
   tipoOperacao: number;
 }
@@ -16,11 +18,9 @@ export interface ICarga {
 export interface INovaCarga {
   chegada: Date;
   entrada?: Date;
-  empresa: string;
-  placa: string;
-  motorista: string;
-  rgCpf: string;
-  celular: string;
+  empresaId: number;
+  placaId: number;
+  motoristaId: number;
   numeroNotaFiscal?: string;
   tipoOperacao: number;
 }

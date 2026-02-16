@@ -70,6 +70,11 @@ export const getGlobalStyles = () => {
       fontWeight: 600,
       fontSize: 20,
     },
+    errorText: {
+      color: "red",
+      fontSize: 18,
+      marginTop: 4,
+    },
 
     // Tabela
     mainContainer: {
@@ -124,7 +129,7 @@ export const getGlobalStyles = () => {
       padding: 6,
     },
     tableColumnText: {
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: 400,
       textAlign: "center",
       paddingHorizontal: 6,

@@ -7,6 +7,12 @@ export async function getAllPlacas(): Promise<IPlaca[]> {
   });
 }
 
+export async function getPlaca(placa: string): Promise<IPlaca> {
+  return await httpClient(`/placa/buscaPlaca/${placa}`, {
+    method: "GET",
+  });
+}
+
 export async function createPlaca(placa: ICreatePlaca) {
   return await httpClient("/placa", {
     method: "POST",
