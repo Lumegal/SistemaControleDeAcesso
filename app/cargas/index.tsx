@@ -112,7 +112,7 @@ const renderTableHeader = (
         <Pressable onPress={onToggleOrdem}>
           <Feather
             name={ordemAsc ? "arrow-up" : "arrow-down"}
-            size={18}
+            size={20}
             color="black"
           />
         </Pressable>
@@ -543,8 +543,7 @@ export default function Cargas() {
     setRgCpf("");
     setNumeroNotaFiscal("");
     setTipoOperacaoFiltro(0);
-
-    setCargasFiltradas(cargas);
+    setOrdemAsc(false);
   };
 
   const getData = useCallback(async () => {
@@ -743,7 +742,10 @@ export default function Cargas() {
 
   return (
     <View
-      style={[globalStyles.mainContainer, { flexDirection: "column", flex: 1 }]}
+      style={[
+        globalStyles.mainContainer,
+        { flexDirection: "column", flex: 1, padding: 24 },
+      ]}
     >
       {/* FILTRO CONTAINER */}
       <View style={globalStyles.mainContainer}>

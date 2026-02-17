@@ -296,7 +296,10 @@ export default function NovaCarga() {
             type="datetime-local"
             style={dataInputStyle}
             value={form.chegada}
-            onChange={(text) => updateField("chegada", text.target.value)}
+            onChange={(text) => {
+              updateField("chegada", text.target.value);
+              setErrors((prev) => ({ ...prev, chegada: undefined }));
+            }}
           />
           <Text style={globalStyles.errorText} selectable={false}>
             {errors.chegada ?? " "}
@@ -312,6 +315,7 @@ export default function NovaCarga() {
             value={form.empresa}
             onChangeText={(text) => {
               updateField("empresa", text.toUpperCase());
+              setErrors((prev) => ({ ...prev, empresa: undefined }));
             }}
             onFocus={() => setDropdowns((prev) => ({ ...prev, empresa: true }))}
             onBlur={() =>
@@ -350,6 +354,7 @@ export default function NovaCarga() {
                       style={{ padding: 10 }}
                       onPress={() => {
                         updateField("empresa", empresa.nome);
+                        setErrors((prev) => ({ ...prev, empresa: undefined }));
                         setDropdowns((prev) => ({ ...prev, empresa: false }));
                       }}
                     >
@@ -389,6 +394,7 @@ export default function NovaCarga() {
                 formatado += "-" + resto;
               }
 
+              setErrors((prev) => ({ ...prev, placa: undefined }));
               updateField("placa", formatado);
             }}
             onFocus={() => setDropdowns((prev) => ({ ...prev, placa: true }))}
@@ -426,6 +432,7 @@ export default function NovaCarga() {
                     style={{ padding: 10 }}
                     onPress={() => {
                       updateField("placa", placa.placa);
+                      setErrors((prev) => ({ ...prev, placa: undefined }));
                       setDropdowns((prev) => ({ ...prev, placa: false }));
                     }}
                   >
@@ -450,6 +457,7 @@ export default function NovaCarga() {
             value={form.rgCpf}
             onChangeText={(text) => {
               updateField("rgCpf", text.toUpperCase());
+              setErrors((prev) => ({ ...prev, rgCpf: undefined }));
             }}
             onFocus={() => setDropdowns((prev) => ({ ...prev, rgCpf: true }))}
             onBlur={() =>
@@ -488,6 +496,7 @@ export default function NovaCarga() {
                       style={{ padding: 10 }}
                       onPress={() => {
                         updateField("rgCpf", rgCpf);
+                        setErrors((prev) => ({ ...prev, placa: undefined }));
 
                         // encontrar motorista pelo RG
                         const motorista = motoristas?.find(
@@ -496,6 +505,10 @@ export default function NovaCarga() {
 
                         if (motorista) {
                           updateField("motorista", motorista.nome);
+                          setErrors((prev) => ({
+                            ...prev,
+                            motorista: undefined,
+                          }));
                           updateField("celular", motorista.celular || "");
                         }
 
@@ -519,6 +532,7 @@ export default function NovaCarga() {
             value={form.motorista}
             onChangeText={(text) => {
               updateField("motorista", text.toUpperCase());
+              setErrors((prev) => ({ ...prev, motorista: undefined }));
             }}
           />
           <Text style={globalStyles.errorText} selectable={false}>
@@ -593,7 +607,10 @@ export default function NovaCarga() {
             {/* Carregamento */}
             <Pressable
               style={styles.checkboxOption}
-              onPress={() => updateField("tipoOperacao", 1)}
+              onPress={() => {
+                updateField("tipoOperacao", 1);
+                setErrors((prev) => ({ ...prev, tipoOperacao: undefined }));
+              }}
             >
               <View
                 style={[
@@ -613,7 +630,10 @@ export default function NovaCarga() {
             {/* Descarregamento */}
             <Pressable
               style={styles.checkboxOption}
-              onPress={() => updateField("tipoOperacao", 2)}
+              onPress={() => {
+                updateField("tipoOperacao", 2);
+                setErrors((prev) => ({ ...prev, tipoOperacao: undefined }));
+              }}
             >
               <View
                 style={[

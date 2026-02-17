@@ -79,7 +79,7 @@ export const getGlobalStyles = () => {
     // Tabela
     mainContainer: {
       borderRadius: 5,
-      padding: 14,
+      padding: 24,
       flexDirection: "row",
       gap: 20,
       boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
