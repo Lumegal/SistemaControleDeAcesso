@@ -57,6 +57,8 @@ function formatarCarga(carga: ICarga): ICargaFormatada {
     saida: saidaDate,
 
     chegadaDataStr: chegadaDate.toLocaleDateString(),
+    entradaDataStr: entradaDate?.toLocaleDateString(),
+    saidaDataStr: saidaDate?.toLocaleDateString(),
 
     chegadaHoraStr: chegadaDate.toLocaleTimeString([], {
       hour: "2-digit",
@@ -120,16 +122,67 @@ const CargaRow = React.memo(
     onEdit: (c: ICarga) => void;
     onDelete: (c: ICarga) => void;
   }) => {
+    const dataEntradaDiferente =
+      carga.entradaDataStr && carga.entradaDataStr !== carga.chegadaDataStr;
+
+    const dataSaidaDiferente =
+      carga.saidaDataStr && carga.saidaDataStr !== carga.chegadaDataStr;
+
+    const algumaDataDiferente = dataEntradaDiferente || dataSaidaDiferente;
+
     return (
       <View style={globalStyles.tableRegister}>
         <View style={[globalStyles.tableColumn, { flex: widthIdColumn }]}>
           <Text style={globalStyles.tableColumnText}>{carga.id}</Text>
         </View>
-        <View style={globalStyles.tableColumn}>
-          <Text style={globalStyles.tableColumnText}>
-            {carga.chegadaDataStr}
-          </Text>
-        </View>
+
+        {/* Se todas as datas da carga forem as mesmas, exibe apenas uma data (a de chegada) */}
+        {!algumaDataDiferente && (
+          <View style={globalStyles.tableColumn}>
+            <Text style={globalStyles.tableColumnText}>
+              {carga.chegadaDataStr}
+            </Text>
+          </View>
+        )}
+
+        {/* Se alguma data for diferente, as datas de Chegada, Entrada e Saída serão mostradas */}
+        {algumaDataDiferente && (
+          <View style={globalStyles.tableColumn}>
+            <View style={[globalStyles.tableDataRow]}>
+              <Text
+                style={[
+                  globalStyles.tableColumnText,
+                  globalStyles.tableDataRowText,
+                ]}
+              >
+                {carga.chegadaDataStr}
+              </Text>
+            </View>
+
+            <View style={[globalStyles.tableDataRow]}>
+              <Text
+                style={[
+                  globalStyles.tableColumnText,
+                  globalStyles.tableDataRowText,
+                ]}
+              >
+                {carga.entradaDataStr}
+              </Text>
+            </View>
+
+            <View style={[globalStyles.tableDataRow, { borderBottomWidth: 0 }]}>
+              <Text
+                style={[
+                  globalStyles.tableColumnText,
+                  globalStyles.tableDataRowText,
+                ]}
+              >
+                {carga.saidaDataStr}
+              </Text>
+            </View>
+          </View>
+        )}
+
         <View
           style={[
             globalStyles.tableColumn,
@@ -138,7 +191,7 @@ const CargaRow = React.memo(
             },
           ]}
         >
-          <View style={[globalStyles.tableDataRow]}>
+          <View style={globalStyles.tableDataRow}>
             <Text
               style={[
                 globalStyles.tableColumnText,
@@ -549,18 +602,19 @@ export default function Cargas() {
       showLoading();
       if (!cargaSelecionada) return;
 
+      const hoje = new Date();
+
       await updateCarga(
         {
           chegada: juntarDataHora(cargaSelecionada.chegada, horarios.chegada),
           entrada: horarios.entrada
-            ? juntarDataHora(cargaSelecionada.chegada, horarios.entrada)
+            ? juntarDataHora(hoje, horarios.entrada)
             : null,
-          saida: horarios.saida
-            ? juntarDataHora(cargaSelecionada.chegada, horarios.saida)
-            : null,
+          saida: horarios.saida ? juntarDataHora(hoje, horarios.saida) : null,
         },
         cargaSelecionada.id,
       );
+      
       hideLoading();
       setIsEditModalVisible(false);
 

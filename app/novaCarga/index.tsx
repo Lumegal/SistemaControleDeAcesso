@@ -93,17 +93,16 @@ export default function NovaCarga() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const [empresas, setEmpresas] = useState<IEmpresa[]>();
-  const [showEmpresaDropdown, setShowEmpresaDropdown] = useState(false);
-
-  const [placas, setPlacas] = useState<IPlaca[]>();
-  const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
-
-  const [motoristas, setMotoristas] = useState<IMotorista[]>();
-  const [motorista, setMotorista] = useState("");
-
+  const [empresas, setEmpresas] = useState<IEmpresa[]>([]);
+  const [placas, setPlacas] = useState<IPlaca[]>([]);
+  const [motoristas, setMotoristas] = useState<IMotorista[]>([]);
   const [allRgCpf, setAllRgCpf] = useState<string[]>([]);
-  const [showAllRgCpfDropdown, setShowAllRgCpfDropdown] = useState(false);
+
+  const [dropdowns, setDropdowns] = useState({
+    empresa: false,
+    placa: false,
+    rgCpf: false,
+  });
 
   useEffect(() => {
     const getData = async () => {
@@ -188,22 +187,17 @@ export default function NovaCarga() {
     const novosErros: typeof errors = {};
 
     if (!form.chegada) novosErros.chegada = "Data de chegada é obrigatória.";
-    else novosErros.chegada = " ";
 
     if (!form.empresa.trim())
       novosErros.empresa = "Nome da empresa é obrigatório.";
-    else novosErros.empresa = " ";
 
     if (!form.placa.trim()) novosErros.placa = "Placa é obrigatória.";
-    else novosErros.placa = " ";
 
     if (!form.rgCpf.trim())
       novosErros.rgCpf = "RG ou CPF do motorista é obrigatório.";
-    else novosErros.rgCpf = " ";
 
     if (!form.motorista.trim())
       novosErros.motorista = "Nome do motorista é obrigatório.";
-    else novosErros.motorista = " ";
 
     if (form.tipoOperacao === 0)
       novosErros.tipoOperacao = "Selecione a operação.";
@@ -214,9 +208,13 @@ export default function NovaCarga() {
   };
 
   const createCarga = async () => {
+    console.log("1");
     try {
       showLoading();
+      console.log("2");
+      console.log(form);
       if (!validarFormulario()) return;
+      console.log("3");
 
       // ===== EMPRESA =====
       let empresa = await getEmpresa(form.empresa.trim().toUpperCase());
@@ -301,7 +299,7 @@ export default function NovaCarga() {
             onChange={(text) => updateField("chegada", text.target.value)}
           />
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.chegada}
+            {errors.chegada ?? " "}
           </Text>
         </View>
 
@@ -315,16 +313,18 @@ export default function NovaCarga() {
             onChangeText={(text) => {
               updateField("empresa", text.toUpperCase());
             }}
-            onFocus={() => setShowEmpresaDropdown(true)}
-            onBlur={() => {
-              setTimeout(() => setShowEmpresaDropdown(false), 100);
-            }}
+            onFocus={() => setDropdowns((prev) => ({ ...prev, empresa: true }))}
+            onBlur={() =>
+              setTimeout(() => {
+                setDropdowns((prev) => ({ ...prev, empresa: false }));
+              }, 150)
+            }
           />
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.empresa}
+            {errors.empresa ?? " "}
           </Text>
 
-          {showEmpresaDropdown &&
+          {dropdowns.empresa &&
             empresasFiltradas &&
             empresasFiltradas.length > 0 && (
               <View
@@ -350,7 +350,7 @@ export default function NovaCarga() {
                       style={{ padding: 10 }}
                       onPress={() => {
                         updateField("empresa", empresa.nome);
-                        setShowEmpresaDropdown(false);
+                        setDropdowns((prev) => ({ ...prev, empresa: false }));
                       }}
                     >
                       <Text>{empresa.nome}</Text>
@@ -391,50 +391,50 @@ export default function NovaCarga() {
 
               updateField("placa", formatado);
             }}
-            onFocus={() => setShowPlacasDropdown(true)}
-            onBlur={() => {
-              setTimeout(() => setShowPlacasDropdown(false), 100);
-            }}
+            onFocus={() => setDropdowns((prev) => ({ ...prev, placa: true }))}
+            onBlur={() =>
+              setTimeout(() => {
+                setDropdowns((prev) => ({ ...prev, placa: false }));
+              }, 150)
+            }
           />
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.placa}
+            {errors.placa ?? " "}
           </Text>
 
-          {showPlacasDropdown &&
-            placasFiltrados &&
-            placasFiltrados.length > 0 && (
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 8,
-                  backgroundColor: "white",
-                  position: "absolute",
-                  top: 95,
-                  width: "95%",
-                  zIndex: 999,
-                  maxHeight: 180,
-                }}
+          {dropdowns.placa && placasFiltrados && placasFiltrados.length > 0 && (
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderRadius: 8,
+                backgroundColor: "white",
+                position: "absolute",
+                top: 95,
+                width: "95%",
+                zIndex: 999,
+                maxHeight: 180,
+              }}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
               >
-                <ScrollView
-                  keyboardShouldPersistTaps="handled"
-                  nestedScrollEnabled
-                >
-                  {placasFiltrados.map((placa) => (
-                    <Pressable
-                      key={placa.id}
-                      style={{ padding: 10 }}
-                      onPress={() => {
-                        updateField("placa", placa.placa);
-                        setShowPlacasDropdown(false);
-                      }}
-                    >
-                      <Text>{placa.placa}</Text>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
+                {placasFiltrados.map((placa) => (
+                  <Pressable
+                    key={placa.id}
+                    style={{ padding: 10 }}
+                    onPress={() => {
+                      updateField("placa", placa.placa);
+                      setDropdowns((prev) => ({ ...prev, placa: false }));
+                    }}
+                  >
+                    <Text>{placa.placa}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       </View>
 
@@ -451,16 +451,18 @@ export default function NovaCarga() {
             onChangeText={(text) => {
               updateField("rgCpf", text.toUpperCase());
             }}
-            onFocus={() => setShowAllRgCpfDropdown(true)}
-            onBlur={() => {
-              setTimeout(() => setShowAllRgCpfDropdown(false), 100);
-            }}
+            onFocus={() => setDropdowns((prev) => ({ ...prev, rgCpf: true }))}
+            onBlur={() =>
+              setTimeout(() => {
+                setDropdowns((prev) => ({ ...prev, rgCpf: false }));
+              }, 150)
+            }
           />
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.rgCpf}
+            {errors.rgCpf ?? " "}
           </Text>
 
-          {showAllRgCpfDropdown &&
+          {dropdowns.rgCpf &&
             allRgCpfFiltradas &&
             allRgCpfFiltradas.length > 0 && (
               <View
@@ -494,11 +496,10 @@ export default function NovaCarga() {
 
                         if (motorista) {
                           updateField("motorista", motorista.nome);
-                          setMotorista(motorista.nome);
                           updateField("celular", motorista.celular || "");
                         }
 
-                        setShowAllRgCpfDropdown(false);
+                        setDropdowns((prev) => ({ ...prev, rgCpf: false }));
                       }}
                     >
                       <Text>{rgCpf}</Text>
@@ -515,14 +516,13 @@ export default function NovaCarga() {
 
           <TextInput
             style={globalStyles.input}
-            value={motorista}
+            value={form.motorista}
             onChangeText={(text) => {
-              setMotorista(text.toUpperCase());
               updateField("motorista", text.toUpperCase());
             }}
           />
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.motorista}
+            {errors.motorista ?? " "}
           </Text>
         </View>
 
@@ -631,7 +631,7 @@ export default function NovaCarga() {
             </Pressable>
           </View>
           <Text style={globalStyles.errorText} selectable={false}>
-            {errors.tipoOperacao}
+            {errors.tipoOperacao ?? " "}
           </Text>
         </View>
       </View>
