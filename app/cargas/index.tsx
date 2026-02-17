@@ -84,25 +84,70 @@ function formatarCarga(carga: ICarga): ICargaFormatada {
 const renderTableHeader = (
   usuario: IJwtPayload | null,
   globalStyles: ReturnType<typeof getGlobalStyles>,
+  ordemAsc: boolean,
+  onToggleOrdem: () => void,
 ) => {
   return (
     <View
       style={[globalStyles.mainContainer, { height: 70, alignItems: "center" }]}
     >
-      <Text style={[globalStyles.tableHeader, { flex: widthIdColumn }]}>
-        ID
+      <View
+        style={[
+          {
+            flex: widthIdColumn,
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            gap: 5,
+          },
+        ]}
+      >
+        <Text
+          style={[globalStyles.tableHeader, { flex: 0, marginLeft: 15 }]}
+          selectable={false}
+        >
+          ID
+        </Text>
+
+        <Pressable onPress={onToggleOrdem}>
+          <Feather
+            name={ordemAsc ? "arrow-up" : "arrow-down"}
+            size={18}
+            color="black"
+          />
+        </Pressable>
+      </View>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        DATA
       </Text>
-      <Text style={globalStyles.tableHeader}>DATA</Text>
-      <Text style={globalStyles.tableHeader}>HORÁRIOS</Text>
-      <Text style={globalStyles.tableHeader}>EMPRESA</Text>
-      <Text style={globalStyles.tableHeader}>PLACA</Text>
-      <Text style={globalStyles.tableHeader}>MOTORISTA</Text>
-      <Text style={globalStyles.tableHeader}>RG / CPF</Text>
-      <Text style={globalStyles.tableHeader}>CELULAR</Text>
-      <Text style={globalStyles.tableHeader}>Nº NF</Text>
-      <Text style={globalStyles.tableHeader}>C/D</Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        HORÁRIOS
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        EMPRESA
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        PLACA
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        MOTORISTA
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        RG / CPF
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        CELULAR
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        Nº NF
+      </Text>
+      <Text style={globalStyles.tableHeader} selectable={false}>
+        C/D
+      </Text>
       {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
-        <Text style={globalStyles.tableHeader}>AÇÕES</Text>
+        <Text style={globalStyles.tableHeader} selectable={false}>
+          AÇÕES
+        </Text>
       )}
     </View>
   );
@@ -422,6 +467,11 @@ export default function Cargas() {
     numeroNotaFiscal,
     tipoOperacaoFiltro,
   ]);
+  const [ordemAsc, setOrdemAsc] = useState(false);
+
+  const toggleOrdem = () => {
+    setOrdemAsc((prev) => !prev);
+  };
 
   const filtrar = () => {
     let resultado = [...cargas];
@@ -477,6 +527,9 @@ export default function Cargas() {
       return true;
     });
 
+    // AQUI entra a ordenação
+    resultado.sort((a, b) => (ordemAsc ? a.id - b.id : b.id - a.id));
+
     setCargasFiltradas(resultado);
   };
 
@@ -499,9 +552,7 @@ export default function Cargas() {
       showLoading();
       const resultado: ICarga[] = await getCargas();
 
-      const ordemDescrescente = [...resultado].sort((a, b) => b.id - a.id);
-
-      const formatadas = ordemDescrescente.map(formatarCarga);
+      const formatadas = resultado.map(formatarCarga);
 
       setCargas(formatadas);
       setCargasFiltradas(formatadas);
@@ -525,6 +576,7 @@ export default function Cargas() {
     numeroNotaFiscal,
     tipoOperacaoFiltro,
     cargas,
+    ordemAsc,
   ]);
 
   useEffect(() => {
@@ -547,8 +599,8 @@ export default function Cargas() {
   }, []);
 
   const tableHeader = useMemo(
-    () => renderTableHeader(usuario, globalStyles),
-    [usuario, globalStyles],
+    () => renderTableHeader(usuario, globalStyles, ordemAsc, toggleOrdem),
+    [usuario, globalStyles, ordemAsc],
   );
 
   const handleEdit = useCallback((carga: ICarga) => {
@@ -614,7 +666,7 @@ export default function Cargas() {
         },
         cargaSelecionada.id,
       );
-      
+
       hideLoading();
       setIsEditModalVisible(false);
 
