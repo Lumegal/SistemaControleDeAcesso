@@ -13,6 +13,7 @@ import { getGlobalStyles } from "../../globalStyles";
 import { colors } from "../../colors";
 
 interface Props {
+  maxWidth?: number;
   visible: boolean;
   onClose: () => void;
   title?: string;
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function SimpleModal({
+  maxWidth = 500,
   visible,
   onClose,
   title,
@@ -88,6 +90,7 @@ export default function SimpleModal({
             {
               opacity,
               transform: [{ translateY }],
+              maxWidth: maxWidth
             },
           ]}
         >
@@ -133,13 +136,13 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "85%",
-    maxWidth: 500,
     minHeight: 120,
     backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     elevation: 8,
     gap: 20,
+    alignItems: "center"
   },
   title: {
     fontSize: 28,

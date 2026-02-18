@@ -10,20 +10,21 @@ import {
 import {
   Entypo,
   Feather,
+  FontAwesome,
   FontAwesome6,
+  MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useAuth } from "../../context/auth";
 import { router, useLocalSearchParams } from "expo-router";
 import { useLoading } from "../../context/providers/loading";
-import FormTitle from "./FormTitle";
 import { colors } from "../../colors";
 
 type TopBarProps = {
   openSideBar: () => void;
-}
+};
 
-export default function TopBar({openSideBar}: TopBarProps) {
+export default function TopBar({ openSideBar }: TopBarProps) {
   const { showLoading, hideLoading } = useLoading();
   const { usuario, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -85,6 +86,59 @@ export default function TopBar({openSideBar}: TopBarProps) {
             </Text>
           </>
         )}
+
+        {params.pageName === "cadastros" && params.subPage === "motoristas" && (
+          <>
+            <FontAwesome name="drivers-license-o" size={40} color={"white"} />
+            <Text style={[styles.title]} selectable={false}>
+              {"Motoristas"}
+            </Text>
+          </>
+        )}
+
+        {params.pageName === "cadastros" && params.subPage === "clientes" && (
+          <>
+            <MaterialCommunityIcons
+              name="office-building-outline"
+              size={40}
+              color={"white"}
+            />
+            <Text style={[styles.title]} selectable={false}>
+              {"Clientes"}
+            </Text>
+          </>
+        )}
+
+        {params.pageName === "cadastros" && params.subPage === "veiculos" && (
+          <>
+            <MaterialCommunityIcons
+              name="truck-outline"
+              size={40}
+              color={"white"}
+            />
+            <Text style={[styles.title]} selectable={false}>
+              {"Veículos"}
+            </Text>
+          </>
+        )}
+
+        {params.pageName === "relatorios" && params.subPage === "pdf" && (
+          <>
+            {/* <FontAwesome name="drivers-license-o" size={40} color={"white"} /> */}
+            <Text style={[styles.title]} selectable={false}>
+              {"PDF"}
+            </Text>
+          </>
+        )}
+
+        {params.pageName === "relatorios" && params.subPage === "excel" && (
+          <>
+            {/* <FontAwesome name="drivers-license-o" size={40} color={"white"} /> */}
+            <Text style={[styles.title]} selectable={false}>
+              {"Excel"}
+            </Text>
+          </>
+        )}
       </Pressable>
 
       <Pressable
@@ -115,7 +169,7 @@ export default function TopBar({openSideBar}: TopBarProps) {
           <Text style={styles.optionText} selectable={false}>
             Meu perfil
           </Text>
-          <FontAwesome6 name="user" size={24} color="white" />
+          <FontAwesome6 name="user" size={24} color="black" />
         </Pressable> */}
 
         <Pressable
