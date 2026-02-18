@@ -41,6 +41,7 @@ export interface IUpdateCarga {
   chegada: Date;
   entrada?: Date | null;
   saida?: Date | null;
+  numeroNotaFiscal?: string;
 }
 
 export interface IUpdateCargaForm {
@@ -58,4 +59,16 @@ export type ICargaFormatada = ICarga & {
 
   saidaDataStr?: string;
   saidaHoraStr: string;
+};
+
+export type ICargaFiltros = {
+  dataInicial: string;
+  horarioInicial: string;
+  dataFinal: string;
+  horarioFinal: string;
+  id: string;
+  empresa: string;
+  rgCpf: string;
+  numeroNotaFiscal: string;
+  tipoOperacao: 0 | 1 | 2;
 };

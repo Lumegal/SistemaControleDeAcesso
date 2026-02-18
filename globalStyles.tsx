@@ -29,7 +29,7 @@ export const getGlobalStyles = () => {
       gap: 40,
       borderRadius: 10,
       backgroundColor: "white",
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
+      boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.4)",
     },
     formRow: {
       flexDirection: "row",
@@ -57,7 +57,8 @@ export const getGlobalStyles = () => {
       fontSize: 20,
     },
     button: {
-      minWidth: 150,
+      width: 200,
+      maxHeight: 50,
       padding: 12,
       borderRadius: 10,
       alignItems: "center",

@@ -168,59 +168,8 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
             },
           ]}
         >
-          {/* <View style={styles.logo}>
-        <Image
-          source={require("../../assets/Logo-Lumegal-Site.jpg")}
-          resizeMode="contain"
-          style={styles.logoImage}
-        />
-      </View> */}
-
-          {/* Botao de fechar */}
-          {/* <Pressable
-          onPress={closeModal}
-          style={{
-            flexDirection: "row",
-            gap: 5,
-            backgroundColor: "white",
-            height: "5%",
-            alignItems: "center",
-            padding: 12,
-          }}
-        >
-          <MaterialIcons name="cancel" size={30} color="black" />
-          <Text style={{ fontSize: 20, fontWeight: 600 }} selectable={false}>
-            FECHAR
-          </Text>
-        </Pressable> */}
-
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             {/* Principal */}
-            {/* <View style={styles.menuSection}>
-          <Text style={styles.menuSectionLabel} selectable={false}>
-            Principal
-          </Text>
-          <Pressable
-            style={(state: any) => [
-              globalStyles.menuOption,
-              Platform.OS === "web" &&
-                state.hovered && {
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                },
-              state.pressed && { backgroundColor: "rgba(255,255,255,0.5)" },
-            ]}
-            onPress={() => console.log("Dashboard")}
-          >
-            <AntDesign
-              name="dashboard"
-              size={menuIconSize}
-              color={textMainColor}
-            />
-            <Text style={styles.menuOptionLabel} selectable={false}>
-              Dashboard
-            </Text>
-          </Pressable>
-        </View> */}
 
             {/* Operações */}
             <View style={styles.menuSection}>
@@ -336,16 +285,40 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                   {/* Motoristas */}
                   <MenuOptionButton
-                    containerStyle={globalStyles.menuOption}
-                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "motoristas"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "motoristas"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
                     pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={styles.menuOptionLabel}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "motoristas"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
                     label="Motoristas"
                     icon={
                       <FontAwesome
                         name="drivers-license-o"
                         size={menuIconSize}
-                        color={textMainColor}
+                        color={
+                          params.subPage === "motoristas"
+                            ? colors.blue
+                            : textMainColor
+                        }
                       />
                     }
                     onPress={() => {
@@ -362,16 +335,40 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                   {/* Clientes */}
                   <MenuOptionButton
-                    containerStyle={globalStyles.menuOption}
-                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "clientes"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "clientes"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
                     pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={styles.menuOptionLabel}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "clientes"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
                     label="Clientes"
                     icon={
                       <MaterialCommunityIcons
                         name="office-building-outline"
                         size={menuIconSize}
-                        color={textMainColor}
+                        color={
+                          params.subPage === "clientes"
+                            ? colors.blue
+                            : textMainColor
+                        }
                       />
                     }
                     onPress={() => {
@@ -388,16 +385,40 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                   {/* Veículos */}
                   <MenuOptionButton
-                    containerStyle={globalStyles.menuOption}
-                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "veiculos"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "veiculos"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
                     pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={styles.menuOptionLabel}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "veiculos"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
                     label="Veículos"
                     icon={
                       <MaterialCommunityIcons
                         name="truck-outline"
                         size={menuIconSize}
-                        color={textMainColor}
+                        color={
+                          params.subPage === "veiculos"
+                            ? colors.blue
+                            : textMainColor
+                        }
                       />
                     }
                     onPress={() => {
@@ -421,16 +442,38 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                   {/* PDF */}
                   <MenuOptionButton
-                    containerStyle={globalStyles.menuOption}
-                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "pdf"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "pdf"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
                     pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={styles.menuOptionLabel}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "pdf"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
                     label="PDF"
                     icon={
                       <FontAwesome6
                         name="file-pdf"
                         size={menuIconSize}
-                        color={textMainColor}
+                        color={
+                          params.subPage === "pdf" ? colors.blue : textMainColor
+                        }
                       />
                     }
                     onPress={() => {
@@ -447,16 +490,40 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                   {/* Excel */}
                   <MenuOptionButton
-                    containerStyle={globalStyles.menuOption}
-                    hoverStyle={{ backgroundColor: "rgba(255,255,255,0.2)" }}
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "excel"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "excel"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
                     pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={styles.menuOptionLabel}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "excel"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
                     label="Excel"
                     icon={
                       <MaterialCommunityIcons
                         name="microsoft-excel"
                         size={menuIconSize}
-                        color={textMainColor}
+                        color={
+                          params.subPage === "excel"
+                            ? colors.blue
+                            : textMainColor
+                        }
                       />
                     }
                     onPress={() => {
@@ -487,7 +554,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     : ""}
             </Text>
             <Text style={styles.version} selectable={false}>
-              V0.27.0
+              V1.0.0
             </Text>
           </ScrollView>
         </Animated.View>

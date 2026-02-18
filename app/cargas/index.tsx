@@ -1,4 +1,5 @@
 import {
+  AntDesign,
   Feather,
   FontAwesome,
   FontAwesome6,
@@ -12,6 +13,7 @@ import {
   FlatList,
   TextInput,
   Pressable,
+  TouchableOpacity,
 } from "react-native";
 import MenuOptionButton from "../_components/MenuOptionButton";
 import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
@@ -22,16 +24,21 @@ import {
   IUpdateCargaForm,
   ICargaFormatada,
   INovaCarga,
+  ICargaFiltros,
 } from "../../interfaces/carga";
 import {
   createNovaCarga,
   deleteCarga,
+  exportarCargas,
+  exportarExcel,
+  exportarPDF,
   getCargas,
   updateCarga,
 } from "../../services/cargas";
 import { useLoading } from "../../context/providers/loading";
 import EditModal from "../_components/SimpleModal";
 import DeleteModal from "../_components/SimpleModal";
+import ExportarModal from "../_components/SimpleModal";
 import { useAuth } from "../../context/auth";
 import { socket } from "../../services/httpclient";
 import { IJwtPayload } from "../../interfaces/jwt";
@@ -103,7 +110,7 @@ const renderTableHeader = (
         ]}
       >
         <Text
-          style={[globalStyles.tableHeader, { flex: 0, marginLeft: 15 }]}
+          style={[globalStyles.tableHeader, { flex: 0 }]}
           selectable={false}
         >
           ID
@@ -334,6 +341,7 @@ const CargaRow = React.memo(
           </Text>
         </View>
 
+        {/* Ações */}
         {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
           <View
             style={[
@@ -341,22 +349,35 @@ const CargaRow = React.memo(
               { flexDirection: "row", gap: 20 },
             ]}
           >
+            {/* Editar */}
             <MenuOptionButton
               containerStyle={{
                 backgroundColor: "#4CA64C",
-                paddingHorizontal: 10,
-                paddingVertical: 7,
+                height: 55,
+                width: 55,
+                alignItems: "center",
+                justifyContent: "center",
                 borderRadius: 10,
               }}
-              label={<Feather name="edit" size={35} color="white" />}
+              label={
+                <Feather
+                  name="edit"
+                  size={35}
+                  color="white"
+                  style={{ marginRight: -3 }}
+                />
+              }
               onPress={() => onEdit(carga)}
             />
 
+            {/* Excluir */}
             <MenuOptionButton
               containerStyle={{
                 backgroundColor: colors.red,
-                paddingHorizontal: 13,
-                paddingVertical: 8,
+                height: 55,
+                width: 55,
+                alignItems: "center",
+                justifyContent: "center",
                 borderRadius: 10,
               }}
               label={<FontAwesome name="trash-o" size={37} color="white" />}
@@ -392,7 +413,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  tipoOperacaoFiltroContainer: {
+  filtroUltimaLinha: {
     flexDirection: "row",
     alignItems: "center",
     gap: 40,
@@ -417,6 +438,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: colors.lightBlue,
   },
+  modalLabelInputContainer: {
+    width: "100%",
+    gap: 5,
+  },
 });
 
 export default function Cargas() {
@@ -429,45 +454,83 @@ export default function Cargas() {
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] =
     useState<boolean>(false);
+  const [isExportarModalVisible, setIsExportarModalVisible] =
+    useState<boolean>(false);
+  const [tipoExport, setTipoExport] = useState<1 | 2>(1);
 
   const [horarios, setHorarios] = useState<IUpdateCargaForm>({
     chegada: "",
     entrada: "",
     saida: "",
   });
+  const [modalNumeroNotaFiscal, setModalNumeroNotaFiscal] =
+    useState<string>("");
 
   // Filtros
-  const [dataInicial, setDataInicial] = useState("");
-  const [horarioInicial, setHorarioInicial] = useState("00:00");
-  const [dataFinal, setDataFinal] = useState("");
-  const [horarioFinal, setHorarioFinal] = useState("23:59");
-  const [id, setId] = useState<string>("");
-  const [empresa, setEmpresa] = useState<string>("");
-  const [rgCpf, setRgCpf] = useState<string>("");
-  const [numeroNotaFiscal, setNumeroNotaFiscal] = useState("");
-  const [cargasFiltradas, setCargasFiltradas] = useState<ICargaFormatada[]>([]);
   // 0 = todos, 1 = carregamento, 2 = descarregamento
-  const [tipoOperacaoFiltro, setTipoOperacaoFiltro] = useState<0 | 1 | 2>(0);
+  const [filtros, setFiltros] = useState<ICargaFiltros>({
+    dataInicial: "",
+    horarioInicial: "00:00",
+    dataFinal: "",
+    horarioFinal: "23:59",
+    id: "",
+    empresa: "",
+    rgCpf: "",
+    numeroNotaFiscal: "",
+    tipoOperacao: 0,
+  });
+  const [filtrosVisible, setFiltrosVisible] = useState<boolean>(true);
+
+  const [cargasFiltradas, setCargasFiltradas] = useState<ICargaFormatada[]>([]);
   const temFiltroAtivo = useMemo(() => {
     return (
-      dataInicial !== "" ||
-      dataFinal !== "" ||
-      id.trim() !== "" ||
-      empresa.trim() !== "" ||
-      rgCpf.trim() !== "" ||
-      numeroNotaFiscal.trim() !== "" ||
-      tipoOperacaoFiltro !== 0
+      filtros.dataInicial !== "" ||
+      filtros.dataFinal !== "" ||
+      filtros.id.trim() !== "" ||
+      filtros.empresa.trim() !== "" ||
+      filtros.rgCpf.trim() !== "" ||
+      filtros.numeroNotaFiscal.trim() !== "" ||
+      filtros.tipoOperacao !== 0
     );
   }, [
-    dataInicial,
-    dataFinal,
-    id,
-    empresa,
-    rgCpf,
-    numeroNotaFiscal,
-    tipoOperacaoFiltro,
+    filtros.dataInicial,
+    filtros.dataFinal,
+    filtros.id,
+    filtros.empresa,
+    filtros.rgCpf,
+    filtros.numeroNotaFiscal,
+    filtros.tipoOperacao,
   ]);
   const [ordemAsc, setOrdemAsc] = useState(false);
+
+  // export modal
+  const [camposSelecionados, setCamposSelecionados] = useState<string[]>([
+    "id",
+    "data",
+    "horarios",
+    "empresa",
+    "placa",
+    "motorista",
+    "rgCpf",
+    "celular",
+    "numeroNotaFiscal",
+    "tipoOperacao",
+  ]);
+  const CAMPOS_EXPORTACAO = [
+    { key: "id", label: "ID" },
+    { key: "data", label: "Data" },
+    { key: "horarios", label: "Horários" },
+    { key: "empresa", label: "Empresa" },
+    { key: "placa", label: "Placa" },
+    { key: "motorista", label: "Motorista" },
+    { key: "rgCpf", label: "RG / CPF" },
+    { key: "celular", label: "Celular" },
+    { key: "numeroNotaFiscal", label: "Nº NF" },
+    { key: "tipoOperacao", label: "Carregamento / Descarregamento" },
+  ];
+  const metade = Math.ceil(CAMPOS_EXPORTACAO.length / 2);
+  const colunaEsquerda = CAMPOS_EXPORTACAO.slice(0, metade);
+  const colunaDireita = CAMPOS_EXPORTACAO.slice(metade);
 
   const toggleOrdem = () => {
     setOrdemAsc((prev) => !prev);
@@ -479,31 +542,40 @@ export default function Cargas() {
     resultado = resultado.filter((c) => {
       // PERÍODO
       const inicio =
-        dataInicial && horarioInicial
-          ? juntarDataHora(parseDateLocal(dataInicial), horarioInicial)
+        filtros.dataInicial && filtros.horarioInicial
+          ? juntarDataHora(
+              parseDateLocal(filtros.dataInicial),
+              filtros.horarioInicial,
+            )
           : null;
 
       const fim =
-        dataFinal && horarioFinal
-          ? juntarDataHora(parseDateLocal(dataFinal), horarioFinal)
+        filtros.dataFinal && filtros.horarioFinal
+          ? juntarDataHora(
+              parseDateLocal(filtros.dataFinal),
+              filtros.horarioFinal,
+            )
           : null;
 
       if (inicio && c.chegada < inicio) return false;
       if (fim && c.chegada > fim) return false;
 
       // ID
-      if (id && !c.id.toString().includes(id.trim())) return false;
+      if (filtros.id && !c.id.toString().includes(filtros.id.trim()))
+        return false;
 
       // EMPRESA
       if (
-        empresa &&
-        !c.empresa.nome.toLowerCase().includes(empresa.trim().toLowerCase())
+        filtros.empresa &&
+        !c.empresa.nome
+          .toLowerCase()
+          .includes(filtros.empresa.trim().toLowerCase())
       )
         return false;
 
       // NOME / RG / CPF - MOTORISTA
-      if (rgCpf) {
-        const busca = rgCpf.trim().toLowerCase();
+      if (filtros.rgCpf) {
+        const busca = filtros.rgCpf.trim().toLowerCase();
 
         const bateRgCpf = c.motorista.rgCpf?.toLowerCase().includes(busca);
         const bateNome = c.motorista.nome?.toLowerCase().includes(busca);
@@ -513,15 +585,15 @@ export default function Cargas() {
 
       // NOTA FISCAL
       if (
-        numeroNotaFiscal &&
+        filtros.numeroNotaFiscal &&
         !(c.numeroNotaFiscal ?? "")
           .toLowerCase()
-          .includes(numeroNotaFiscal.trim().toLowerCase())
+          .includes(filtros.numeroNotaFiscal.trim().toLowerCase())
       )
         return false;
 
       // TIPO OPERAÇÃO
-      if (tipoOperacaoFiltro !== 0 && c.tipoOperacao !== tipoOperacaoFiltro)
+      if (filtros.tipoOperacao !== 0 && c.tipoOperacao !== filtros.tipoOperacao)
         return false;
 
       return true;
@@ -534,15 +606,16 @@ export default function Cargas() {
   };
 
   const limparFiltro = () => {
-    setDataInicial("");
-    setDataFinal("");
-    setHorarioInicial("00:00");
-    setHorarioFinal("23:59");
-    setId("");
-    setEmpresa("");
-    setRgCpf("");
-    setNumeroNotaFiscal("");
-    setTipoOperacaoFiltro(0);
+    setFiltros((prev) => ({ ...prev, dataInicial: "" }));
+    setFiltros((prev) => ({ ...prev, horarioInicial: "00:00" }));
+    setFiltros((prev) => ({ ...prev, dataFinal: "" }));
+    setFiltros((prev) => ({ ...prev, horarioFinal: "23:59" }));
+    setFiltros((prev) => ({ ...prev, id: "" }));
+    setFiltros((prev) => ({ ...prev, empresa: "" }));
+    setFiltros((prev) => ({ ...prev, rgCpf: "" }));
+    setFiltros((prev) => ({ ...prev, numeroNotaFiscal: "" }));
+    setFiltros((prev) => ({ ...prev, tipoOperacao: 0 }));
+
     setOrdemAsc(false);
   };
 
@@ -565,15 +638,15 @@ export default function Cargas() {
   useEffect(() => {
     filtrar();
   }, [
-    dataInicial,
-    dataFinal,
-    horarioInicial,
-    horarioFinal,
-    id,
-    empresa,
-    rgCpf,
-    numeroNotaFiscal,
-    tipoOperacaoFiltro,
+    filtros.dataInicial,
+    filtros.dataFinal,
+    filtros.horarioInicial,
+    filtros.horarioFinal,
+    filtros.id,
+    filtros.empresa,
+    filtros.rgCpf,
+    filtros.numeroNotaFiscal,
+    filtros.tipoOperacao,
     cargas,
     ordemAsc,
   ]);
@@ -624,6 +697,8 @@ export default function Cargas() {
         : "",
     });
 
+    setModalNumeroNotaFiscal(carga.numeroNotaFiscal);
+
     setIsEditModalVisible(true);
   }, []);
 
@@ -662,6 +737,7 @@ export default function Cargas() {
             ? juntarDataHora(hoje, horarios.entrada)
             : null,
           saida: horarios.saida ? juntarDataHora(hoje, horarios.saida) : null,
+          numeroNotaFiscal: modalNumeroNotaFiscal,
         },
         cargaSelecionada.id,
       );
@@ -740,6 +816,71 @@ export default function Cargas() {
     }
   };
 
+  const toggleCampo = (key: string) => {
+    setCamposSelecionados((prev) =>
+      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+    );
+  };
+
+  const selecionarTodos = () => {
+    setCamposSelecionados(CAMPOS_EXPORTACAO.map((c) => c.key));
+  };
+
+  const desmarcarTodos = () => {
+    setCamposSelecionados([]);
+  };
+
+  const montarDadosExportacao = () => {
+    return cargasFiltradas.map((c) => {
+      const obj: Record<string, any> = {};
+
+      if (camposSelecionados.includes("id")) {
+        obj["ID"] = c.id;
+      }
+
+      if (camposSelecionados.includes("data")) {
+        obj["Data"] = c.chegadaDataStr;
+      }
+
+      if (camposSelecionados.includes("horarios")) {
+        obj["Chegada"] = c.chegadaHoraStr;
+        obj["Entrada"] = c.entradaHoraStr;
+        obj["Saída"] = c.saidaHoraStr;
+      }
+
+      if (camposSelecionados.includes("empresa")) {
+        obj["Empresa"] = c.empresa.nome;
+      }
+
+      if (camposSelecionados.includes("placa")) {
+        obj["Placa"] = c.placa.placa;
+      }
+
+      if (camposSelecionados.includes("motorista")) {
+        obj["Motorista"] = c.motorista.nome;
+      }
+
+      if (camposSelecionados.includes("rgCpf")) {
+        obj["RG / CPF"] = c.motorista.rgCpf;
+      }
+
+      if (camposSelecionados.includes("celular")) {
+        obj["Celular"] = c.motorista.celular;
+      }
+
+      if (camposSelecionados.includes("numeroNotaFiscal")) {
+        obj["Nº NF"] = c.numeroNotaFiscal ?? "S/NF";
+      }
+
+      if (camposSelecionados.includes("tipoOperacao")) {
+        obj["Operação"] =
+          c.tipoOperacao === 1 ? "Carregamento" : "Descarregamento";
+      }
+
+      return obj;
+    });
+  };
+
   return (
     <View
       style={[
@@ -748,246 +889,350 @@ export default function Cargas() {
       ]}
     >
       {/* FILTRO CONTAINER */}
-      <View style={globalStyles.mainContainer}>
-        <View style={globalStyles.filtroContainer}>
-          <View style={globalStyles.filtroContainerRow}>
-            <View style={styles.dataHorarioContainer}>
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <FontAwesome name="calendar-o" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Data Inicial
-                  </Text>
-                </View>
-                <input
-                  type="date"
-                  style={dataInputStyle}
-                  value={dataInicial}
-                  onChange={(e) => setDataInicial(e.target.value)}
-                />
-              </View>
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <Feather name="clock" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Horário de chegada
-                  </Text>
-                </View>
-                <input
-                  type="time"
-                  style={dataInputStyle}
-                  value={horarioInicial}
-                  onChange={(e) => setHorarioInicial(e.target.value)}
-                />
-              </View>
-            </View>
+      {!filtrosVisible && (
+        <Pressable
+          style={{
+            flexDirection: "row",
+            gap: 10,
+            boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.4)",
+            backgroundColor: "white",
+            paddingHorizontal: 12,
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+          }}
+          onPress={() => setFiltrosVisible(true)}
+        >
+          <Text style={{ fontWeight: 500, fontSize: 22 }}>Filtros</Text>
+          <AntDesign name="arrow-down" size={20} color="black" />
+        </Pressable>
+      )}
 
-            <View style={styles.dataHorarioContainer}>
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <FontAwesome name="calendar-o" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Data Final
-                  </Text>
-                </View>
-                <input
-                  type="date"
-                  style={dataInputStyle}
-                  value={dataFinal}
-                  onChange={(e) => setDataFinal(e.target.value)}
-                />
-              </View>
-              <View style={globalStyles.dataLabelInputContainer}>
-                <View style={globalStyles.dataLabelContainer}>
-                  <Feather name="clock" size={24} color="black" />
-                  <Text style={globalStyles.dataLabelText} selectable={false}>
-                    Horário final
-                  </Text>
-                </View>
-                <input
-                  type="time"
-                  style={dataInputStyle}
-                  value={horarioFinal}
-                  onChange={(e) => setHorarioFinal(e.target.value)}
-                />
-              </View>
-            </View>
-          </View>
-
-          <View style={globalStyles.filtroContainerRow}>
-            <View style={globalStyles.dataLabelInputContainer}>
-              <View style={globalStyles.dataLabelContainer}>
-                <FontAwesome name="id-badge" size={24} color="black" />
-                <Text style={globalStyles.dataLabelText} selectable={false}>
-                  ID
-                </Text>
-              </View>
-              <TextInput
-                style={globalStyles.input}
-                value={id}
-                onChangeText={(text) => setId(text)}
-              />
-            </View>
-
-            <View style={globalStyles.dataLabelInputContainer}>
-              <View style={globalStyles.dataLabelContainer}>
-                <FontAwesome6 name="industry" size={24} color="black" />
-                <Text style={globalStyles.dataLabelText} selectable={false}>
-                  Empresa
-                </Text>
-              </View>
-              <TextInput
-                style={globalStyles.input}
-                value={empresa}
-                onChangeText={(text) => setEmpresa(text)}
-              />
-            </View>
-
-            <View style={globalStyles.dataLabelInputContainer}>
-              <View style={globalStyles.dataLabelContainer}>
-                <FontAwesome name="id-card-o" size={24} color="black" />
-                <Text style={globalStyles.dataLabelText} selectable={false}>
-                  NOME / RG / CPF - Motorista
-                </Text>
-              </View>
-              <TextInput
-                style={globalStyles.input}
-                value={rgCpf}
-                onChangeText={(text) => setRgCpf(text)}
-              />
-            </View>
-
-            <View style={globalStyles.dataLabelInputContainer}>
-              <View style={globalStyles.dataLabelContainer}>
-                <Ionicons
-                  name="document-text-outline"
-                  size={24}
-                  color="black"
-                />
-                <Text style={globalStyles.dataLabelText} selectable={false}>
-                  Nº NF
-                </Text>
-              </View>
-              <TextInput
-                style={globalStyles.input}
-                value={numeroNotaFiscal}
-                onChangeText={(text) => setNumeroNotaFiscal(text)}
-              />
-            </View>
-          </View>
-
-          {/* Limpar Filtro Container */}
-          <View
-            style={[
-              globalStyles.filtroContainerRow,
-              { justifyContent: "space-between", marginTop: -10 },
-            ]}
+      {filtrosVisible && (
+        <View style={globalStyles.mainContainer}>
+          <Pressable
+            style={{
+              height: 20,
+              width: "auto",
+              position: "absolute",
+              zIndex: 999,
+              right: 28,
+              top: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+            onPress={() => setFiltrosVisible(false)}
           >
-            <View style={styles.tipoOperacaoFiltroContainer}>
-              {/* TODOS */}
-              <Pressable
-                style={styles.radioLabelContainer}
-                onPress={() => setTipoOperacaoFiltro(0)}
-              >
-                <View style={styles.radioButton}>
-                  {tipoOperacaoFiltro === 0 && (
-                    <View style={styles.radioFill} />
-                  )}
+            <Text
+              selectable={false}
+              style={{ color: "black", fontWeight: 500 }}
+            >
+              Minimizar
+            </Text>
+            <AntDesign name="arrow-up" size={16} color="black" />
+          </Pressable>
+          <View style={globalStyles.filtroContainer}>
+            <View style={globalStyles.filtroContainerRow}>
+              <View style={styles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Inicial
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={filtros.dataInicial}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        dataInicial: e.target.value,
+                      }))
+                    }
+                  />
                 </View>
-                <Text
-                  style={[
-                    globalStyles.labelText,
-                    tipoOperacaoFiltro === 0
-                      ? { fontWeight: 700 }
-                      : { fontWeight: 400 },
-                  ]}
-                  selectable={false}
-                >
-                  Todos
-                </Text>
-              </Pressable>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário de chegada
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={filtros.horarioInicial}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        horarioInicial: e.target.value,
+                      }))
+                    }
+                  />
+                </View>
+              </View>
 
-              {/* CARREGAMENTO */}
-              <Pressable
-                style={styles.radioLabelContainer}
-                onPress={() => setTipoOperacaoFiltro(1)}
-              >
-                <View style={styles.radioButton}>
-                  {tipoOperacaoFiltro === 1 && (
-                    <View style={styles.radioFill} />
-                  )}
+              <View style={styles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Final
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={filtros.dataFinal}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        dataFinal: e.target.value,
+                      }))
+                    }
+                  />
                 </View>
-                <Text
-                  style={[
-                    globalStyles.labelText,
-                    tipoOperacaoFiltro === 1
-                      ? { fontWeight: 700 }
-                      : { fontWeight: 400 },
-                  ]}
-                  selectable={false}
-                >
-                  Carregamento
-                </Text>
-              </Pressable>
-
-              {/* DESCARREGAMENTO */}
-              <Pressable
-                style={styles.radioLabelContainer}
-                onPress={() => setTipoOperacaoFiltro(2)}
-              >
-                <View style={styles.radioButton}>
-                  {tipoOperacaoFiltro === 2 && (
-                    <View style={styles.radioFill} />
-                  )}
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário final
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={filtros.horarioFinal}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        horarioFinal: e.target.value,
+                      }))
+                    }
+                  />
                 </View>
-                <Text
-                  style={[
-                    globalStyles.labelText,
-                    tipoOperacaoFiltro === 2
-                      ? { fontWeight: 700 }
-                      : { fontWeight: 400 },
-                  ]}
-                  selectable={false}
-                >
-                  Descarregamento
-                </Text>
-              </Pressable>
+              </View>
             </View>
 
-            {/* Limpar filtro */}
-            <MenuOptionButton
-              containerStyle={[
-                globalStyles.button,
-                styles.button,
-                {
-                  borderWidth: temFiltroAtivo ? 3 : 2,
-                  borderColor: temFiltroAtivo ? colors.red : colors.gray,
-                },
-              ]}
-              labelStyle={globalStyles.buttonText}
-              label={
-                <View style={styles.buttonLabel}>
-                  <MaterialCommunityIcons
-                    name="cancel"
-                    size={24}
-                    color={temFiltroAtivo ? colors.red : colors.gray}
-                  />
-                  <Text
-                    style={
-                      temFiltroAtivo
-                        ? { color: colors.red, fontWeight: 700 }
-                        : { color: colors.gray }
-                    }
-                  >
-                    Limpar filtro
+            <View style={globalStyles.filtroContainerRow}>
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome name="id-badge" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    ID
                   </Text>
                 </View>
-              }
-              onPress={limparFiltro}
-            />
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.id}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, id: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome6 name="industry" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Empresa
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.empresa}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, empresa: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome name="id-card-o" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    NOME / RG / CPF - Motorista
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.rgCpf}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, rgCpf: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <Ionicons
+                    name="document-text-outline"
+                    size={24}
+                    color="black"
+                  />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Nº NF
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.numeroNotaFiscal}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, numeroNotaFiscal: text }))
+                  }
+                />
+              </View>
+            </View>
+
+            {/* Ultima linha Container */}
+            <View
+              style={[
+                globalStyles.filtroContainerRow,
+                { justifyContent: "space-between", marginTop: -10 },
+              ]}
+            >
+              {/* Lado esquerdo */}
+              <View style={styles.filtroUltimaLinha}>
+                {/* TODOS */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, tipoOperacao: 0 }))
+                  }
+                >
+                  <View style={styles.radioButton}>
+                    {filtros.tipoOperacao === 0 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.tipoOperacao === 0
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Todos
+                  </Text>
+                </Pressable>
+
+                {/* CARREGAMENTO */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, tipoOperacao: 1 }))
+                  }
+                >
+                  <View style={styles.radioButton}>
+                    {filtros.tipoOperacao === 1 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.tipoOperacao === 1
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Carregamento
+                  </Text>
+                </Pressable>
+
+                {/* DESCARREGAMENTO */}
+                <Pressable
+                  style={styles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, tipoOperacao: 2 }))
+                  }
+                >
+                  <View style={styles.radioButton}>
+                    {filtros.tipoOperacao === 2 && (
+                      <View style={styles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.tipoOperacao === 2
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    Descarregamento
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* Lado direito */}
+              <View style={styles.filtroUltimaLinha}>
+                {/* Exportar */}
+                <MenuOptionButton
+                  containerStyle={[
+                    globalStyles.button,
+                    {
+                      backgroundColor: colors.purple,
+                    },
+                  ]}
+                  labelStyle={globalStyles.buttonText}
+                  label={
+                    <View style={styles.buttonLabel}>
+                      <MaterialCommunityIcons
+                        name="microsoft-excel"
+                        size={35}
+                        color="white"
+                      />
+                      <Text style={{ color: "white" }}>Exportar</Text>
+                    </View>
+                  }
+                  onPress={() => {
+                    setIsExportarModalVisible(true);
+                  }}
+                />
+
+                {/* Limpar filtro */}
+                <MenuOptionButton
+                  containerStyle={[
+                    globalStyles.button,
+                    styles.button,
+                    {
+                      borderWidth: temFiltroAtivo ? 3 : 2,
+                      borderColor: temFiltroAtivo ? colors.red : colors.gray,
+                    },
+                  ]}
+                  labelStyle={globalStyles.buttonText}
+                  label={
+                    <View style={styles.buttonLabel}>
+                      <MaterialCommunityIcons
+                        name="cancel"
+                        size={24}
+                        color={temFiltroAtivo ? colors.red : colors.gray}
+                      />
+                      <Text
+                        style={
+                          temFiltroAtivo
+                            ? { color: colors.red, fontWeight: 700 }
+                            : { color: colors.gray }
+                        }
+                      >
+                        Limpar filtro
+                      </Text>
+                    </View>
+                  }
+                  onPress={limparFiltro}
+                />
+              </View>
+            </View>
           </View>
         </View>
-      </View>
+      )}
       <FlatList
         data={cargasFiltradas}
         keyExtractor={(item) => item.id.toString()}
@@ -1023,87 +1268,87 @@ export default function Cargas() {
           onClose={() => setIsEditModalVisible(false)}
           title="Editar carga"
         >
-          <Text style={globalStyles.labelText}>Chegada</Text>
-          <input
-            type="time"
-            style={dataInputStyle}
-            value={horarios.chegada}
-            onChange={(e) =>
-              setHorarios((prev) => ({
-                ...prev,
-                chegada: e.target.value,
-              }))
-            }
-          />
-
-          <Text style={globalStyles.labelText}>Entrada</Text>
-          <input
-            type="time"
+          <View
             style={{
-              ...dataInputStyle,
-              ...(!horarios.chegada && { opacity: 0.6, cursor: "not-allowed" }),
+              gap: 30,
+              width: "100%",
+              maxWidth: 500,
+              alignItems: "center",
             }}
-            disabled={horarios.chegada == ""}
-            value={horarios.entrada}
-            onChange={(e) =>
-              setHorarios((prev) => ({
-                ...prev,
-                entrada: e.target.value,
-              }))
-            }
-          />
+          >
+            <View style={styles.modalLabelInputContainer}>
+              <Text style={globalStyles.labelText}>Chegada</Text>
+              <input
+                type="time"
+                style={dataInputStyle}
+                value={horarios.chegada}
+                onChange={(e) =>
+                  setHorarios((prev) => ({
+                    ...prev,
+                    chegada: e.target.value,
+                  }))
+                }
+              />
+            </View>
 
-          <Text style={globalStyles.labelText}>Saída</Text>
-          <input
-            type="time"
-            style={{
-              ...dataInputStyle,
-              ...(!horarios.entrada && { opacity: 0.6, cursor: "not-allowed" }),
-            }}
-            disabled={horarios.entrada == ""}
-            value={horarios.saida}
-            onChange={(e) =>
-              setHorarios((prev) => ({
-                ...prev,
-                saida: e.target.value,
-              }))
-            }
-          />
+            <View style={styles.modalLabelInputContainer}>
+              <Text style={globalStyles.labelText}>Entrada</Text>
+              <input
+                type="time"
+                style={{
+                  ...dataInputStyle,
+                  ...(!horarios.chegada && {
+                    opacity: 0.6,
+                    cursor: "not-allowed",
+                  }),
+                }}
+                disabled={horarios.chegada == ""}
+                value={horarios.entrada}
+                onChange={(e) =>
+                  setHorarios((prev) => ({
+                    ...prev,
+                    entrada: e.target.value,
+                  }))
+                }
+              />
+            </View>
 
-          {/* Salvar */}
-          <MenuOptionButton
-            containerStyle={[
-              globalStyles.button,
-              { backgroundColor: colors.green },
-            ]}
-            labelStyle={globalStyles.buttonText}
-            label={
-              <View
-                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
-              >
-                <Text style={globalStyles.buttonText} selectable={false}>
-                  Salvar
-                </Text>
-                <Feather
-                  name="check-circle"
-                  size={24}
-                  color="white"
-                  style={{ marginBottom: -2 }}
-                />
-              </View>
-            }
-            onPress={async () => atualizarCarga()}
-          />
+            <View style={styles.modalLabelInputContainer}>
+              <Text style={globalStyles.labelText}>Saída</Text>
+              <input
+                type="time"
+                style={{
+                  ...dataInputStyle,
+                  ...(!horarios.entrada && {
+                    opacity: 0.6,
+                    cursor: "not-allowed",
+                  }),
+                }}
+                disabled={horarios.entrada == ""}
+                value={horarios.saida}
+                onChange={(e) =>
+                  setHorarios((prev) => ({
+                    ...prev,
+                    saida: e.target.value,
+                  }))
+                }
+              />
+            </View>
 
-          {/* Vai carregar */}
-          {cargaSelecionada?.tipoOperacao === 2 && (
+            <View style={styles.modalLabelInputContainer}>
+              <Text style={globalStyles.labelText}>Nota fiscal</Text>
+              <TextInput
+                style={globalStyles.input}
+                value={modalNumeroNotaFiscal}
+                onChangeText={(text) => setModalNumeroNotaFiscal(text)}
+              />
+            </View>
+
+            {/* Salvar */}
             <MenuOptionButton
-              enabled={
-                !!(horarios.chegada && horarios.entrada && horarios.saida)
-              }
               containerStyle={[
                 globalStyles.button,
-                { backgroundColor: colors.lightBlue },
+                { backgroundColor: colors.green },
               ]}
               labelStyle={globalStyles.buttonText}
               label={
@@ -1111,19 +1356,53 @@ export default function Cargas() {
                   style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
                 >
                   <Text style={globalStyles.buttonText} selectable={false}>
-                    Vai carregar
+                    Salvar
                   </Text>
-                  <MaterialCommunityIcons
-                    name="truck-cargo-container"
-                    size={30}
+                  <Feather
+                    name="check-circle"
+                    size={24}
                     color="white"
-                    style={{ marginBottom: -5 }}
+                    style={{ marginBottom: -2 }}
                   />
                 </View>
               }
-              onPress={async () => vaiCarregar()}
+              onPress={async () => atualizarCarga()}
             />
-          )}
+
+            {/* Vai carregar */}
+            {cargaSelecionada?.tipoOperacao === 2 && (
+              <MenuOptionButton
+                enabled={
+                  !!(horarios.chegada && horarios.entrada && horarios.saida)
+                }
+                containerStyle={[
+                  globalStyles.button,
+                  { backgroundColor: colors.lightBlue },
+                ]}
+                labelStyle={globalStyles.buttonText}
+                label={
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 8,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={globalStyles.buttonText} selectable={false}>
+                      Vai carregar
+                    </Text>
+                    <MaterialCommunityIcons
+                      name="truck-cargo-container"
+                      size={30}
+                      color="white"
+                      style={{ marginBottom: -5 }}
+                    />
+                  </View>
+                }
+                onPress={async () => vaiCarregar()}
+              />
+            )}
+          </View>
         </EditModal>
       )}
 
@@ -1170,6 +1449,264 @@ export default function Cargas() {
           </>
         </DeleteModal>
       )}
+
+      <ExportarModal
+        visible={isExportarModalVisible}
+        onClose={() => setIsExportarModalVisible(false)}
+        title="Exportar dados"
+        maxWidth={1000}
+      >
+        <View style={{ flexDirection: "row", gap: 30 }}>
+          {/* PDF */}
+          <Pressable
+            style={styles.radioLabelContainer}
+            onPress={() => setTipoExport(1)}
+          >
+            <View style={styles.radioButton}>
+              {tipoExport === 1 && <View style={styles.radioFill} />}
+            </View>
+            <Text
+              style={[
+                globalStyles.labelText,
+                tipoExport === 1 ? { fontWeight: 700 } : { fontWeight: 400 },
+              ]}
+              selectable={false}
+            >
+              PDF
+            </Text>
+          </Pressable>
+
+          {/* EXCEL */}
+          <Pressable
+            style={styles.radioLabelContainer}
+            onPress={() => setTipoExport(2)}
+          >
+            <View style={styles.radioButton}>
+              {tipoExport === 2 && <View style={styles.radioFill} />}
+            </View>
+            <Text
+              style={[
+                globalStyles.labelText,
+                tipoExport === 2 ? { fontWeight: 700 } : { fontWeight: 400 },
+              ]}
+              selectable={false}
+            >
+              EXCEL
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={[globalStyles.labelText, { color: colors.red }]}>
+          ATENÇÃO: Os dados exportados serão de acordo com o filtro selecionado
+        </Text>
+        <Text style={[globalStyles.labelText, { fontSize: 32 }]}>
+          Campos a serem exportados:
+        </Text>
+
+        {/* Ações rápidas */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 10,
+            marginBottom: 15,
+            gap: 30,
+          }}
+        >
+          <TouchableOpacity onPress={selecionarTodos}>
+            <Text
+              style={[
+                globalStyles.labelText,
+                {
+                  backgroundColor: colors.lightBlue,
+                  fontWeight: "600",
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderRadius: 10,
+                  boxShadow: "0px 0px 5px rgba(0, 0, 0, 1)",
+                  color: "white",
+                },
+              ]}
+            >
+              Selecionar todos
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={desmarcarTodos}>
+            <Text
+              style={[
+                globalStyles.labelText,
+                {
+                  backgroundColor: colors.red,
+                  fontWeight: "600",
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderRadius: 10,
+                  boxShadow: "0px 0px 5px rgba(0, 0, 0, 1)",
+                  color: "white",
+                },
+              ]}
+            >
+              Desmarcar todos
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Lista de checkboxes em 2 colunas */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 10,
+          }}
+        >
+          {/* COLUNA ESQUERDA */}
+          <View style={{ flex: 1, gap: 14 }}>
+            {colunaEsquerda.map((campo) => {
+              const selecionado = camposSelecionados.includes(campo.key);
+
+              return (
+                <Pressable
+                  key={campo.key}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                  }}
+                  onPress={() => toggleCampo(campo.key)}
+                >
+                  <View
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderWidth: 2,
+                      borderColor: selecionado ? colors.lightBlue : "#CFCFCF",
+                      borderRadius: 6,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: selecionado
+                        ? colors.lightBlue
+                        : "transparent",
+                    }}
+                  >
+                    {selecionado && (
+                      <Feather name="check" size={15} color="white" />
+                    )}
+                  </View>
+
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      selecionado ? { fontWeight: "700" } : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    {campo.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* ESPAÇO ENTRE COLUNAS */}
+          <View style={{ width: 40 }} />
+
+          {/* COLUNA DIREITA */}
+          <View style={{ flex: 1, gap: 14 }}>
+            {colunaDireita.map((campo) => {
+              const selecionado = camposSelecionados.includes(campo.key);
+
+              return (
+                <Pressable
+                  key={campo.key}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 12,
+                  }}
+                  onPress={() => toggleCampo(campo.key)}
+                >
+                  <View
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderWidth: 2,
+                      borderColor: selecionado ? colors.lightBlue : "#CFCFCF",
+                      borderRadius: 6,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: selecionado
+                        ? colors.lightBlue
+                        : "transparent",
+                    }}
+                  >
+                    {selecionado && (
+                      <Feather name="check" size={15} color="white" />
+                    )}
+                  </View>
+
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      selecionado ? { fontWeight: "700" } : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    {campo.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <MenuOptionButton
+          containerStyle={[
+            globalStyles.button,
+            {
+              backgroundColor: colors.purple,
+            },
+          ]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={styles.buttonLabel}>
+              <Text style={{ color: "white" }}>Exportar</Text>
+              <MaterialCommunityIcons
+                name="file-export-outline"
+                size={28}
+                color="white"
+              />
+            </View>
+          }
+          onPress={async () => {
+            try {
+              const dados = montarDadosExportacao();
+              // console.log("Filtros: ", filtros);
+              // console.log("Campos selecionados: ", camposSelecionados);
+              // console.log("Dados: ", dados);
+
+              const campos = normalizarCampos(camposSelecionados);
+              // console.log("Campos: ", campos);
+
+              // console.log("Tipo export: ", tipoExport);
+
+              const resultado = await exportarCargas(
+                filtros,
+                camposSelecionados.includes("data") ||
+                  camposSelecionados.includes("horarios")
+                  ? campos
+                  : camposSelecionados,
+              );
+
+              if (tipoExport === 1) exportarPDF(resultado);
+              if (tipoExport === 2) exportarExcel(resultado);
+
+              console.log(resultado);
+            } catch (erro: any) {
+              console.log(erro.message);
+            }
+          }}
+        />
+      </ExportarModal>
     </View>
   );
 }
@@ -1189,4 +1726,23 @@ function juntarDataHora(dataBase: Date, hora: string) {
 function parseDateLocal(dateStr: string) {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day);
+}
+
+function normalizarCampos(campos: string[]): string[] {
+  const novosCampos = [...campos];
+
+  const temData = novosCampos.includes("data");
+  const temHorarios = novosCampos.includes("horarios");
+
+  if (temData || temHorarios) {
+    // Remove data e horarios
+    const filtrados = novosCampos.filter(
+      (c) => c !== "data" && c !== "horarios",
+    );
+
+    // Adiciona os campos reais
+    return [...filtrados, "chegada", "entrada", "saida"];
+  }
+
+  return novosCampos;
 }
