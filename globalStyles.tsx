@@ -147,6 +147,16 @@ export const getGlobalStyles = () => {
       color: "black",
       fontSize: 20,
     },
+    modalContainer: {
+      gap: 30,
+      width: "100%",
+      maxWidth: 500,
+      alignItems: "center",
+    },
+    modalLabelInputContainer: {
+      width: "100%",
+      gap: 5,
+    },
   });
 };
 

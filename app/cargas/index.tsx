@@ -29,7 +29,6 @@ import {
 import {
   createNovaCarga,
   deleteCarga,
-  exportarCargas,
   exportarExcel,
   exportarPDF,
   getCargas,
@@ -438,10 +437,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: colors.lightBlue,
   },
-  modalLabelInputContainer: {
-    width: "100%",
-    gap: 5,
-  },
 });
 
 export default function Cargas() {
@@ -505,28 +500,28 @@ export default function Cargas() {
 
   // export modal
   const [camposSelecionados, setCamposSelecionados] = useState<string[]>([
-    "id",
-    "data",
-    "horarios",
-    "empresa",
-    "placa",
-    "motorista",
-    "rgCpf",
-    "celular",
-    "numeroNotaFiscal",
-    "tipoOperacao",
+    "ID",
+    "Data",
+    "Horários",
+    "Empresa",
+    "Placa",
+    "Motorista",
+    "RG/CPF",
+    "Celular",
+    "Nº Nota Fiscal",
+    "Operação",
   ]);
   const CAMPOS_EXPORTACAO = [
-    { key: "id", label: "ID" },
-    { key: "data", label: "Data" },
-    { key: "horarios", label: "Horários" },
-    { key: "empresa", label: "Empresa" },
-    { key: "placa", label: "Placa" },
-    { key: "motorista", label: "Motorista" },
-    { key: "rgCpf", label: "RG / CPF" },
-    { key: "celular", label: "Celular" },
-    { key: "numeroNotaFiscal", label: "Nº NF" },
-    { key: "tipoOperacao", label: "Carregamento / Descarregamento" },
+    { key: "ID", label: "ID" },
+    { key: "Data", label: "Data" },
+    { key: "Horários", label: "Horários" },
+    { key: "Empresa", label: "Empresa" },
+    { key: "Placa", label: "Placa" },
+    { key: "Motorista", label: "Motorista" },
+    { key: "RG/CPF", label: "RG / CPF" },
+    { key: "Celular", label: "Celular" },
+    { key: "Nº Nota Fiscal", label: "Nº NF" },
+    { key: "Operação", label: "Carregamento / Descarregamento" },
   ];
   const metade = Math.ceil(CAMPOS_EXPORTACAO.length / 2);
   const colunaEsquerda = CAMPOS_EXPORTACAO.slice(0, metade);
@@ -828,57 +823,6 @@ export default function Cargas() {
 
   const desmarcarTodos = () => {
     setCamposSelecionados([]);
-  };
-
-  const montarDadosExportacao = () => {
-    return cargasFiltradas.map((c) => {
-      const obj: Record<string, any> = {};
-
-      if (camposSelecionados.includes("id")) {
-        obj["ID"] = c.id;
-      }
-
-      if (camposSelecionados.includes("data")) {
-        obj["Data"] = c.chegadaDataStr;
-      }
-
-      if (camposSelecionados.includes("horarios")) {
-        obj["Chegada"] = c.chegadaHoraStr;
-        obj["Entrada"] = c.entradaHoraStr;
-        obj["Saída"] = c.saidaHoraStr;
-      }
-
-      if (camposSelecionados.includes("empresa")) {
-        obj["Empresa"] = c.empresa.nome;
-      }
-
-      if (camposSelecionados.includes("placa")) {
-        obj["Placa"] = c.placa.placa;
-      }
-
-      if (camposSelecionados.includes("motorista")) {
-        obj["Motorista"] = c.motorista.nome;
-      }
-
-      if (camposSelecionados.includes("rgCpf")) {
-        obj["RG / CPF"] = c.motorista.rgCpf;
-      }
-
-      if (camposSelecionados.includes("celular")) {
-        obj["Celular"] = c.motorista.celular;
-      }
-
-      if (camposSelecionados.includes("numeroNotaFiscal")) {
-        obj["Nº NF"] = c.numeroNotaFiscal ?? "S/NF";
-      }
-
-      if (camposSelecionados.includes("tipoOperacao")) {
-        obj["Operação"] =
-          c.tipoOperacao === 1 ? "Carregamento" : "Descarregamento";
-      }
-
-      return obj;
-    });
   };
 
   return (
@@ -1261,195 +1205,186 @@ export default function Cargas() {
         ]}
       />
 
-      {/* <EditModal /> */}
-      {isEditModalVisible && (
-        <EditModal
-          visible={isEditModalVisible}
-          onClose={() => setIsEditModalVisible(false)}
-          title="Editar carga"
-        >
-          <View
-            style={{
-              gap: 30,
-              width: "100%",
-              maxWidth: 500,
-              alignItems: "center",
-            }}
-          >
-            <View style={styles.modalLabelInputContainer}>
-              <Text style={globalStyles.labelText}>Chegada</Text>
-              <input
-                type="time"
-                style={dataInputStyle}
-                value={horarios.chegada}
-                onChange={(e) =>
-                  setHorarios((prev) => ({
-                    ...prev,
-                    chegada: e.target.value,
-                  }))
-                }
-              />
-            </View>
+      {/* EditModal */}
+      <EditModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        title="Editar carga"
+      >
+        <View style={globalStyles.modalContainer}>
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Chegada</Text>
+            <input
+              type="time"
+              style={dataInputStyle}
+              value={horarios.chegada}
+              onChange={(e) =>
+                setHorarios((prev) => ({
+                  ...prev,
+                  chegada: e.target.value,
+                }))
+              }
+            />
+          </View>
 
-            <View style={styles.modalLabelInputContainer}>
-              <Text style={globalStyles.labelText}>Entrada</Text>
-              <input
-                type="time"
-                style={{
-                  ...dataInputStyle,
-                  ...(!horarios.chegada && {
-                    opacity: 0.6,
-                    cursor: "not-allowed",
-                  }),
-                }}
-                disabled={horarios.chegada == ""}
-                value={horarios.entrada}
-                onChange={(e) =>
-                  setHorarios((prev) => ({
-                    ...prev,
-                    entrada: e.target.value,
-                  }))
-                }
-              />
-            </View>
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Entrada</Text>
+            <input
+              type="time"
+              style={{
+                ...dataInputStyle,
+                ...(!horarios.chegada && {
+                  opacity: 0.6,
+                  cursor: "not-allowed",
+                }),
+              }}
+              disabled={horarios.chegada == ""}
+              value={horarios.entrada}
+              onChange={(e) =>
+                setHorarios((prev) => ({
+                  ...prev,
+                  entrada: e.target.value,
+                }))
+              }
+            />
+          </View>
 
-            <View style={styles.modalLabelInputContainer}>
-              <Text style={globalStyles.labelText}>Saída</Text>
-              <input
-                type="time"
-                style={{
-                  ...dataInputStyle,
-                  ...(!horarios.entrada && {
-                    opacity: 0.6,
-                    cursor: "not-allowed",
-                  }),
-                }}
-                disabled={horarios.entrada == ""}
-                value={horarios.saida}
-                onChange={(e) =>
-                  setHorarios((prev) => ({
-                    ...prev,
-                    saida: e.target.value,
-                  }))
-                }
-              />
-            </View>
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Saída</Text>
+            <input
+              type="time"
+              style={{
+                ...dataInputStyle,
+                ...(!horarios.entrada && {
+                  opacity: 0.6,
+                  cursor: "not-allowed",
+                }),
+              }}
+              disabled={horarios.entrada == ""}
+              value={horarios.saida}
+              onChange={(e) =>
+                setHorarios((prev) => ({
+                  ...prev,
+                  saida: e.target.value,
+                }))
+              }
+            />
+          </View>
 
-            <View style={styles.modalLabelInputContainer}>
-              <Text style={globalStyles.labelText}>Nota fiscal</Text>
-              <TextInput
-                style={globalStyles.input}
-                value={modalNumeroNotaFiscal}
-                onChangeText={(text) => setModalNumeroNotaFiscal(text)}
-              />
-            </View>
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Nota fiscal</Text>
+            <TextInput
+              style={globalStyles.input}
+              value={modalNumeroNotaFiscal}
+              onChangeText={(text) => setModalNumeroNotaFiscal(text)}
+            />
+          </View>
 
-            {/* Salvar */}
+          {/* Salvar */}
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.green },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View
+                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+              >
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Salvar
+                </Text>
+                <Feather
+                  name="check-circle"
+                  size={24}
+                  color="white"
+                  style={{ marginBottom: -2 }}
+                />
+              </View>
+            }
+            onPress={async () => atualizarCarga()}
+          />
+
+          {/* Vai carregar */}
+          {cargaSelecionada?.tipoOperacao === 2 && (
             <MenuOptionButton
+              enabled={
+                !!(horarios.chegada && horarios.entrada && horarios.saida)
+              }
               containerStyle={[
                 globalStyles.button,
-                { backgroundColor: colors.green },
+                { backgroundColor: colors.lightBlue },
               ]}
               labelStyle={globalStyles.buttonText}
               label={
                 <View
-                  style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+                  style={{
+                    flexDirection: "row",
+                    gap: 8,
+                    alignItems: "center",
+                  }}
                 >
                   <Text style={globalStyles.buttonText} selectable={false}>
-                    Salvar
+                    Vai carregar
                   </Text>
-                  <Feather
-                    name="check-circle"
-                    size={24}
+                  <MaterialCommunityIcons
+                    name="truck-cargo-container"
+                    size={30}
                     color="white"
-                    style={{ marginBottom: -2 }}
+                    style={{ marginBottom: -5 }}
                   />
                 </View>
               }
-              onPress={async () => atualizarCarga()}
+              onPress={async () => vaiCarregar()}
             />
+          )}
+        </View>
+      </EditModal>
 
-            {/* Vai carregar */}
-            {cargaSelecionada?.tipoOperacao === 2 && (
-              <MenuOptionButton
-                enabled={
-                  !!(horarios.chegada && horarios.entrada && horarios.saida)
-                }
-                containerStyle={[
-                  globalStyles.button,
-                  { backgroundColor: colors.lightBlue },
-                ]}
-                labelStyle={globalStyles.buttonText}
-                label={
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 8,
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={globalStyles.buttonText} selectable={false}>
-                      Vai carregar
-                    </Text>
-                    <MaterialCommunityIcons
-                      name="truck-cargo-container"
-                      size={30}
-                      color="white"
-                      style={{ marginBottom: -5 }}
-                    />
-                  </View>
-                }
-                onPress={async () => vaiCarregar()}
-              />
-            )}
-          </View>
-        </EditModal>
-      )}
-
-      {isDeleteModalVisible && (
-        <DeleteModal
-          visible={isDeleteModalVisible}
-          onClose={() => setIsDeleteModalVisible(false)}
-          title="Excluir carga?"
-          closeButtonColor={colors.gray}
-        >
-          <>
-            <Text
-              style={{ fontSize: 26, fontWeight: "400", textAlign: "center" }}
-            >
-              Tem certeza que deseja excluir a carga da empresa{" "}
-              <Text style={{ fontWeight: "700" }}>
-                {cargaSelecionada?.empresa.nome}
-              </Text>
-              {" ?\n\n"}
-              chegada:{" "}
-              <Text style={{ fontWeight: "700" }}>
-                {cargaSelecionada?.chegada.toLocaleDateString()}
-              </Text>
+      {/* DeleteModal */}
+      <DeleteModal
+        visible={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        title="Excluir carga?"
+        closeButtonColor={colors.gray}
+      >
+        <>
+          <Text
+            style={{ fontSize: 26, fontWeight: "400", textAlign: "center" }}
+          >
+            Tem certeza que deseja excluir a carga da empresa{" "}
+            <Text style={{ fontWeight: "700" }}>
+              {cargaSelecionada?.empresa.nome}
             </Text>
+            {" ?\n\n"}
+            chegada:{" "}
+            <Text style={{ fontWeight: "700" }}>
+              {cargaSelecionada?.chegada.toLocaleDateString()}
+            </Text>
+          </Text>
 
-            <MenuOptionButton
-              containerStyle={[
-                globalStyles.button,
-                { backgroundColor: colors.red },
-              ]}
-              labelStyle={globalStyles.buttonText}
-              label={
-                <View style={{ flexDirection: "row", gap: 10 }}>
-                  <Text style={globalStyles.buttonText} selectable={false}>
-                    Excluir
-                  </Text>
-                  <Feather name="check-circle" size={24} color="white" />
-                </View>
-              }
-              onPress={async () => {
-                if (cargaSelecionada) handleDelete(cargaSelecionada.id);
-              }}
-            />
-          </>
-        </DeleteModal>
-      )}
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.red },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Excluir
+                </Text>
+                <Feather name="check-circle" size={24} color="white" />
+              </View>
+            }
+            onPress={async () => {
+              if (cargaSelecionada) handleDelete(cargaSelecionada.id);
+            }}
+          />
+        </>
+      </DeleteModal>
 
+      {/* ExportModal */}
       <ExportarModal
         visible={isExportarModalVisible}
         onClose={() => setIsExportarModalVisible(false)}
@@ -1495,6 +1430,7 @@ export default function Cargas() {
             </Text>
           </Pressable>
         </View>
+
         <Text style={[globalStyles.labelText, { color: colors.red }]}>
           ATENÇÃO: Os dados exportados serão de acordo com o filtro selecionado
         </Text>
@@ -1679,28 +1615,18 @@ export default function Cargas() {
           }
           onPress={async () => {
             try {
-              const dados = montarDadosExportacao();
-              // console.log("Filtros: ", filtros);
-              // console.log("Campos selecionados: ", camposSelecionados);
-              // console.log("Dados: ", dados);
+              const camposNormalizados =
+                normalizarCamposSelecionados(camposSelecionados);
 
-              const campos = normalizarCampos(camposSelecionados);
-              // console.log("Campos: ", campos);
-
-              // console.log("Tipo export: ", tipoExport);
-
-              const resultado = await exportarCargas(
-                filtros,
-                camposSelecionados.includes("data") ||
-                  camposSelecionados.includes("horarios")
-                  ? campos
-                  : camposSelecionados,
+              const dadosSelecionados = montarDadosExportacao(
+                cargasFiltradas,
+                camposNormalizados,
               );
 
-              if (tipoExport === 1) exportarPDF(resultado);
-              if (tipoExport === 2) exportarExcel(resultado);
-
-              console.log(resultado);
+              if (tipoExport === 1)
+                exportarPDF(dadosSelecionados, camposNormalizados);
+              if (tipoExport === 2)
+                exportarExcel(dadosSelecionados, camposNormalizados);
             } catch (erro: any) {
               console.log(erro.message);
             }
@@ -1728,21 +1654,99 @@ function parseDateLocal(dateStr: string) {
   return new Date(year, month - 1, day);
 }
 
-function normalizarCampos(campos: string[]): string[] {
-  const novosCampos = [...campos];
+function normalizarCamposSelecionados(campos: string[]): string[] {
+  const ORDEM_PADRAO = [
+    "ID",
+    "Chegada",
+    "Entrada",
+    "Saída",
+    "Empresa",
+    "Placa",
+    "Motorista",
+    "RG/CPF",
+    "Celular",
+    "Nº Nota Fiscal",
+    "Operação",
+  ];
+  const camposExpandidos: string[] = [];
 
-  const temData = novosCampos.includes("data");
-  const temHorarios = novosCampos.includes("horarios");
+  campos.forEach((campo) => {
+    if (campo === "Data" || campo === "Horários") {
+      camposExpandidos.push("Chegada", "Entrada", "Saída");
+    } else {
+      camposExpandidos.push(campo);
+    }
+  });
 
-  if (temData || temHorarios) {
-    // Remove data e horarios
-    const filtrados = novosCampos.filter(
-      (c) => c !== "data" && c !== "horarios",
-    );
+  return ORDEM_PADRAO.filter((campo) => camposExpandidos.includes(campo));
+}
 
-    // Adiciona os campos reais
-    return [...filtrados, "chegada", "entrada", "saida"];
-  }
+function montarDadosExportacao(dados: any[], camposSelecionados: string[]) {
+  console.log(dados);
+  return dados.map((item, index) => {
+    if (!item) {
+      console.log("Item inválido no índice:", index);
+    }
+    const novoObjeto: any = {};
 
-  return novosCampos;
+    camposSelecionados.forEach((campo) => {
+      switch (campo) {
+        case "ID":
+          novoObjeto.ID = item.id;
+          break;
+
+        case "Chegada":
+          novoObjeto.Chegada =
+            item.chegadaDataStr && item.chegadaHoraStr
+              ? `${item.chegadaDataStr} ${item.chegadaHoraStr}`
+              : "";
+          break;
+
+        case "Entrada":
+          novoObjeto.Entrada =
+            item.entradaDataStr && item.entradaHoraStr !== "--"
+              ? `${item.entradaDataStr} ${item.entradaHoraStr}`
+              : "";
+          break;
+
+        case "Saída":
+          novoObjeto.Saída =
+            item.saidaDataStr && item.saidaHoraStr !== "--"
+              ? `${item.saidaDataStr} ${item.saidaHoraStr}`
+              : "";
+          break;
+
+        case "Empresa":
+          novoObjeto.Empresa = item.empresa?.nome;
+          break;
+
+        case "Placa":
+          novoObjeto.Placa = item.placa?.placa;
+          break;
+
+        case "Motorista":
+          novoObjeto.Motorista = item.motorista?.nome;
+          break;
+
+        case "RG/CPF":
+          novoObjeto["RG/CPF"] = item.motorista?.rgCpf;
+          break;
+
+        case "Celular":
+          novoObjeto.Celular = item.motorista?.celular ?? "";
+          break;
+
+        case "Nº Nota Fiscal":
+          novoObjeto["Nº Nota Fiscal"] = item.numeroNotaFiscal;
+          break;
+
+        case "Operação":
+          novoObjeto.Operação =
+            item.tipoOperacao === 1 ? "Carregamento" : "Descarregamento";
+          break;
+      }
+    });
+
+    return novoObjeto;
+  });
 }

@@ -1,12 +1,5 @@
-import { Feather, FontAwesome } from "@expo/vector-icons";
-import {
-  Text,
-  View,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  FlatList,
-} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { Text, View, TextInput, FlatList } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
 import MenuOptionButton from "../_components/MenuOptionButton";
 import { colors } from "../../colors";
@@ -15,10 +8,21 @@ import { getAllMotoristas } from "../../services/motorista";
 import { IMotorista } from "../../interfaces/motorista";
 import React from "react";
 import { IJwtPayload } from "../../interfaces/jwt";
+import SimpleModal from "../_components/SimpleModal";
 
-export default function NovaCarga() {
+export default function Motoristas() {
   const globalStyles = getGlobalStyles();
   const [motoristas, setMotoristas] = useState<IMotorista[]>([]);
+  const [motoristaSelecionado, setMotoristaSelecionado] =
+    useState<IMotorista>();
+  const [motoristaInput, setMotoristaInput] = useState<{
+    nome: string;
+    rgCpf: string;
+    celular: string;
+  }>({ nome: "", rgCpf: "", celular: "" });
+
+  const [isModalEdicaoVisible, setIsModalEdicaoVisible] =
+    useState<boolean>(false);
 
   const tableHeader = () => {
     return (
@@ -71,7 +75,14 @@ export default function NovaCarga() {
                 borderRadius: 10,
               }}
               label={<Feather name="edit" size={35} color="white" />}
-              onPress={() => {}}
+              onPress={() => {
+                setMotoristaInput({
+                  nome: motorista.nome,
+                  rgCpf: motorista.rgCpf,
+                  celular: motorista.celular ?? "",
+                });
+                setIsModalEdicaoVisible(true);
+              }}
             />
             {/* <MenuOptionButton
                     containerStyle={{
@@ -151,8 +162,74 @@ export default function NovaCarga() {
           renderItem={({ item }) => (
             <CargaRow motorista={item} globalStyles={globalStyles} />
           )}
-        ></FlatList>
+        />
       </View>
+
+      <SimpleModal
+        visible={isModalEdicaoVisible}
+        onClose={() => setIsModalEdicaoVisible(false)}
+        title="Editar motorista"
+      >
+        <View style={globalStyles.modalContainer}>
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Nome</Text>
+            <TextInput
+              style={globalStyles.input}
+              value={motoristaSelecionado?.nome}
+              onChangeText={(text) =>
+                setMotoristaInput((prev) => ({ ...prev, nome: text }))
+              }
+            />
+          </View>
+
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>RG ou CPF</Text>
+            <TextInput
+              style={globalStyles.input}
+              value={motoristaSelecionado?.rgCpf}
+              onChangeText={(text) =>
+                setMotoristaInput((prev) => ({ ...prev, rgCpf: text }))
+              }
+            />
+          </View>
+
+          <View style={globalStyles.modalLabelInputContainer}>
+            <Text style={globalStyles.labelText}>Celular</Text>
+            <TextInput
+              style={globalStyles.input}
+              value={motoristaSelecionado?.celular}
+              onChangeText={(text) =>
+                setMotoristaInput((prev) => ({ ...prev, celular: text }))
+              }
+            />
+          </View>
+
+          {/* Salvar */}
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.green },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View
+                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+              >
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Salvar
+                </Text>
+                <Feather
+                  name="check-circle"
+                  size={24}
+                  color="white"
+                  style={{ marginBottom: -2 }}
+                />
+              </View>
+            }
+            onPress={async () => {}}
+          />
+        </View>
+      </SimpleModal>
     </View>
   );
 }
