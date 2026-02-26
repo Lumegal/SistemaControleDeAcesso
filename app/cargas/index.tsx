@@ -470,6 +470,7 @@ export default function Cargas() {
     horarioFinal: "23:59",
     id: "",
     empresa: "",
+    placa: "",
     rgCpf: "",
     numeroNotaFiscal: "",
     tipoOperacao: 0,
@@ -483,6 +484,7 @@ export default function Cargas() {
       filtros.dataFinal !== "" ||
       filtros.id.trim() !== "" ||
       filtros.empresa.trim() !== "" ||
+      filtros.placa.trim() !== "" ||
       filtros.rgCpf.trim() !== "" ||
       filtros.numeroNotaFiscal.trim() !== "" ||
       filtros.tipoOperacao !== 0
@@ -492,6 +494,7 @@ export default function Cargas() {
     filtros.dataFinal,
     filtros.id,
     filtros.empresa,
+    filtros.placa,
     filtros.rgCpf,
     filtros.numeroNotaFiscal,
     filtros.tipoOperacao,
@@ -568,6 +571,15 @@ export default function Cargas() {
       )
         return false;
 
+      // PLACA
+      if (
+        filtros.placa &&
+        !c.placa.placa
+          .toLowerCase()
+          .includes(filtros.placa.trim().toLowerCase())
+      )
+        return false;
+
       // NOME / RG / CPF - MOTORISTA
       if (filtros.rgCpf) {
         const busca = filtros.rgCpf.trim().toLowerCase();
@@ -639,6 +651,7 @@ export default function Cargas() {
     filtros.horarioFinal,
     filtros.id,
     filtros.empresa,
+    filtros.placa,
     filtros.rgCpf,
     filtros.numeroNotaFiscal,
     filtros.tipoOperacao,
@@ -989,6 +1002,26 @@ export default function Cargas() {
                   value={filtros.empresa}
                   onChangeText={(text) =>
                     setFiltros((prev) => ({ ...prev, empresa: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <MaterialCommunityIcons
+                    name="truck-outline"
+                    size={24}
+                    color="black"
+                  />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Placa
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.placa}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, placa: text }))
                   }
                 />
               </View>

@@ -68,6 +68,7 @@ export type ICargaFiltros = {
   horarioFinal: string;
   id: string;
   empresa: string;
+  placa: string;
   rgCpf: string;
   numeroNotaFiscal: string;
   tipoOperacao: 0 | 1 | 2;

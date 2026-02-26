@@ -434,13 +434,13 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                   />
                 </View>
 
-                {/* Relatórios */}
+                {/* Relatórios
                 <View style={styles.menuSection}>
                   <Text style={styles.menuSectionLabel} selectable={false}>
                     Relatórios
                   </Text>
 
-                  {/* PDF */}
+                  PDF
                   <MenuOptionButton
                     containerStyle={[
                       globalStyles.menuOption,
@@ -488,7 +488,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     }}
                   />
 
-                  {/* Excel */}
+                  Excel
                   <MenuOptionButton
                     containerStyle={[
                       globalStyles.menuOption,
@@ -537,7 +537,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                       });
                     }}
                   />
-                </View>
+                </View> */}
               </>
             )}
 
@@ -554,7 +554,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     : ""}
             </Text>
             <Text style={styles.version} selectable={false}>
-              V1.1.0
+              V1.2.0
             </Text>
           </ScrollView>
         </Animated.View>
