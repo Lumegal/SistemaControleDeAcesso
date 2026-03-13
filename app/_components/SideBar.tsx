@@ -452,7 +452,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               BASE DE TESTES
             </Text>
             <Text style={styles.version} selectable={false}>
-              V1.4.0
+              V1.5.0
             </Text>
           </ScrollView>
         </Animated.View>

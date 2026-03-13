@@ -97,10 +97,16 @@ const renderTableHeader = (
     <View
       style={[globalStyles.mainContainer, { height: 70, alignItems: "center" }]}
     >
+      <Text
+        style={[globalStyles.tableHeader, { flex: widthIdColumn }]}
+        selectable={false}
+      >
+        ID
+      </Text>
       <View
         style={[
           {
-            flex: widthIdColumn,
+            flex: 1,
             flexDirection: "row",
             alignItems: "flex-end",
             justifyContent: "center",
@@ -112,7 +118,7 @@ const renderTableHeader = (
           style={[globalStyles.tableHeader, { flex: 0 }]}
           selectable={false}
         >
-          ID
+          DATA
         </Text>
 
         <Pressable onPress={onToggleOrdem}>
@@ -123,9 +129,6 @@ const renderTableHeader = (
           />
         </Pressable>
       </View>
-      <Text style={globalStyles.tableHeader} selectable={false}>
-        DATA
-      </Text>
       <Text style={globalStyles.tableHeader} selectable={false}>
         HORÁRIOS
       </Text>
@@ -617,8 +620,10 @@ export default function Cargas() {
           : b.chegada.getTime() - a.chegada.getTime();
       }
 
-      // Sem data inicial → ordena por ID
-      return ordemAsc ? a.id - b.id : b.id - a.id;
+      // Sem data inicial → ordena por chegada
+      return ordemAsc
+        ? a.chegada.getTime() - b.chegada.getTime()
+        : b.chegada.getTime() - a.chegada.getTime();
     });
 
     setCargasFiltradas(resultado);
