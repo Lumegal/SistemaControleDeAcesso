@@ -475,7 +475,7 @@ export default function Cargas() {
     numeroNotaFiscal: "",
     tipoOperacao: 0,
   });
-  const [filtrosVisible, setFiltrosVisible] = useState<boolean>(true);
+  const [filtrosVisible, setFiltrosVisible] = useState<boolean>(false);
 
   const [cargasFiltradas, setCargasFiltradas] = useState<ICargaFormatada[]>([]);
   const temFiltroAtivo = useMemo(() => {
@@ -707,23 +707,19 @@ export default function Cargas() {
   const handleEdit = useCallback((carga: ICarga) => {
     setCargaSelecionada(carga);
 
+    function formatarData(data: Date): string {
+      const ano = data.getFullYear();
+      const mes = String(data.getMonth() + 1).padStart(2, "0");
+      const dia = String(data.getDate()).padStart(2, "0");
+      const horas = String(data.getHours()).padStart(2, "0");
+      const minutos = String(data.getMinutes()).padStart(2, "0");
+
+      return `${ano}-${mes}-${dia}T${horas}:${minutos}`;
+    }
     setHorarios({
-      chegada: carga.chegada.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      entrada: carga.entrada
-        ? carga.entrada.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
-      saida: carga.saida
-        ? carga.saida.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
+      chegada: formatarData(carga.chegada),
+      entrada: carga.entrada ? formatarData(carga.entrada) : "",
+      saida: carga.saida ? formatarData(carga.saida) : "",
     });
 
     setModalNumeroNotaFiscal(carga.numeroNotaFiscal);
@@ -757,15 +753,11 @@ export default function Cargas() {
       showLoading();
       if (!cargaSelecionada) return;
 
-      const hoje = new Date();
-
       await updateCarga(
         {
-          chegada: juntarDataHora(cargaSelecionada.chegada, horarios.chegada),
-          entrada: horarios.entrada
-            ? juntarDataHora(hoje, horarios.entrada)
-            : null,
-          saida: horarios.saida ? juntarDataHora(hoje, horarios.saida) : null,
+          chegada: new Date(horarios.chegada),
+          entrada: horarios.entrada ? new Date(horarios.entrada) : null,
+          saida: horarios.saida ? new Date(horarios.saida) : null,
           numeroNotaFiscal: modalNumeroNotaFiscal,
         },
         cargaSelecionada.id,
@@ -822,8 +814,8 @@ export default function Cargas() {
       }
 
       const carga: INovaCarga = {
-        chegada: juntarDataHora(cargaSelecionada.chegada, horarios.saida),
-        entrada: juntarDataHora(cargaSelecionada.chegada, horarios.saida),
+        chegada: new Date(horarios.saida),
+        entrada: new Date(horarios.saida),
         empresaId: cargaSelecionada.empresa.id,
         placaId: cargaSelecionada.placa.id,
         motoristaId: cargaSelecionada.motorista.id,
@@ -880,7 +872,9 @@ export default function Cargas() {
           }}
           onPress={() => setFiltrosVisible(true)}
         >
-          <Text style={{ fontWeight: 500, fontSize: 22 }}>Filtros</Text>
+          <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
+            Filtros
+          </Text>
           <AntDesign name="arrow-down" size={20} color="black" />
         </Pressable>
       )}
@@ -1269,7 +1263,7 @@ export default function Cargas() {
           <View style={globalStyles.modalLabelInputContainer}>
             <Text style={globalStyles.labelText}>Chegada</Text>
             <input
-              type="time"
+              type="datetime-local"
               style={dataInputStyle}
               value={horarios.chegada}
               onChange={(e) =>
@@ -1284,7 +1278,7 @@ export default function Cargas() {
           <View style={globalStyles.modalLabelInputContainer}>
             <Text style={globalStyles.labelText}>Entrada</Text>
             <input
-              type="time"
+              type="datetime-local"
               style={{
                 ...dataInputStyle,
                 ...(!horarios.chegada && {
@@ -1306,7 +1300,7 @@ export default function Cargas() {
           <View style={globalStyles.modalLabelInputContainer}>
             <Text style={globalStyles.labelText}>Saída</Text>
             <input
-              type="time"
+              type="datetime-local"
               style={{
                 ...dataInputStyle,
                 ...(!horarios.entrada && {
