@@ -433,111 +433,6 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     }}
                   />
                 </View>
-
-                {/* Relatórios
-                <View style={styles.menuSection}>
-                  <Text style={styles.menuSectionLabel} selectable={false}>
-                    Relatórios
-                  </Text>
-
-                  PDF
-                  <MenuOptionButton
-                    containerStyle={[
-                      globalStyles.menuOption,
-                      {
-                        backgroundColor:
-                          params.subPage === "pdf"
-                            ? textMainColor
-                            : colors.blue,
-                      },
-                    ]}
-                    hoverStyle={[
-                      params.subPage === "pdf"
-                        ? {}
-                        : { backgroundColor: "rgba(255,255,255,0.2)" },
-                    ]}
-                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={[
-                      styles.menuOptionLabel,
-                      {
-                        color:
-                          params.subPage === "pdf"
-                            ? colors.blue
-                            : textMainColor,
-                      },
-                    ]}
-                    label="PDF"
-                    icon={
-                      <FontAwesome6
-                        name="file-pdf"
-                        size={menuIconSize}
-                        color={
-                          params.subPage === "pdf" ? colors.blue : textMainColor
-                        }
-                      />
-                    }
-                    onPress={() => {
-                      console.log("PDF");
-                      router.push({
-                        pathname: "/main",
-                        params: {
-                          pageName: "relatorios",
-                          subPage: "pdf",
-                        },
-                      });
-                    }}
-                  />
-
-                  Excel
-                  <MenuOptionButton
-                    containerStyle={[
-                      globalStyles.menuOption,
-                      {
-                        backgroundColor:
-                          params.subPage === "excel"
-                            ? textMainColor
-                            : colors.blue,
-                      },
-                    ]}
-                    hoverStyle={[
-                      params.subPage === "excel"
-                        ? {}
-                        : { backgroundColor: "rgba(255,255,255,0.2)" },
-                    ]}
-                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                    labelStyle={[
-                      styles.menuOptionLabel,
-                      {
-                        color:
-                          params.subPage === "excel"
-                            ? colors.blue
-                            : textMainColor,
-                      },
-                    ]}
-                    label="Excel"
-                    icon={
-                      <MaterialCommunityIcons
-                        name="microsoft-excel"
-                        size={menuIconSize}
-                        color={
-                          params.subPage === "excel"
-                            ? colors.blue
-                            : textMainColor
-                        }
-                      />
-                    }
-                    onPress={() => {
-                      console.log("Excel");
-                      router.push({
-                        pathname: "/main",
-                        params: {
-                          pageName: "relatorios",
-                          subPage: "excel",
-                        },
-                      });
-                    }}
-                  />
-                </View> */}
               </>
             )}
 
@@ -554,7 +449,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                     : ""}
             </Text>
             <Text style={styles.version} selectable={false}>
-              V1.2.0
+              V1.3.0
             </Text>
           </ScrollView>
         </Animated.View>

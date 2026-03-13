@@ -606,22 +606,37 @@ export default function Cargas() {
       return true;
     });
 
-    // AQUI entra a ordenação
-    resultado.sort((a, b) => (ordemAsc ? a.id - b.id : b.id - a.id));
+    // ORDENAÇÃO
+    const temDataInicial = !!filtros.dataInicial;
+
+    resultado.sort((a, b) => {
+      if (temDataInicial) {
+        // Se tem data inicial → ordena por chegada
+        return ordemAsc
+          ? a.chegada.getTime() - b.chegada.getTime()
+          : b.chegada.getTime() - a.chegada.getTime();
+      }
+
+      // Sem data inicial → ordena por ID
+      return ordemAsc ? a.id - b.id : b.id - a.id;
+    });
 
     setCargasFiltradas(resultado);
   };
 
   const limparFiltro = () => {
-    setFiltros((prev) => ({ ...prev, dataInicial: "" }));
-    setFiltros((prev) => ({ ...prev, horarioInicial: "00:00" }));
-    setFiltros((prev) => ({ ...prev, dataFinal: "" }));
-    setFiltros((prev) => ({ ...prev, horarioFinal: "23:59" }));
-    setFiltros((prev) => ({ ...prev, id: "" }));
-    setFiltros((prev) => ({ ...prev, empresa: "" }));
-    setFiltros((prev) => ({ ...prev, rgCpf: "" }));
-    setFiltros((prev) => ({ ...prev, numeroNotaFiscal: "" }));
-    setFiltros((prev) => ({ ...prev, tipoOperacao: 0 }));
+    setFiltros({
+      dataInicial: "",
+      horarioInicial: "00:00",
+      dataFinal: "",
+      horarioFinal: "23:59",
+      id: "",
+      empresa: "",
+      placa: "",
+      rgCpf: "",
+      numeroNotaFiscal: "",
+      tipoOperacao: 0,
+    });
 
     setOrdemAsc(false);
   };
@@ -660,6 +675,12 @@ export default function Cargas() {
   ]);
 
   useEffect(() => {
+    if (filtros.dataInicial) {
+      setOrdemAsc(true);
+    }
+  }, [filtros.dataInicial]);
+
+  useEffect(() => {
     getData();
 
     const handleCargaAtualizada = () => {
@@ -680,7 +701,7 @@ export default function Cargas() {
 
   const tableHeader = useMemo(
     () => renderTableHeader(usuario, globalStyles, ordemAsc, toggleOrdem),
-    [usuario, globalStyles, ordemAsc],
+    [usuario, globalStyles, ordemAsc, toggleOrdem],
   );
 
   const handleEdit = useCallback((carga: ICarga) => {

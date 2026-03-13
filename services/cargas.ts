@@ -43,70 +43,73 @@ export async function deleteCarga(id: number) {
   });
 }
 
-// export async function exportarCargas(
-//   filtros: ICargaFiltros,
-//   campos: string[],
-//   tipoArquivo: number,
-// ) {
-//   const token = await AsyncStorage.getItem("token");
+function converterDataBR(valor: string): Date | null {
+  if (!valor) return null;
 
-//   const fileName = tipoArquivo === 1 ? "cargas.pdf" : "cargas.xlsx";
+  const [dataParte, horaParte] = valor.split(" ");
 
-//   const filePath = Paths.cache + fileName;
+  if (!dataParte) return null;
 
-//   const response = await fetch(
-//     `${process.env.EXPO_PUBLIC_BACKEND_API_URL}/cargas/exportar`,
-//     {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-//       },
-//       body: JSON.stringify({ filtros, campos, tipoArquivo }),
-//     },
-//   );
+  const [dia, mes, ano] = dataParte.split("/").map(Number);
 
-//   if (!response.ok) {
-//     throw new Error("Erro ao exportar");
-//   }
+  let horas = 0;
+  let minutos = 0;
 
-//   const buffer = await response.arrayBuffer();
-//   const bytes = new Uint8Array(buffer);
+  if (horaParte) {
+    [horas, minutos] = horaParte.split(":").map(Number);
+  }
 
-//   const exportFile = new File(filePath);
-
-//   exportFile.write(bytes);
-
-//   await Sharing.shareAsync(exportFile.uri);
-// }
+  return new Date(ano, mes - 1, dia, horas, minutos);
+}
 
 export function exportarExcel(dados: any[], camposSelecionados: string[]) {
   if (!dados || !dados.length) return;
+
+  const camposData = ["Chegada", "Entrada", "Saída"];
 
   const dadosFormatados = dados.map((item) => {
     const novo: any = {};
 
     camposSelecionados.forEach((campo) => {
-      novo[campo] = item[campo] ?? "";
+      const valor = item[campo];
+
+      if (camposData.includes(campo) && valor) {
+        // Converte corretamente para Date
+        novo[campo] = converterDataBR(valor);
+      } else {
+        novo[campo] = valor ?? "";
+      }
     });
 
     return novo;
   });
 
-  // FORÇA ORDEM DAS COLUNAS
   const worksheet = XLSX.utils.json_to_sheet(dadosFormatados, {
     header: camposSelecionados,
+    cellDates: true, // ESSENCIAL
   });
 
   const range = XLSX.utils.decode_range(worksheet["!ref"]!);
 
-  for (let row = range.s.r; row <= range.e.r; row++) {
+  for (let row = range.s.r + 1; row <= range.e.r; row++) {
     for (let col = range.s.c; col <= range.e.c; col++) {
       const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
 
-      if (!worksheet[cellAddress]) continue;
+      if (!cell) continue;
 
-      worksheet[cellAddress].s = {
+      const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
+
+      const nomeColuna = headerCell?.v;
+
+      if (camposData.includes(nomeColuna)) {
+        if (cell.v instanceof Date) {
+          cell.t = "d"; // força tipo data real
+          cell.z = "dd/mm/yyyy hh:mm"; // formato visual
+        }
+      }
+
+      cell.s = {
         alignment: {
           horizontal: "center",
           vertical: "center",
@@ -115,6 +118,7 @@ export function exportarExcel(dados: any[], camposSelecionados: string[]) {
     }
   }
 
+  // Estilo do cabeçalho
   for (let col = range.s.c; col <= range.e.c; col++) {
     const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
 
@@ -148,6 +152,7 @@ export function exportarExcel(dados: any[], camposSelecionados: string[]) {
   const excelBuffer = XLSX.write(workbook, {
     bookType: "xlsx",
     type: "array",
+    cellDates: true,
   });
 
   const blob = new Blob([excelBuffer], {

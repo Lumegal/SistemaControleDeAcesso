@@ -2,10 +2,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { io } from "socket.io-client";
 
-const api = "http://192.168.0.64:3001";
+const api = "http://localhost:3001";
 
 export async function httpClient(endpoint: string, options: RequestInit) {
-  console.log(api)
+  console.log(`${api}${endpoint}`);
   const token = await AsyncStorage.getItem("token");
 
   const response = await fetch(`${api}${endpoint}`, {
