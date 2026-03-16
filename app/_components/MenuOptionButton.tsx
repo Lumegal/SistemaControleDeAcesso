@@ -14,7 +14,7 @@ interface MenuOptionButtonProps {
   labelStyle?: StyleProp<TextStyle>;
   label: string | React.ReactNode;
   icon?: React.ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
   enabled?: boolean;
 }
 

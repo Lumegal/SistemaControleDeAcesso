@@ -79,12 +79,17 @@ export const getGlobalStyles = () => {
 
     // Tabela
     mainContainer: {
-      borderRadius: 5,
+      borderRadius: 10,
       padding: 24,
       flexDirection: "row",
       gap: 20,
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
-      backgroundColor: "white",
+
+      backgroundColor: "#ffffff",
+
+      borderWidth: 1,
+      borderColor: "#e2e8f0",
+
+      boxShadow: "0px 4px 14px rgba(0,0,0,0.06)",
     },
     filtroContainer: {
       flex: 1,

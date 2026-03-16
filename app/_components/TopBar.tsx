@@ -11,7 +11,9 @@ import {
   Entypo,
   Feather,
   FontAwesome,
+  FontAwesome5,
   FontAwesome6,
+  Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
@@ -65,6 +67,9 @@ export default function TopBar({ openSideBar }: TopBarProps) {
     <View style={styles.container}>
       <Pressable style={[styles.titleContainer]} onPress={openSideBar}>
         <Entypo name="menu" size={40} color="white" />
+
+        {/* PORTARIA */}
+        {/* Nova Carga */}
         {params.pageName === "operacoes" && params.subPage === "novaCarga" && (
           <>
             <MaterialIcons
@@ -78,6 +83,7 @@ export default function TopBar({ openSideBar }: TopBarProps) {
           </>
         )}
 
+        {/* Cargas */}
         {params.pageName === "operacoes" && params.subPage === "cargas" && (
           <>
             <Feather name="package" size={40} color={"white"} />
@@ -87,6 +93,7 @@ export default function TopBar({ openSideBar }: TopBarProps) {
           </>
         )}
 
+        {/* Motoristas */}
         {params.pageName === "cadastros" && params.subPage === "motoristas" && (
           <>
             <FontAwesome name="drivers-license-o" size={40} color={"white"} />
@@ -96,6 +103,7 @@ export default function TopBar({ openSideBar }: TopBarProps) {
           </>
         )}
 
+        {/* Clientes */}
         {params.pageName === "cadastros" && params.subPage === "clientes" && (
           <>
             <MaterialCommunityIcons
@@ -109,6 +117,7 @@ export default function TopBar({ openSideBar }: TopBarProps) {
           </>
         )}
 
+        {/* Veículos */}
         {params.pageName === "cadastros" && params.subPage === "veiculos" && (
           <>
             <MaterialCommunityIcons
@@ -122,25 +131,67 @@ export default function TopBar({ openSideBar }: TopBarProps) {
           </>
         )}
 
-        {params.pageName === "relatorios" && params.subPage === "pdf" && (
+        {/* ALMOXARIFADO */}
+        {/* Itens */}
+        {params.pageName === "almoxarifado" && params.subPage === "itens" && (
           <>
-            {/* <FontAwesome name="drivers-license-o" size={40} color={"white"} /> */}
+            <Entypo name="archive" size={40} color={"white"} />
             <Text style={[styles.title]} selectable={false}>
-              {"PDF"}
+              {"Itens"}
             </Text>
           </>
         )}
 
-        {params.pageName === "relatorios" && params.subPage === "excel" && (
-          <>
-            {/* <FontAwesome name="drivers-license-o" size={40} color={"white"} /> */}
-            <Text style={[styles.title]} selectable={false}>
-              {"Excel"}
-            </Text>
-          </>
-        )}
+        {/* Registrar Item */}
+        {params.pageName === "almoxarifado" &&
+          params.subPage === "registrarItem" && (
+            <>
+              <FontAwesome6 name="box-open" size={40} color={"white"} />
+              <Text style={[styles.title]} selectable={false}>
+                {"Registrar Item"}
+              </Text>
+            </>
+          )}
+
+        {/* Entrada/Saída */}
+        {params.pageName === "almoxarifado" &&
+          params.subPage === "entradaSaida" && (
+            <>
+              <MaterialCommunityIcons
+                name="archive-edit"
+                size={40}
+                color={"white"}
+              />
+              <Text style={[styles.title]} selectable={false}>
+                {"Entrada/Saída"}
+              </Text>
+            </>
+          )}
+
+        {/* Pesquisar */}
+        {params.pageName === "almoxarifado" &&
+          params.subPage === "pesquisar" && (
+            <>
+              <FontAwesome5 name="search" size={40} color={"white"} />
+              <Text style={[styles.title]} selectable={false}>
+                {"Pesquisar"}
+              </Text>
+            </>
+          )}
+
+        {/* Relatórios */}
+        {params.pageName === "almoxarifado" &&
+          params.subPage === "relatorios" && (
+            <>
+              <Ionicons name="document" size={40} color={"white"} />
+              <Text style={[styles.title]} selectable={false}>
+                {"Relatórios"}
+              </Text>
+            </>
+          )}
       </Pressable>
 
+      {/* USERBUTTON */}
       <Pressable
         style={styles.userButton}
         onPress={() => setMenuOpen((prev) => !prev)}

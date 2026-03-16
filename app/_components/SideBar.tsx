@@ -14,13 +14,17 @@ import {
   MaterialIcons,
   FontAwesome,
   MaterialCommunityIcons,
+  Entypo,
   FontAwesome6,
+  FontAwesome5,
+  Ionicons,
 } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import MenuOptionButton from "./MenuOptionButton";
 import { getGlobalStyles } from "../../globalStyles";
 import { useAuth } from "../../context/auth";
 import { useRef, useState, useEffect } from "react";
+import "../../global.css";
 
 type SideBarProps = {
   visible: boolean;
@@ -37,6 +41,13 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
   const opacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(-100)).current;
+
+  const [portariaDropdown, setPortariaDropdown] = useState<boolean>(
+    params.pageName === "operacoes" || params.pageName === "cadastros",
+  );
+  const [almoxarifadoDropdown, setAlmoxarifadoDropdown] = useState<boolean>(
+    params.pageName === "almoxarifado",
+  );
 
   const [internalVisible, setInternalVisible] = useState(visible);
 
@@ -103,6 +114,10 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
       flexGrow: 1,
       padding: 12,
     },
+    sectionDropdown: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
     menuSection: {
       padding: 12,
       gap: 6,
@@ -168,291 +183,563 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
             },
           ]}
         >
-          <ScrollView contentContainerStyle={styles.scrollViewContent}>
-            {/* Principal */}
-
-            {/* Operações */}
+          <ScrollView
+            contentContainerStyle={styles.scrollViewContent}
+            nativeID="sidebarScroll"
+          >
+            {/* PORTARIA DROPDOWN */}
             <View style={styles.menuSection}>
-              <Text style={styles.menuSectionLabel} selectable={false}>
-                Operações
-              </Text>
-
-              {/* Nova carga */}
-              {(usuario?.nivelDeAcesso === 1 ||
-                usuario?.nivelDeAcesso === 2) && (
-                <MenuOptionButton
-                  containerStyle={[
-                    globalStyles.menuOption,
-                    {
-                      backgroundColor:
-                        params.subPage === "novaCarga"
-                          ? textMainColor
-                          : colors.blue,
-                    },
-                  ]}
-                  hoverStyle={[
-                    params.subPage === "novaCarga"
-                      ? {}
-                      : { backgroundColor: "rgba(255,255,255,0.2)" },
-                  ]}
-                  pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                  labelStyle={[
-                    styles.menuOptionLabel,
-                    {
-                      color:
-                        params.subPage === "novaCarga"
-                          ? colors.blue
-                          : textMainColor,
-                    },
-                  ]}
-                  label="Nova carga"
-                  icon={
-                    <MaterialIcons
-                      name="add-circle-outline"
-                      size={menuIconSize}
-                      color={
-                        params.subPage === "novaCarga"
-                          ? colors.blue
-                          : textMainColor
-                      }
-                    />
-                  }
-                  onPress={() => {
-                    console.log("Nova carga");
-                    router.push({
-                      pathname: "/main",
-                      params: {
-                        pageName: "operacoes",
-                        subPage: "novaCarga",
-                      },
-                    });
-                  }}
+              <Pressable
+                style={styles.sectionDropdown}
+                onPress={() => setPortariaDropdown(!portariaDropdown)}
+              >
+                <Text style={styles.menuSectionLabel} selectable={false}>
+                  Portaria
+                </Text>
+                <Entypo
+                  name={`chevron-${portariaDropdown ? "up" : "down"}`}
+                  size={24}
+                  color="white"
                 />
-              )}
+              </Pressable>
 
-              {/* Cargas */}
-              <MenuOptionButton
-                containerStyle={[
-                  globalStyles.menuOption,
-                  {
-                    backgroundColor:
-                      params.subPage === "cargas" ? textMainColor : colors.blue,
-                  },
-                ]}
-                hoverStyle={[
-                  params.subPage === "cargas"
-                    ? {}
-                    : { backgroundColor: "rgba(255,255,255,0.2)" },
-                ]}
-                pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-                labelStyle={[
-                  styles.menuOptionLabel,
-                  {
-                    color:
-                      params.subPage === "cargas" ? colors.blue : textMainColor,
-                  },
-                ]}
-                label="Cargas"
-                icon={
-                  <Feather
-                    name="package"
-                    size={menuIconSize}
-                    color={
-                      params.subPage === "cargas" ? colors.blue : textMainColor
-                    }
-                  />
-                }
-                onPress={() => {
-                  console.log("Cargas");
-                  router.push({
-                    pathname: "/main",
-                    params: {
-                      pageName: "operacoes",
-                      subPage: "cargas",
-                    },
-                  });
-                }}
-              />
+              {/* Operações */}
+              {portariaDropdown && (
+                <>
+                  <View style={styles.menuSection}>
+                    <Text style={styles.menuSectionLabel} selectable={false}>
+                      Operações
+                    </Text>
+
+                    {/* Nova carga */}
+                    {(usuario?.tipoDeAcesso === "adm" ||
+                      usuario?.tipoDeAcesso === "portariaEdit") && (
+                      <MenuOptionButton
+                        containerStyle={[
+                          globalStyles.menuOption,
+                          {
+                            backgroundColor:
+                              params.subPage === "novaCarga"
+                                ? textMainColor
+                                : colors.blue,
+                          },
+                        ]}
+                        hoverStyle={[
+                          params.subPage === "novaCarga"
+                            ? {}
+                            : { backgroundColor: "rgba(255,255,255,0.2)" },
+                        ]}
+                        pressedStyle={{
+                          backgroundColor: "rgba(255,255,255,0.5)",
+                        }}
+                        labelStyle={[
+                          styles.menuOptionLabel,
+                          {
+                            color:
+                              params.subPage === "novaCarga"
+                                ? colors.blue
+                                : textMainColor,
+                          },
+                        ]}
+                        label="Nova carga"
+                        icon={
+                          <MaterialIcons
+                            name="add-circle-outline"
+                            size={menuIconSize}
+                            color={
+                              params.subPage === "novaCarga"
+                                ? colors.blue
+                                : textMainColor
+                            }
+                          />
+                        }
+                        onPress={() => {
+                          router.push({
+                            pathname: "/main",
+                            params: {
+                              pageName: "operacoes",
+                              subPage: "novaCarga",
+                            },
+                          });
+                        }}
+                      />
+                    )}
+
+                    {/* Cargas */}
+                    <MenuOptionButton
+                      containerStyle={[
+                        globalStyles.menuOption,
+                        {
+                          backgroundColor:
+                            params.subPage === "cargas"
+                              ? textMainColor
+                              : colors.blue,
+                        },
+                      ]}
+                      hoverStyle={[
+                        params.subPage === "cargas"
+                          ? {}
+                          : { backgroundColor: "rgba(255,255,255,0.2)" },
+                      ]}
+                      pressedStyle={{
+                        backgroundColor: "rgba(255,255,255,0.5)",
+                      }}
+                      labelStyle={[
+                        styles.menuOptionLabel,
+                        {
+                          color:
+                            params.subPage === "cargas"
+                              ? colors.blue
+                              : textMainColor,
+                        },
+                      ]}
+                      label="Cargas"
+                      icon={
+                        <Feather
+                          name="package"
+                          size={menuIconSize}
+                          color={
+                            params.subPage === "cargas"
+                              ? colors.blue
+                              : textMainColor
+                          }
+                        />
+                      }
+                      onPress={() => {
+                        router.push({
+                          pathname: "/main",
+                          params: {
+                            pageName: "operacoes",
+                            subPage: "cargas",
+                          },
+                        });
+                      }}
+                    />
+                  </View>
+
+                  {usuario?.tipoDeAcesso === "adm" && (
+                    <View style={styles.menuSection}>
+                      <Text style={styles.menuSectionLabel} selectable={false}>
+                        Cadastros
+                      </Text>
+
+                      {/* Motoristas */}
+                      <MenuOptionButton
+                        containerStyle={[
+                          globalStyles.menuOption,
+                          {
+                            backgroundColor:
+                              params.subPage === "motoristas"
+                                ? textMainColor
+                                : colors.blue,
+                          },
+                        ]}
+                        labelStyle={[
+                          styles.menuOptionLabel,
+                          {
+                            color:
+                              params.subPage === "motoristas"
+                                ? colors.blue
+                                : textMainColor,
+                          },
+                        ]}
+                        label="Motoristas"
+                        icon={
+                          <FontAwesome
+                            name="drivers-license-o"
+                            size={menuIconSize}
+                            color={
+                              params.subPage === "motoristas"
+                                ? colors.blue
+                                : textMainColor
+                            }
+                          />
+                        }
+                        onPress={() => {
+                          router.push({
+                            pathname: "/main",
+                            params: {
+                              pageName: "cadastros",
+                              subPage: "motoristas",
+                            },
+                          });
+                        }}
+                      />
+
+                      {/* Clientes */}
+                      <MenuOptionButton
+                        containerStyle={[
+                          globalStyles.menuOption,
+                          {
+                            backgroundColor:
+                              params.subPage === "clientes"
+                                ? textMainColor
+                                : colors.blue,
+                          },
+                        ]}
+                        labelStyle={[
+                          styles.menuOptionLabel,
+                          {
+                            color:
+                              params.subPage === "clientes"
+                                ? colors.blue
+                                : textMainColor,
+                          },
+                        ]}
+                        label="Clientes"
+                        icon={
+                          <MaterialCommunityIcons
+                            name="office-building-outline"
+                            size={menuIconSize}
+                            color={
+                              params.subPage === "clientes"
+                                ? colors.blue
+                                : textMainColor
+                            }
+                          />
+                        }
+                        onPress={() => {
+                          router.push({
+                            pathname: "/main",
+                            params: {
+                              pageName: "cadastros",
+                              subPage: "clientes",
+                            },
+                          });
+                        }}
+                      />
+
+                      {/* Veículos */}
+                      <MenuOptionButton
+                        containerStyle={[
+                          globalStyles.menuOption,
+                          {
+                            backgroundColor:
+                              params.subPage === "veiculos"
+                                ? textMainColor
+                                : colors.blue,
+                          },
+                        ]}
+                        labelStyle={[
+                          styles.menuOptionLabel,
+                          {
+                            color:
+                              params.subPage === "veiculos"
+                                ? colors.blue
+                                : textMainColor,
+                          },
+                        ]}
+                        label="Veículos"
+                        icon={
+                          <MaterialCommunityIcons
+                            name="truck-outline"
+                            size={menuIconSize}
+                            color={
+                              params.subPage === "veiculos"
+                                ? colors.blue
+                                : textMainColor
+                            }
+                          />
+                        }
+                        onPress={() => {
+                          router.push({
+                            pathname: "/main",
+                            params: {
+                              pageName: "cadastros",
+                              subPage: "veiculos",
+                            },
+                          });
+                        }}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
             </View>
 
-            {usuario?.nivelDeAcesso === 1 && (
-              <>
-                {/* Cadastros */}
-                <View style={styles.menuSection}>
-                  <Text style={styles.menuSectionLabel} selectable={false}>
-                    Cadastros
-                  </Text>
+            {/* ALMOXARIFADO DROPDOWN */}
+            <View style={styles.menuSection}>
+              <Pressable
+                style={styles.sectionDropdown}
+                onPress={() => setAlmoxarifadoDropdown(!almoxarifadoDropdown)}
+              >
+                <Text style={styles.menuSectionLabel} selectable={false}>
+                  Almoxarifado
+                </Text>
+                <Entypo
+                  name={`chevron-${almoxarifadoDropdown ? "up" : "down"}`}
+                  size={24}
+                  color="white"
+                />
+              </Pressable>
 
-                  {/* Motoristas */}
+              {almoxarifadoDropdown && (
+                <>
                   <MenuOptionButton
                     containerStyle={[
                       globalStyles.menuOption,
                       {
                         backgroundColor:
-                          params.subPage === "motoristas"
+                          params.subPage === "itens"
                             ? textMainColor
                             : colors.blue,
                       },
                     ]}
                     hoverStyle={[
-                      params.subPage === "motoristas"
+                      params.subPage === "itens"
                         ? {}
                         : { backgroundColor: "rgba(255,255,255,0.2)" },
                     ]}
-                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
                     labelStyle={[
                       styles.menuOptionLabel,
                       {
                         color:
-                          params.subPage === "motoristas"
+                          params.subPage === "itens"
                             ? colors.blue
                             : textMainColor,
                       },
                     ]}
-                    label="Motoristas"
+                    label="Itens"
                     icon={
-                      <FontAwesome
-                        name="drivers-license-o"
+                      <Entypo
+                        name="archive"
                         size={menuIconSize}
                         color={
-                          params.subPage === "motoristas"
+                          params.subPage === "itens"
                             ? colors.blue
                             : textMainColor
                         }
                       />
                     }
                     onPress={() => {
-                      console.log("Motoristas");
                       router.push({
                         pathname: "/main",
                         params: {
-                          pageName: "cadastros",
-                          subPage: "motoristas",
+                          pageName: "almoxarifado",
+                          subPage: "itens",
                         },
                       });
                     }}
                   />
 
-                  {/* Clientes */}
                   <MenuOptionButton
                     containerStyle={[
                       globalStyles.menuOption,
                       {
                         backgroundColor:
-                          params.subPage === "clientes"
+                          params.subPage === "registrarItem"
                             ? textMainColor
                             : colors.blue,
                       },
                     ]}
                     hoverStyle={[
-                      params.subPage === "clientes"
+                      params.subPage === "registrarItem"
                         ? {}
                         : { backgroundColor: "rgba(255,255,255,0.2)" },
                     ]}
-                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
                     labelStyle={[
                       styles.menuOptionLabel,
                       {
                         color:
-                          params.subPage === "clientes"
+                          params.subPage === "registrarItem"
                             ? colors.blue
                             : textMainColor,
                       },
                     ]}
-                    label="Clientes"
+                    label="Registrar item"
+                    icon={
+                      <FontAwesome6
+                        name="box-open"
+                        size={menuIconSize}
+                        color={
+                          params.subPage === "registrarItem"
+                            ? colors.blue
+                            : textMainColor
+                        }
+                      />
+                    }
+                    onPress={() => {
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "almoxarifado",
+                          subPage: "registrarItem",
+                        },
+                      });
+                    }}
+                  />
+
+                  {/* Entrada/Saída */}
+                  <MenuOptionButton
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "entradaSaida"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "entradaSaida"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "entradaSaida"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
+                    label="Entrada/Saída"
                     icon={
                       <MaterialCommunityIcons
-                        name="office-building-outline"
+                        name="archive-edit"
                         size={menuIconSize}
                         color={
-                          params.subPage === "clientes"
+                          params.subPage === "entradaSaida"
                             ? colors.blue
                             : textMainColor
                         }
                       />
                     }
                     onPress={() => {
-                      console.log("Clientes");
                       router.push({
                         pathname: "/main",
                         params: {
-                          pageName: "cadastros",
-                          subPage: "clientes",
+                          pageName: "almoxarifado",
+                          subPage: "entradaSaida",
                         },
                       });
                     }}
                   />
 
-                  {/* Veículos */}
-                  <MenuOptionButton
+                  {/* Pesquisar */}
+                  {/* <MenuOptionButton
                     containerStyle={[
                       globalStyles.menuOption,
                       {
                         backgroundColor:
-                          params.subPage === "veiculos"
+                          params.subPage === "pesquisar"
                             ? textMainColor
                             : colors.blue,
                       },
                     ]}
                     hoverStyle={[
-                      params.subPage === "veiculos"
+                      params.subPage === "pesquisar"
                         ? {}
                         : { backgroundColor: "rgba(255,255,255,0.2)" },
                     ]}
-                    pressedStyle={{ backgroundColor: "rgba(255,255,255,0.5)" }}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
                     labelStyle={[
                       styles.menuOptionLabel,
                       {
                         color:
-                          params.subPage === "veiculos"
+                          params.subPage === "pesquisar"
                             ? colors.blue
                             : textMainColor,
                       },
                     ]}
-                    label="Veículos"
+                    label="Pesquisar"
                     icon={
-                      <MaterialCommunityIcons
-                        name="truck-outline"
+                      <FontAwesome5
+                        name="search"
                         size={menuIconSize}
                         color={
-                          params.subPage === "veiculos"
+                          params.subPage === "pesquisar"
                             ? colors.blue
                             : textMainColor
                         }
                       />
                     }
                     onPress={() => {
-                      console.log("Motoristas");
                       router.push({
                         pathname: "/main",
                         params: {
-                          pageName: "cadastros",
-                          subPage: "veiculos",
+                          pageName: "almoxarifado",
+                          subPage: "pesquisar",
+                        },
+                      });
+                    }}
+                  /> */}
+
+                  {/* Relatórios */}
+                  <MenuOptionButton
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "relatorios"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "relatorios"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "relatorios"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
+                    label="Relatórios"
+                    icon={
+                      <Ionicons
+                        name="document"
+                        size={menuIconSize}
+                        color={
+                          params.subPage === "relatorios"
+                            ? colors.blue
+                            : textMainColor
+                        }
+                      />
+                    }
+                    onPress={() => {
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "almoxarifado",
+                          subPage: "relatorios",
                         },
                       });
                     }}
                   />
-                </View>
-              </>
-            )}
+                </>
+              )}
+            </View>
 
             <Text
               style={[styles.version, { marginTop: "auto" }]}
               selectable={false}
             >
-              {usuario?.nivelDeAcesso === 1
-                ? "ADM"
-                : usuario?.nivelDeAcesso === 2
-                  ? "EDIT"
-                  : usuario?.nivelDeAcesso === 3
-                    ? "VIEW"
-                    : ""}
+              {usuario?.tipoDeAcesso}
             </Text>
             <Text style={styles.version} selectable={false}>
-              BASE DE TESTES
-            </Text>
-            <Text style={styles.version} selectable={false}>
-              V1.5.0
+              {`PRODUÇÃO
+V2.0.0`}
             </Text>
           </ScrollView>
         </Animated.View>

@@ -153,7 +153,8 @@ const renderTableHeader = (
       <Text style={globalStyles.tableHeader} selectable={false}>
         C/D
       </Text>
-      {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+      {(usuario?.tipoDeAcesso === "adm" ||
+        usuario?.tipoDeAcesso === "portariaEdit") && (
         <Text style={globalStyles.tableHeader} selectable={false}>
           AÇÕES
         </Text>
@@ -344,7 +345,8 @@ const CargaRow = React.memo(
         </View>
 
         {/* Ações */}
-        {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+        {(usuario?.tipoDeAcesso === "adm" ||
+          usuario?.tipoDeAcesso === "portariaEdit") && (
           <View
             style={[
               globalStyles.tableColumn,

@@ -4,11 +4,15 @@ import { io } from "socket.io-client";
 
 const api = "http://localhost:3001";
 
-export async function httpClient(endpoint: string, options: RequestInit) {
-  console.log(`${api}${endpoint}`);
+export async function httpClient(
+  endpoint: string,
+  options: RequestInit,
+  apiUrl: string = api,
+) {
+  console.log(`${apiUrl}${endpoint}`);
   const token = await AsyncStorage.getItem("token");
 
-  const response = await fetch(`${api}${endpoint}`, {
+  const response = await fetch(`${apiUrl}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
