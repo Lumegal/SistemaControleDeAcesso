@@ -738,8 +738,8 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               {usuario?.tipoDeAcesso}
             </Text>
             <Text style={styles.version} selectable={false}>
-              {`PRODUÇÃO
-V2.0.0`}
+              {`BASE DE TESTES
+V2.1.0`}
             </Text>
           </ScrollView>
         </Animated.View>

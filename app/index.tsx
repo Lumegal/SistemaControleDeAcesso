@@ -73,7 +73,7 @@ export default function Login() {
             color: "black",
           }}
         >
-          PORTARIA LUMEGAL
+          SISTEMA LUMEGAL
         </Text>
         <View style={styles.loginInputContainer}>
           <Feather

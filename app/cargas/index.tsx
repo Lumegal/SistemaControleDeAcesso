@@ -400,6 +400,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 20,
   },
+  maximizarFiltroButton: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+    backgroundColor: "#ffffff",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  minimizarFiltroButton: {
+    height: 20,
+    width: "auto",
+    position: "absolute",
+    zIndex: 999,
+    right: 28,
+    top: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
   button: {
     minWidth: 130,
     maxHeight: 50,
@@ -868,15 +892,7 @@ export default function Cargas() {
       {/* FILTRO CONTAINER */}
       {!filtrosVisible && (
         <Pressable
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.4)",
-            backgroundColor: "white",
-            paddingHorizontal: 12,
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-          }}
+          style={styles.maximizarFiltroButton}
           onPress={() => setFiltrosVisible(true)}
         >
           <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
@@ -889,17 +905,7 @@ export default function Cargas() {
       {filtrosVisible && (
         <View style={globalStyles.mainContainer}>
           <Pressable
-            style={{
-              height: 20,
-              width: "auto",
-              position: "absolute",
-              zIndex: 999,
-              right: 28,
-              top: 16,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-            }}
+            style={styles.minimizarFiltroButton}
             onPress={() => setFiltrosVisible(false)}
           >
             <Text

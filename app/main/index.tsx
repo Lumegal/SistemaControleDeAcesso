@@ -9,7 +9,7 @@ import Motoristas from "../motoristas";
 import Clientes from "../clientes";
 import Veiculos from "../veiculos";
 import { useState } from "react";
-import ItensEmFalta from "../almoxarifado/itensEmFalta";
+import Itens from "../almoxarifado/itens";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -54,7 +54,7 @@ export default function Main() {
           )}
 
           {params.pageName === "almoxarifado" && params.subPage === "itens" && (
-            <ItensEmFalta />
+            <Itens />
           )}
         </View>
       </View>
