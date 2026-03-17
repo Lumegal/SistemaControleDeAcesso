@@ -102,6 +102,26 @@ export const getGlobalStyles = () => {
       gap: 20,
       backgroundColor: "white",
     },
+    radioLabelContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    radioButton: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.lightBlue,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    radioFill: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.lightBlue,
+    },
     dataLabelInputContainer: {
       flex: 1,
     },
