@@ -446,26 +446,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 40,
   },
-  radioLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.lightBlue,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioFill: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.lightBlue,
-  },
 });
 
 export default function Cargas() {
@@ -1102,14 +1082,14 @@ export default function Cargas() {
               <View style={styles.filtroUltimaLinha}>
                 {/* TODOS */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 0 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 0 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1127,14 +1107,14 @@ export default function Cargas() {
 
                 {/* CARREGAMENTO */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 1 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 1 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1152,14 +1132,14 @@ export default function Cargas() {
 
                 {/* DESCARREGAMENTO */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 2 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 2 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1455,11 +1435,11 @@ export default function Cargas() {
         <View style={{ flexDirection: "row", gap: 30 }}>
           {/* PDF */}
           <Pressable
-            style={styles.radioLabelContainer}
+            style={globalStyles.radioLabelContainer}
             onPress={() => setTipoExport(1)}
           >
-            <View style={styles.radioButton}>
-              {tipoExport === 1 && <View style={styles.radioFill} />}
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 1 && <View style={globalStyles.radioFill} />}
             </View>
             <Text
               style={[
@@ -1474,11 +1454,11 @@ export default function Cargas() {
 
           {/* EXCEL */}
           <Pressable
-            style={styles.radioLabelContainer}
+            style={globalStyles.radioLabelContainer}
             onPress={() => setTipoExport(2)}
           >
-            <View style={styles.radioButton}>
-              {tipoExport === 2 && <View style={styles.radioFill} />}
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 2 && <View style={globalStyles.radioFill} />}
             </View>
             <Text
               style={[
