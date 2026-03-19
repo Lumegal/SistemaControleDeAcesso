@@ -1,4 +1,5 @@
 export interface IOrcamento {
+  id: number;
   enviarPara: string;
   aosCuidados: string;
   departamento: string;
@@ -10,11 +11,13 @@ export interface IOrcamento {
 }
 
 export interface IMaterial {
+  id: number;
   nome: string;
   preco: number;
 }
 
 export interface IOrcamentoForm {
+  nomeDoArquivo: string
   enviarPara: string;
   aosCuidados: string;
   departamento: string;

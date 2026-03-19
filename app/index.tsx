@@ -45,7 +45,7 @@ export default function Login() {
         });
       }
 
-      if (usuarioLogado.tipoDeAcesso === "portariaView") {
+      if (usuarioLogado.tipoDeAcesso === "portariaView" || usuarioLogado.tipoDeAcesso === "comercial") {
         router.push({
           pathname: "/main",
           params: {

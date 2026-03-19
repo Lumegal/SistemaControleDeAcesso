@@ -281,7 +281,7 @@ export default function TopBar({ openSideBar }: TopBarProps) {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: "10%",
+    height: "8%",
     backgroundColor: colors.lightBlue,
     flexDirection: "row",
     alignItems: "center",
