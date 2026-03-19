@@ -189,6 +189,28 @@ export default function TopBar({ openSideBar }: TopBarProps) {
               </Text>
             </>
           )}
+
+        {/* Comercial */}
+        {/* Novo orçamento */}
+        {params.pageName === "comercial" &&
+          params.subPage === "novoOrcamento" && (
+            <>
+              <Entypo name="new-message" size={40} color={"white"} />
+              <Text style={[styles.title]} selectable={false}>
+                {"Novo Orçamento"}
+              </Text>
+            </>
+          )}
+
+        {/* Orçamentos */}
+        {params.pageName === "comercial" && params.subPage === "orcamentos" && (
+          <>
+            <FontAwesome5 name="database" size={40} color={"white"} />
+            <Text style={[styles.title]} selectable={false}>
+              {"Orçamentos"}
+            </Text>
+          </>
+        )}
       </Pressable>
 
       {/* USERBUTTON */}

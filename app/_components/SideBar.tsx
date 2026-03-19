@@ -48,6 +48,9 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
   const [almoxarifadoDropdown, setAlmoxarifadoDropdown] = useState<boolean>(
     params.pageName === "almoxarifado",
   );
+  const [comercialDropdown, setComercialDropdown] = useState<boolean>(
+    params.pageName === "comercial",
+  );
 
   const [internalVisible, setInternalVisible] = useState(visible);
 
@@ -731,15 +734,139 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               )}
             </View>
 
+            {/* COMERCIAL DROPDOWN */}
+            <View style={styles.menuSection}>
+              <Pressable
+                style={styles.sectionDropdown}
+                onPress={() => setComercialDropdown(!comercialDropdown)}
+              >
+                <Text style={styles.menuSectionLabel} selectable={false}>
+                  Comercial
+                </Text>
+                <Entypo
+                  name={`chevron-${comercialDropdown ? "up" : "down"}`}
+                  size={24}
+                  color="white"
+                />
+              </Pressable>
+
+              {comercialDropdown && (
+                <>
+                  {/* Novo orçamento */}
+                  <MenuOptionButton
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "novoOrcamento"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "novoOrcamento"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "novoOrcamento"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
+                    label="Novo orçamento"
+                    icon={
+                      <Entypo
+                        name="new-message"
+                        size={menuIconSize}
+                        color={
+                          params.subPage === "novoOrcamento"
+                            ? colors.blue
+                            : textMainColor
+                        }
+                      />
+                    }
+                    onPress={() => {
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "comercial",
+                          subPage: "novoOrcamento",
+                        },
+                      });
+                    }}
+                  />
+
+                  {/* Orçamentos */}
+                  <MenuOptionButton
+                    containerStyle={[
+                      globalStyles.menuOption,
+                      {
+                        backgroundColor:
+                          params.subPage === "orcamentos"
+                            ? textMainColor
+                            : colors.blue,
+                      },
+                    ]}
+                    hoverStyle={[
+                      params.subPage === "orcamentos"
+                        ? {}
+                        : { backgroundColor: "rgba(255,255,255,0.2)" },
+                    ]}
+                    pressedStyle={{
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
+                    labelStyle={[
+                      styles.menuOptionLabel,
+                      {
+                        color:
+                          params.subPage === "orcamentos"
+                            ? colors.blue
+                            : textMainColor,
+                      },
+                    ]}
+                    label="Orçamentos"
+                    icon={
+                      <FontAwesome5
+                        name="database"
+                        size={menuIconSize}
+                        color={
+                          params.subPage === "orcamentos"
+                            ? colors.blue
+                            : textMainColor
+                        }
+                      />
+                    }
+                    onPress={() => {
+                      router.push({
+                        pathname: "/main",
+                        params: {
+                          pageName: "comercial",
+                          subPage: "orcamentos",
+                        },
+                      });
+                    }}
+                  />
+                </>
+              )}
+            </View>
+
             <Text
               style={[styles.version, { marginTop: "auto" }]}
               selectable={false}
             >
               {usuario?.tipoDeAcesso}
             </Text>
+
             <Text style={styles.version} selectable={false}>
               {`BASE DE TESTES
-V2.1.0`}
+V2.3.0`}
             </Text>
           </ScrollView>
         </Animated.View>
