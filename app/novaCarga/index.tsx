@@ -208,13 +208,10 @@ export default function NovaCarga() {
   };
 
   const createCarga = async () => {
-    console.log("1");
     try {
       showLoading();
-      console.log("2");
       console.log(form);
       if (!validarFormulario()) return;
-      console.log("3");
 
       // ===== EMPRESA =====
       let empresa = await getEmpresa(form.empresa.trim().toUpperCase());

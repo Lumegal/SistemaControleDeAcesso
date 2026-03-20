@@ -1,17 +1,30 @@
 import { Platform, ScrollView, Text, TextInput, View } from "react-native";
 import { dataInputStyle, getGlobalStyles } from "../../../globalStyles";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  ICreateOrcamento,
+  IMaterial,
   IMaterialForm,
   IOrcamentoForm,
 } from "../../../interfaces/comercial/orcamento";
-import { gerarPdfOrcamentoFront } from "../../../services/comercial/orcamento";
-import { Feather, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
+import {
+  createOrcamento,
+  gerarPdfOrcamentoFront,
+} from "../../../services/comercial/orcamento";
+import { Feather, FontAwesome } from "@expo/vector-icons";
 import { colors } from "../../../colors";
 import MenuOptionButton from "../../_components/MenuOptionButton";
+import { useLoading } from "../../../context/providers/loading";
+import {
+  getMateriais,
+  getMaterialByNome,
+} from "../../../services/comercial/material";
+import { useAuth } from "../../../context/auth";
 
 export default function NovoOrcamento() {
   const globalStyles = getGlobalStyles();
+  const { usuario } = useAuth();
+  const { showLoading, hideLoading } = useLoading();
 
   const nowLocal = useMemo(() => {
     const now = new Date();
@@ -31,6 +44,50 @@ export default function NovoOrcamento() {
     data: nowLocal,
     materiais: [{ nome: "", preco: "" }],
   });
+
+  const [errors, setErrors] = useState<{
+    data?: string;
+    enviarPara?: string;
+    item?: string;
+  }>({
+    data: " ",
+    enviarPara: " ",
+    item: " ",
+  });
+
+  const validarFormulario = () => {
+    const novosErros: typeof errors = {};
+
+    if (!form.data) novosErros.data = "Data é obrigatória.";
+
+    if (!form.enviarPara.trim())
+      novosErros.enviarPara = "Deve informar o cliente.";
+
+    const materiaisInvalidos = form.materiais.some(
+      (m) => !m.nome.trim() || !m.preco.trim(),
+    );
+
+    if (materiaisInvalidos) {
+      novosErros.item = "Todos os materiais devem ter nome e preço.";
+    }
+
+    setErrors(novosErros);
+
+    return Object.keys(novosErros).length === 0;
+  };
+
+  // const [materiaisDisponiveis, setMateriaisDisponiveis] = useState<IMaterial[]>(
+  //   [],
+  // );
+
+  // useEffect(() => {
+  //   async function carregar() {
+  //     const data: IMaterial[] = await getMateriais();
+  //     setMateriaisDisponiveis(data);
+  //   }
+
+  //   carregar();
+  // }, []);
 
   const updateField = (field: keyof IOrcamentoForm, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -73,14 +130,27 @@ export default function NovoOrcamento() {
     elevation: 3,
   };
 
-  const inputStyle = [
-    globalStyles.input,
-    {
-      borderRadius: 10,
-      paddingVertical: 10,
-      backgroundColor: "#f9f9f9",
-    },
-  ];
+  const salvarOrcamento = async (form: IOrcamentoForm) => {
+    if (!validarFormulario()) return;
+    try {
+      showLoading();
+      const { nomeDoArquivo, ...rest } = form;
+
+      const criarOrcamento: ICreateOrcamento = {
+        ...rest,
+        status: "PENDENTE",
+        usuarioId: usuario?.sub!,
+      };
+      await gerarPdfOrcamentoFront(form);
+      await createOrcamento(criarOrcamento);
+
+      alert("Orçamento criado com sucesso!");
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
 
   return (
     <View
@@ -97,61 +167,87 @@ export default function NovoOrcamento() {
             Dados do Orçamento
           </Text>
 
+          {/* DATA E NOME DO ARQUIVO */}
           <View style={globalStyles.formRow}>
             <View style={globalStyles.labelInputContainer}>
-              <Text style={globalStyles.labelText}>Data</Text>
+              <Text style={globalStyles.labelText}>Data*</Text>
               <input
                 type="date"
                 style={dataInputStyle}
                 value={form.data}
-                onChange={(e) => updateField("data", e.target.value)}
+                onChange={(e) => {
+                  updateField("data", e.target.value);
+                  setErrors((prev) => ({ ...prev, data: " " }));
+                }}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {errors.data ?? " "}
+              </Text>
             </View>
 
             <View style={globalStyles.labelInputContainer}>
               <Text style={globalStyles.labelText}>Nome do arquivo</Text>
               <TextInput
-                style={inputStyle}
+                style={globalStyles.input}
                 value={form.nomeDoArquivo}
+                placeholder="Orçamento"
+                placeholderTextColor={colors.gray}
                 onChangeText={(text) => updateField("nomeDoArquivo", text)}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
             </View>
           </View>
 
+          {/* PARA E AOS CUIDADOS DE */}
           <View style={globalStyles.formRow}>
             <View style={globalStyles.labelInputContainer}>
-              <Text style={globalStyles.labelText}>Para</Text>
+              <Text style={globalStyles.labelText}>Para*</Text>
               <TextInput
-                style={inputStyle}
+                style={globalStyles.input}
                 value={form.enviarPara}
-                onChangeText={(text) => updateField("enviarPara", text)}
+                onChangeText={(text) => {
+                  updateField("enviarPara", text);
+                  setErrors((prev) => ({ ...prev, enviarPara: " " }));
+                }}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {errors.enviarPara ?? " "}
+              </Text>
             </View>
 
             <View style={globalStyles.labelInputContainer}>
-              <Text style={globalStyles.labelText}>A/C</Text>
+              <Text style={globalStyles.labelText}>Aos cuidados de</Text>
               <TextInput
-                style={inputStyle}
+                style={globalStyles.input}
                 value={form.aosCuidados}
                 onChangeText={(text) => updateField("aosCuidados", text)}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
             </View>
           </View>
 
+          {/* EMAIL E TELEFONE */}
           <View style={globalStyles.formRow}>
             <View style={globalStyles.labelInputContainer}>
               <Text style={globalStyles.labelText}>Email</Text>
               <TextInput
-                style={inputStyle}
+                style={globalStyles.input}
                 value={form.email}
                 onChangeText={(text) => updateField("email", text)}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
             </View>
 
             <View style={globalStyles.labelInputContainer}>
               <Text style={globalStyles.labelText}>Telefone</Text>
               <TextInput
-                style={inputStyle}
+                style={globalStyles.input}
                 value={form.telefone}
                 placeholder="(99) 99999-9999"
                 placeholderTextColor={colors.gray}
@@ -178,6 +274,36 @@ export default function NovoOrcamento() {
                   updateField("telefone", value);
                 }}
               />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
+            </View>
+          </View>
+
+          {/* DEPARTAMENTO E INSCRIÇÃO */}
+          <View style={globalStyles.formRow}>
+            <View style={globalStyles.labelInputContainer}>
+              <Text style={globalStyles.labelText}>Departamento</Text>
+              <TextInput
+                style={globalStyles.input}
+                value={form.departamento}
+                onChangeText={(text) => updateField("departamento", text)}
+              />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
+            </View>
+
+            <View style={globalStyles.labelInputContainer}>
+              <Text style={globalStyles.labelText}>Inscrição</Text>
+              <TextInput
+                style={globalStyles.input}
+                value={form.inscricao}
+                onChangeText={(text) => updateField("inscricao", text)}
+              />
+              <Text style={globalStyles.errorText} selectable={false}>
+                {" "}
+              </Text>
             </View>
           </View>
         </View>
@@ -203,9 +329,12 @@ export default function NovoOrcamento() {
                   style={globalStyles.labelText}
                 >{`Item ${index + 1}`}</Text>
                 <TextInput
-                  style={[inputStyle, { flex: 2 }]}
+                  style={[globalStyles.input, { flex: 2 }]}
                   value={material.nome}
-                  onChangeText={(text) => updateMaterial(index, "nome", text)}
+                  onChangeText={(text) => {
+                    updateMaterial(index, "nome", text);
+                    setErrors((prev) => ({ ...prev, item: " " }));
+                  }}
                 />
               </View>
 
@@ -220,14 +349,15 @@ export default function NovoOrcamento() {
                 >
                   <Text style={{ fontSize: 24, fontWeight: "bold" }}>R$</Text>
                   <TextInput
-                    style={[inputStyle, { flex: 1 }]}
+                    style={[globalStyles.input, { flex: 1 }]}
                     value={material.preco}
                     placeholder="99,99"
                     placeholderTextColor={colors.gray}
                     keyboardType="numeric"
-                    onChangeText={(text) =>
-                      updateMaterial(index, "preco", formatDinheiro(text))
-                    }
+                    onChangeText={(text) => {
+                      updateMaterial(index, "preco", formatDinheiro(text));
+                      setErrors((prev) => ({ ...prev, item: " " }));
+                    }}
                   />
                 </View>
               </View>
@@ -251,30 +381,41 @@ export default function NovoOrcamento() {
             </View>
           ))}
 
-          <MenuOptionButton
-            containerStyle={{
-              backgroundColor: colors.green,
-              padding: 12,
-              borderRadius: 10,
-              marginTop: 10,
-              alignItems: "center",
-              alignSelf: "flex-end",
-              maxWidth: 250,
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
-            label={
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
-              >
-                + Adicionar Item
-              </Text>
-            }
-            onPress={() =>
-              setForm((prev) => ({
-                ...prev,
-                materiais: [...prev.materiais, { nome: "", preco: "" }],
-              }))
-            }
-          />
+          >
+            <Text style={globalStyles.errorText} selectable={false}>
+              {errors.item ?? " "}
+            </Text>
+
+            <MenuOptionButton
+              containerStyle={{
+                backgroundColor: colors.green,
+                padding: 12,
+                borderRadius: 10,
+                marginTop: 10,
+                alignItems: "center",
+                alignSelf: "flex-end",
+                maxWidth: 250,
+              }}
+              label={
+                <Text
+                  style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
+                >
+                  + Adicionar Item
+                </Text>
+              }
+              onPress={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  materiais: [...prev.materiais, { nome: "", preco: "" }],
+                }))
+              }
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -325,7 +466,7 @@ export default function NovoOrcamento() {
             <Feather name="check-circle" size={24} color="white" />
           </View>
         }
-        onPress={async () => gerarPdfOrcamentoFront(form)}
+        onPress={async () => salvarOrcamento(form)}
       />
     </View>
   );
