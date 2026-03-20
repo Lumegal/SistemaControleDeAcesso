@@ -8,6 +8,7 @@ export interface IOrcamento {
   inscricao: string;
   data: Date;
   materiais: IMaterial[];
+  status: string;
 }
 
 export interface IMaterial {
@@ -16,8 +17,25 @@ export interface IMaterial {
   preco: number;
 }
 
+export interface ICreateOrcamento {
+  enviarPara: string;
+  aosCuidados: string;
+  departamento: string;
+  telefone: string;
+  email: string;
+  inscricao: string;
+  data: Date;
+  materiais: IMaterial[];
+  status: string;
+}
+
+export interface ICreateMaterial {
+  nome: string;
+  preco: number;
+}
+
 export interface IOrcamentoForm {
-  nomeDoArquivo: string
+  nomeDoArquivo: string;
   enviarPara: string;
   aosCuidados: string;
   departamento: string;

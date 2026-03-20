@@ -9,9 +9,11 @@ import { gerarPdfOrcamentoFront } from "../../../services/comercial/orcamento";
 import { Feather, FontAwesome, FontAwesome6 } from "@expo/vector-icons";
 import { colors } from "../../../colors";
 import MenuOptionButton from "../../_components/MenuOptionButton";
+import { useLoading } from "../../../context/providers/loading";
 
 export default function NovoOrcamento() {
   const globalStyles = getGlobalStyles();
+  const { showLoading, hideLoading } = useLoading();
 
   const nowLocal = useMemo(() => {
     const now = new Date();
@@ -81,6 +83,17 @@ export default function NovoOrcamento() {
       backgroundColor: "#f9f9f9",
     },
   ];
+
+  const salvarOrcamento = async (form: IOrcamentoForm) => {
+    try {
+      showLoading();
+      await gerarPdfOrcamentoFront(form);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
 
   return (
     <View
@@ -325,7 +338,7 @@ export default function NovoOrcamento() {
             <Feather name="check-circle" size={24} color="white" />
           </View>
         }
-        onPress={async () => gerarPdfOrcamentoFront(form)}
+        onPress={async () => salvarOrcamento(form)}
       />
     </View>
   );
