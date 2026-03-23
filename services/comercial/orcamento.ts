@@ -53,6 +53,10 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
       font-weight: bold;
       background-color: ${colors.gray};
     }
+
+    .tabela-cliente {
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -81,7 +85,7 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
     </table>
 
     <!-- DADOS CLIENTE -->
-    <table>
+    <table class="tabela-cliente">
   <tr>
     <td style="width: 80%">Para: ${orcamento.enviarPara}</td>
     <td rowspan="2" style="width: 20%; text-align: center; font-size: 16px;">
@@ -182,7 +186,7 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
 
 
 
-    <div style="font-size: 12px;">
+    <div style="font-size: 10px;">
 <div class="titulo" style="text-align: center;
       border: 1px solid #000;">
   <strong>Observações e recomendações</strong>
@@ -204,7 +208,7 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
   </p>
 
   <p>
-    Caso o material não esteja adequado, sendo necessária adaptação ou correção, seguem os valores:
+    Caso o material, mesmo assim, não esteja adequado para o processo de galvanização a fogo, sendo necessária alguma adaptação ou correção das furações, segue abaixo a tabela de valores para este tipo de situação:
   </p>
 
   <!-- TABELA DE VALORES -->
@@ -216,7 +220,7 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
 
     <tr>
       <td>
-        Adaptação feita pelo cliente ou terceiro nas dependências da Lumegal
+        Adaptação feita pelo cliente ou terceiro nas dependências da Lumegal, referente a gastos, como mão de obra e equipamentos para deslocamento do material, entre outros.
       </td>
       <td>R$150,00  por hora de material manuseado</td>
     </tr>
@@ -229,15 +233,15 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
     </tr>
   </table>
 
-  <p>3 - Caso prevista pintura após a galvanização, informar “Não Passivar”.</p>
-  <p>4 - Controle por peso de entrada e saída.</p>
-  <p>5 - Vendas a prazo sujeitas à análise cadastral.</p>
-  <p>6 - Valor mínimo para faturamento R$ 500,00.</p>
-  <p>7 - Cobrança baseada no peso de saída.</p>
-  <p>8 - Pode haver alteração de custo e prazo.</p>
+  <p>3 - Caso prevista a pintura após a galvanização, mencionar na NF a informação - “Não Passivar”.</p>
+  <p>4 - Os lotes recebidos pela Lumegal serão controlados por peso de entrada e peso de saída.</p>
+  <p>5 - Vendas a prazo ficam condicionadas a análise prévia de cadastro.</p>
+  <p>6 - Na condição de pagamento a vista o valor mínimo para faturamento é de R$ 500,00. O material será liberado para carregamento após deposito compensado.</p>
+  <p>7 - A Cobrança do serviço de galvanização será feita a partir do peso de saída da carga, considerando o acréscimo de Zinco aplicado ao material.</p>
+  <p>8 - No caso dos itens 1 e 2 não serem atendidos poderá gerar alterações no custo e prazo de entrega acordado.</p>
 
   <p>
-    9 - Nota fiscal: CFOP 5.901 (SP) / CFOP 6.901 (demais estados).
+    9 - O material deverá vir acompanhado de nota fiscal como Remessa para industrialização, CFOP 5.901 (SP) / CFOP 6.901 (demais estados).
   </p>
 
   <p>
@@ -247,15 +251,15 @@ export function gerarHtmlOrcamento(orcamento: IOrcamentoForm) {
   </p>
 
   <p>
-    11 - Conforme NBR 6323:2007, não nos responsabilizamos por diferenças estéticas.
+    11 - Conforme NBR 6323:2007, item 6.1.1, a Lumegal não se responsabiliza por eventuais diferenças estéticas do material galvanizado, como aspecto acinzentado localizado ou generalizado, bem como diferenças de brilho, tonalidade ou cristalização, pois são problemas relacionados com a composição química do material base.
   </p>
 
   <p>
-    12 - Diferenças na camada de zinco serão renegociadas.
+    12 - Diferenças excessivas da camada de Zinco ocasionadas pela composição química do aço, em comparação ao determinado pela norma NBR 6323:2007 serão renegociadas e posteriormente cobradas.
   </p>
 
   <p>
-    13 - Não nos responsabilizamos por partes móveis (rolamentos, dobradiças, etc).
+    13 - Não nos responsabilizamos por partes móveis e funcionais anexadas a peças a serem galvanizadas como: rolamentos, dobradiças, correntes, roscas etc.
   </p>
 
 </div>
