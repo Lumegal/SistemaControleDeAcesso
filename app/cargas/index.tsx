@@ -394,60 +394,6 @@ const CargaRow = React.memo(
   },
 );
 
-const styles = StyleSheet.create({
-  dataHorarioContainer: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 20,
-  },
-  maximizarFiltroButton: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
-    backgroundColor: "#ffffff",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  minimizarFiltroButton: {
-    height: 20,
-    width: "auto",
-    position: "absolute",
-    zIndex: 999,
-    right: 28,
-    top: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  button: {
-    minWidth: 130,
-    maxHeight: 50,
-  },
-  buttonFiltrar: {
-    backgroundColor: colors.lightBlue,
-  },
-  buttonLimpar: {
-    borderWidth: 2,
-    borderColor: colors.gray,
-  },
-  buttonLabel: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filtroUltimaLinha: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 40,
-  },
-});
-
 export default function Cargas() {
   const { usuario } = useAuth();
   const globalStyles = useMemo(() => getGlobalStyles(), []);
@@ -872,7 +818,7 @@ export default function Cargas() {
       {/* FILTRO CONTAINER */}
       {!filtrosVisible && (
         <Pressable
-          style={styles.maximizarFiltroButton}
+          style={globalStyles.maximizarFiltroButton}
           onPress={() => setFiltrosVisible(true)}
         >
           <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
@@ -885,7 +831,7 @@ export default function Cargas() {
       {filtrosVisible && (
         <View style={globalStyles.mainContainer}>
           <Pressable
-            style={styles.minimizarFiltroButton}
+            style={globalStyles.minimizarFiltroButton}
             onPress={() => setFiltrosVisible(false)}
           >
             <Text
@@ -898,7 +844,7 @@ export default function Cargas() {
           </Pressable>
           <View style={globalStyles.filtroContainer}>
             <View style={globalStyles.filtroContainerRow}>
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -939,7 +885,7 @@ export default function Cargas() {
                 </View>
               </View>
 
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -1079,7 +1025,7 @@ export default function Cargas() {
               ]}
             >
               {/* Lado esquerdo */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* TODOS */}
                 <Pressable
                   style={globalStyles.radioLabelContainer}
@@ -1157,7 +1103,7 @@ export default function Cargas() {
               </View>
 
               {/* Lado direito */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* Exportar */}
                 <MenuOptionButton
                   containerStyle={[
@@ -1168,7 +1114,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="microsoft-excel"
                         size={35}
@@ -1186,7 +1132,7 @@ export default function Cargas() {
                 <MenuOptionButton
                   containerStyle={[
                     globalStyles.button,
-                    styles.button,
+                    globalStyles.buttonFiltrosContainer,
                     {
                       borderWidth: temFiltroAtivo ? 3 : 2,
                       borderColor: temFiltroAtivo ? colors.red : colors.gray,
@@ -1194,7 +1140,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="cancel"
                         size={24}
@@ -1645,7 +1591,7 @@ export default function Cargas() {
           ]}
           labelStyle={globalStyles.buttonText}
           label={
-            <View style={styles.buttonLabel}>
+            <View style={globalStyles.buttonLabel}>
               <Text style={{ color: "white" }}>Exportar</Text>
               <MaterialCommunityIcons
                 name="file-export-outline"

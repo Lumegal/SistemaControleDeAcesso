@@ -11,6 +11,7 @@ import Veiculos from "../veiculos";
 import { useState } from "react";
 import Itens from "../almoxarifado/itens";
 import NovoOrcamento from "../comercial/novoOrcamento.tsx";
+import Orcamentos from "../comercial/orcamentos";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -60,6 +61,9 @@ export default function Main() {
 
           {params.pageName === "comercial" &&
             params.subPage === "novoOrcamento" && <NovoOrcamento />}
+
+          {params.pageName === "comercial" &&
+            params.subPage === "orcamentos" && <Orcamentos />}
         </View>
       </View>
     </View>

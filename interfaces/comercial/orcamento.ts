@@ -1,3 +1,8 @@
+import {
+  IOrcamentoMaterial,
+  IUpdateOrcamentoMaterial,
+} from "./orcamentoMaterial";
+
 export interface IOrcamento {
   id: number;
   enviarPara: string;
@@ -7,7 +12,7 @@ export interface IOrcamento {
   email: string;
   inscricao: string;
   data: Date;
-  materiais: IMaterial[];
+  materiais: IOrcamentoMaterial[];
   status: string;
 }
 
@@ -53,3 +58,35 @@ export interface IMaterialForm {
   nome: string;
   preco: string;
 }
+
+export interface IUpdateOrcamento {
+  enviarPara?: string;
+  aosCuidados?: string;
+  departamento?: string;
+  telefone?: string;
+  email?: string;
+  inscricao?: string;
+  data?: Date;
+  materiais?: IUpdateOrcamentoMaterial[];
+  status?: string;
+}
+
+export interface IUpdateMaterial {
+  nome?: string;
+  preco?: number;
+}
+
+export type IOrcamentoFiltros = {
+  dataInicial: string;
+  horarioInicial: string;
+  dataFinal: string;
+  horarioFinal: string;
+  id: string;
+  enviarPara: string;
+  inscricao: string;
+  email: string;
+  telefone: string;
+  departamento: string;
+  aosCuidadosDe: string;
+  status: string
+};

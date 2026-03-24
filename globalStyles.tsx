@@ -76,6 +76,57 @@ export const getGlobalStyles = () => {
       fontSize: 18,
       marginTop: 4,
     },
+    dataHorarioContainer: {
+      flex: 1,
+      flexDirection: "row",
+      gap: 20,
+    },
+    maximizarFiltroButton: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#e2e8f0",
+      boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#ffffff",
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+    },
+    minimizarFiltroButton: {
+      height: 20,
+      width: "auto",
+      position: "absolute",
+      zIndex: 999,
+      right: 28,
+      top: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    filtroUltimaLinha: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 40,
+    },
+    buttonLabel: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonFiltrosContainer: {
+      minWidth: 130,
+      maxHeight: 50,
+    },
+    buttonFiltrar: {
+      backgroundColor: colors.lightBlue,
+    },
+    buttonLimpar: {
+      borderWidth: 2,
+      borderColor: colors.gray,
+    },
 
     // Tabela
     mainContainer: {

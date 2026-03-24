@@ -40,3 +40,5 @@ export async function httpClient(
 }
 
 export const socket = io(api);
+
+export const socketOrcamento = io("http://localhost:3003")

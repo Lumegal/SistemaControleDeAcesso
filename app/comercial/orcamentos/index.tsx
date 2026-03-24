@@ -1,0 +1,1055 @@
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  TextInput,
+} from "react-native";
+import { dataInputStyle, getGlobalStyles } from "../../../globalStyles";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  IOrcamento,
+  IOrcamentoFiltros,
+} from "../../../interfaces/comercial/orcamento";
+import { colors } from "../../../colors";
+import { getAllOrcamentoMaterial } from "../../../services/comercial/orcamentoMaterial";
+import {
+  AntDesign,
+  Feather,
+  FontAwesome,
+  FontAwesome6,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import MenuOptionButton from "../../_components/MenuOptionButton";
+import { useLoading } from "../../../context/providers/loading";
+import StatusModal from "../../_components/SimpleModal";
+import { updateOrcamento } from "../../../services/comercial/orcamento";
+import { socketOrcamento } from "../../../services/httpclient";
+
+export default function Orcamentos() {
+  const globalStyles = getGlobalStyles();
+  const { showLoading, hideLoading } = useLoading();
+  const [aviso, setAviso] = useState<string>("Carregando...");
+  const [isStatusModalVisible, setIsStatusModalVisible] =
+    useState<boolean>(false);
+  const [isExportarModalVisible, setIsExportarModalVisible] =
+    useState<boolean>(false);
+
+  const [orcamentos, setOrcamentos] = useState<IOrcamento[]>([]);
+  const [orcamentosFiltrados, setOrcamentosFiltrados] = useState<IOrcamento[]>(
+    [],
+  );
+  const [orcamentoSelecionado, setOrcamentoSelecionado] =
+    useState<IOrcamento>();
+  const [statusSelecionado, setStatusSelecionado] = useState<string>("");
+  const [filtrosVisible, setFiltrosVisible] = useState<boolean>(false);
+
+  const [filtros, setFiltros] = useState<IOrcamentoFiltros>({
+    dataInicial: "",
+    horarioInicial: "00:00",
+    dataFinal: "",
+    horarioFinal: "23:59",
+    id: "",
+    enviarPara: "",
+    inscricao: "",
+    email: "",
+    telefone: "",
+    departamento: "",
+    aosCuidadosDe: "",
+    status: "TODOS",
+  });
+
+  const temFiltroAtivo = useMemo(() => {
+    return (
+      filtros.dataInicial !== "" ||
+      filtros.horarioInicial !== "00:00" ||
+      filtros.dataFinal !== "" ||
+      filtros.horarioFinal !== "23:59" ||
+      filtros.id.trim() !== "" ||
+      filtros.enviarPara.trim() !== "" ||
+      filtros.inscricao.trim() !== "" ||
+      filtros.email.trim() !== "" ||
+      filtros.telefone.trim() !== "" ||
+      filtros.departamento.trim() !== "" ||
+      filtros.aosCuidadosDe.trim() !== "" ||
+      filtros.status.trim() !== "TODOS"
+    );
+  }, [
+    filtros.dataInicial,
+    filtros.horarioInicial,
+    filtros.dataFinal,
+    filtros.horarioFinal,
+    filtros.id,
+    filtros.enviarPara,
+    filtros.inscricao,
+    filtros.email,
+    filtros.telefone,
+    filtros.departamento,
+    filtros.aosCuidadosDe,
+    filtros.status,
+  ]);
+
+  const filtrar = () => {
+    let resultado = [...orcamentos];
+
+    resultado = resultado.filter((orcamento) => {
+      // PERÍODO
+      const inicio =
+        filtros.dataInicial && filtros.horarioInicial
+          ? juntarDataHora(
+              parseDateLocal(filtros.dataInicial),
+              filtros.horarioInicial,
+            )
+          : null;
+
+      const fim =
+        filtros.dataFinal && filtros.horarioFinal
+          ? juntarDataHora(
+              parseDateLocal(filtros.dataFinal),
+              filtros.horarioFinal,
+            )
+          : null;
+
+      if (inicio && orcamento.data < inicio) return false;
+      if (fim && orcamento.data > fim) return false;
+
+      // ID
+      if (filtros.id && !orcamento.id.toString().includes(filtros.id.trim()))
+        return false;
+
+      // ENVIAR PARA
+      if (
+        filtros.enviarPara &&
+        !orcamento.enviarPara
+          .toLowerCase()
+          .includes(filtros.enviarPara.trim().toLowerCase())
+      )
+        return false;
+
+      // INSCRIÇÃO
+      if (
+        filtros.inscricao &&
+        !orcamento.inscricao
+          .toLowerCase()
+          .includes(filtros.inscricao.trim().toLowerCase())
+      )
+        return false;
+
+      // EMAIL
+      if (
+        filtros.email &&
+        !orcamento.email
+          .toLowerCase()
+          .includes(filtros.email.trim().toLowerCase())
+      )
+        return false;
+
+      // TELEFONE
+      if (
+        filtros.telefone &&
+        !(orcamento.telefone ?? "")
+          .toLowerCase()
+          .includes(filtros.telefone.trim().toLowerCase())
+      )
+        return false;
+
+      // DEPARTAMENTO
+      if (
+        filtros.departamento &&
+        !(orcamento.departamento ?? "")
+          .toLowerCase()
+          .includes(filtros.departamento.trim().toLowerCase())
+      )
+        return false;
+
+      // AOS CUIDADOS DE
+      if (
+        filtros.aosCuidadosDe &&
+        !(orcamento.aosCuidados ?? "")
+          .toLowerCase()
+          .includes(filtros.aosCuidadosDe.trim().toLowerCase())
+      )
+        return false;
+
+      // STATUS
+      if (
+        filtros.status !== "TODOS" &&
+        orcamento.status.toLowerCase() !== filtros.status.trim().toLowerCase()
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    setOrcamentosFiltrados(resultado);
+  };
+
+  useEffect(() => {
+    filtrar();
+  }, [orcamentosFiltrados]);
+
+  const limparFiltro = () => {
+    setFiltros({
+      dataInicial: "",
+      horarioInicial: "00:00",
+      dataFinal: "",
+      horarioFinal: "23:59",
+      id: "",
+      enviarPara: "",
+      inscricao: "",
+      email: "",
+      telefone: "",
+      departamento: "",
+      aosCuidadosDe: "",
+      status: "TODOS",
+    });
+  };
+
+  const getData = useCallback(async () => {
+    try {
+      showLoading();
+      const resultado: IOrcamento[] = await getAllOrcamentoMaterial();
+      if (resultado.length === 0) {
+        setAviso("Não há nenhum orçamento salvo!");
+      } else {
+        setAviso("Carregando...");
+      }
+
+      const resultadoOrdenado = resultado.sort((a, b) => b.id - a.id);
+
+      console.log(resultadoOrdenado);
+
+      setOrcamentos(resultadoOrdenado);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  }, [showLoading, hideLoading]);
+
+  useEffect(() => {
+    getData();
+
+    const handleOrcamentoAtualizado = () => {
+      getData();
+    };
+
+    socketOrcamento.on("orcamentoAtualizado", handleOrcamentoAtualizado);
+
+    socketOrcamento.on("connect_error", (erro: any) => {
+      alert(erro.message);
+    });
+
+    return () => {
+      socketOrcamento.off("orcamentoAtualizado", handleOrcamentoAtualizado);
+      socketOrcamento.off("connect_error");
+    };
+  }, []);
+
+  const atualizarStatusOrcamento = async () => {
+    try {
+      showLoading();
+      await updateOrcamento(orcamentoSelecionado!.id, {
+        status: statusSelecionado,
+      });
+
+      alert("Status do orçamento atualizado com sucesso!");
+      setIsStatusModalVisible(false);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const styles = StyleSheet.create({
+    card: {
+      backgroundColor: "#fff",
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.lightGray,
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+      gap: 12,
+    },
+
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+
+    orcamentoAceito: {
+      backgroundColor: colors.lightGreen,
+      color: colors.green,
+    },
+
+    orcamentoPendente: {
+      backgroundColor: colors.backgroundBlue,
+      color: colors.lightBlue,
+    },
+
+    orcamentoRecusado: {
+      backgroundColor: colors.lightRed,
+      color: colors.red,
+    },
+
+    id: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: colors.lightBlue,
+    },
+
+    status: {
+      fontSize: 28,
+      fontWeight: "bold",
+    },
+
+    section: {
+      gap: 6,
+    },
+
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+
+    label: {
+      fontSize: 26,
+      color: "#777",
+    },
+
+    value: {
+      fontSize: 24,
+      fontWeight: "500",
+      color: "#333",
+    },
+
+    field: {
+      width: "32%",
+      minWidth: 120,
+    },
+  });
+
+  const Field = ({ label, value }: { label: string; value: any }) => (
+    <View style={styles.field}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value || "-"}</Text>
+    </View>
+  );
+
+  const renderOrcamento = (orcamento: IOrcamento) => {
+    const orcamentoAceito = orcamento.status === "ACEITO";
+    const orcamentoPendente = orcamento.status === "PENDENTE";
+    const orcamentoRecusado = orcamento.status === "RECUSADO";
+
+    return (
+      <View key={orcamento.id} style={styles.card}>
+        {/* HEADER */}
+        <View
+          style={[
+            styles.header,
+            orcamentoAceito && styles.orcamentoAceito,
+            orcamentoPendente && styles.orcamentoPendente,
+            orcamentoRecusado && styles.orcamentoRecusado,
+          ]}
+        >
+          <Text
+            style={[
+              styles.id,
+              orcamentoAceito && styles.orcamentoAceito,
+              orcamentoPendente && styles.orcamentoPendente,
+              orcamentoRecusado && styles.orcamentoRecusado,
+            ]}
+          >
+            Orçamento #{orcamento.id}
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
+            <Text
+              style={[
+                styles.status,
+                orcamentoAceito && styles.orcamentoAceito,
+                orcamentoPendente && styles.orcamentoPendente,
+                orcamentoRecusado && styles.orcamentoRecusado,
+              ]}
+            >
+              {orcamento.status}
+            </Text>
+            {/* Editar */}
+            <MenuOptionButton
+              containerStyle={{
+                backgroundColor: "#4CA64C",
+                height: 40,
+                width: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 10,
+              }}
+              label={<Feather name="edit" size={25} color="white" />}
+              onPress={() => {
+                setOrcamentoSelecionado(orcamento);
+                setStatusSelecionado(orcamento.status);
+                setIsStatusModalVisible(true);
+              }}
+            />
+          </View>
+        </View>
+
+        {/* DATA */}
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <Field
+              label="Data"
+              value={new Date(orcamento.data).toLocaleDateString()}
+            />
+            <Field label="Enviar para" value={orcamento.enviarPara} />
+            <Field label="Inscrição" value={orcamento.inscricao} />
+          </View>
+        </View>
+
+        {/* CONTATO */}
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <Field label="Email" value={orcamento.email} />
+            <Field label="Telefone" value={orcamento.telefone} />
+            <Field label="Departamento" value={orcamento.departamento} />
+          </View>
+        </View>
+
+        {/* EXTRA */}
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <Field label="Aos cuidados de" value={orcamento.aosCuidados} />
+          </View>
+        </View>
+
+        {/* MATERIAIS TITLE */}
+        <View style={[styles.row, { marginTop: 24 }]}>
+          <Text style={styles.value}>Materiais</Text>
+        </View>
+
+        {/* MATERIAIS */}
+        {orcamento.materiais?.map((material, idx) => {
+          return (
+            <View
+              key={material.id}
+              style={[styles.section, { marginHorizontal: 36 }]}
+            >
+              <View
+                style={[
+                  styles.row,
+                  {
+                    borderBottomWidth: 1,
+                    borderTopWidth: 1,
+                    borderColor: "#b8b8b8",
+
+                    paddingBottom: 12,
+                  },
+                ]}
+              >
+                <Field
+                  label={`Item ${idx + 1}`}
+                  value={`Material: ${material.material.nome}`}
+                />
+                <Field
+                  label=" "
+                  value={`Preço: R$ ${String(material.preco).replace(".", ",")}`}
+                />
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  return (
+    <View
+      style={[
+        globalStyles.mainContainer,
+        {
+          flexDirection: "column",
+          flex: 1,
+          margin: 24,
+        },
+      ]}
+    >
+      {/* FILTRO CONTAINER */}
+      {!filtrosVisible && (
+        <Pressable
+          style={globalStyles.maximizarFiltroButton}
+          onPress={() => setFiltrosVisible(true)}
+        >
+          <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
+            Filtros
+          </Text>
+          <AntDesign name="arrow-down" size={20} color="black" />
+        </Pressable>
+      )}
+
+      {filtrosVisible && (
+        <View style={globalStyles.mainContainer}>
+          <Pressable
+            style={globalStyles.minimizarFiltroButton}
+            onPress={() => setFiltrosVisible(false)}
+          >
+            <Text
+              selectable={false}
+              style={{ color: "black", fontWeight: 500 }}
+            >
+              Minimizar
+            </Text>
+            <AntDesign name="arrow-up" size={16} color="black" />
+          </Pressable>
+          <View style={globalStyles.filtroContainer}>
+            <View style={globalStyles.filtroContainerRow}>
+              <View style={globalStyles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Inicial
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={filtros.dataInicial}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        dataInicial: e.target.value,
+                      }))
+                    }
+                  />
+                </View>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário de chegada
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={filtros.horarioInicial}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        horarioInicial: e.target.value,
+                      }))
+                    }
+                  />
+                </View>
+              </View>
+
+              <View style={globalStyles.dataHorarioContainer}>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <FontAwesome name="calendar-o" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Data Final
+                    </Text>
+                  </View>
+                  <input
+                    type="date"
+                    style={dataInputStyle}
+                    value={filtros.dataFinal}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        dataFinal: e.target.value,
+                      }))
+                    }
+                  />
+                </View>
+                <View style={globalStyles.dataLabelInputContainer}>
+                  <View style={globalStyles.dataLabelContainer}>
+                    <Feather name="clock" size={24} color="black" />
+                    <Text style={globalStyles.dataLabelText} selectable={false}>
+                      Horário final
+                    </Text>
+                  </View>
+                  <input
+                    type="time"
+                    style={dataInputStyle}
+                    value={filtros.horarioFinal}
+                    onChange={(e) =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        horarioFinal: e.target.value,
+                      }))
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={globalStyles.filtroContainerRow}>
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome name="id-badge" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    ID
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.id}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, id: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome name="send" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Enviar para
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.enviarPara}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, enviarPara: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <MaterialCommunityIcons
+                    name="badge-account-horizontal"
+                    size={24}
+                    color="black"
+                  />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Inscrição
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.inscricao}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, inscricao: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <MaterialIcons
+                    name="alternate-email"
+                    size={24}
+                    color="black"
+                  />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    E-mail
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.email}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, email: text }))
+                  }
+                />
+              </View>
+            </View>
+
+            <View style={globalStyles.filtroContainerRow}>
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome name="phone" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Telefone
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.telefone}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, telefone: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <FontAwesome6 name="industry" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Departamento
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.departamento}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, departamento: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <MaterialIcons name="co-present" size={24} color="black" />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Aos cuidados de
+                  </Text>
+                </View>
+                <TextInput
+                  style={globalStyles.input}
+                  value={filtros.aosCuidadosDe}
+                  onChangeText={(text) =>
+                    setFiltros((prev) => ({ ...prev, aosCuidadosDe: text }))
+                  }
+                />
+              </View>
+
+              <View style={globalStyles.dataLabelInputContainer}>
+                <View style={globalStyles.dataLabelContainer}>
+                  <MaterialCommunityIcons
+                    name="list-status"
+                    size={24}
+                    color="black"
+                  />
+                  <Text style={globalStyles.dataLabelText} selectable={false}>
+                    Status
+                  </Text>
+                </View>
+                <Text
+                  selectable={false}
+                  style={[
+                    globalStyles.input,
+                    { backgroundColor: colors.lightGray },
+                  ]}
+                >
+                  {filtros.status}
+                </Text>
+              </View>
+            </View>
+
+            {/* Ultima linha Container */}
+            <View
+              style={[
+                globalStyles.filtroContainerRow,
+                { justifyContent: "space-between", marginTop: -10 },
+              ]}
+            >
+              {/* Lado esquerdo */}
+              <View style={globalStyles.filtroUltimaLinha}>
+                {/* TODOS */}
+                <Pressable
+                  style={globalStyles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, status: "TODOS" }))
+                  }
+                >
+                  <View style={globalStyles.radioButton}>
+                    {filtros.status === "TODOS" && (
+                      <View style={globalStyles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.status === "TODOS"
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    TODOS
+                  </Text>
+                </Pressable>
+
+                {/* PENDENTE */}
+                <Pressable
+                  style={globalStyles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, status: "PENDENTE" }))
+                  }
+                >
+                  <View style={globalStyles.radioButton}>
+                    {filtros.status === "PENDENTE" && (
+                      <View style={globalStyles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.status === "PENDENTE"
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    PENDENTE
+                  </Text>
+                </Pressable>
+
+                {/* ACEITO */}
+                <Pressable
+                  style={globalStyles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, status: "ACEITO" }))
+                  }
+                >
+                  <View style={globalStyles.radioButton}>
+                    {filtros.status === "ACEITO" && (
+                      <View style={globalStyles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.status === "ACEITO"
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    ACEITO
+                  </Text>
+                </Pressable>
+
+                {/* RECUSADO */}
+                <Pressable
+                  style={globalStyles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, status: "RECUSADO" }))
+                  }
+                >
+                  <View style={globalStyles.radioButton}>
+                    {filtros.status === "RECUSADO" && (
+                      <View style={globalStyles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.status === "RECUSADO"
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    RECUSADO
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* Lado direito */}
+              <View style={globalStyles.filtroUltimaLinha}>
+                {/* Exportar */}
+                <MenuOptionButton
+                  containerStyle={[
+                    globalStyles.button,
+                    {
+                      backgroundColor: colors.purple,
+                    },
+                  ]}
+                  labelStyle={globalStyles.buttonText}
+                  label={
+                    <View style={globalStyles.buttonLabel}>
+                      <MaterialCommunityIcons
+                        name="microsoft-excel"
+                        size={35}
+                        color="white"
+                      />
+                      <Text style={{ color: "white" }}>Exportar</Text>
+                    </View>
+                  }
+                  onPress={() => {
+                    setIsExportarModalVisible(true);
+                  }}
+                />
+
+                {/* Limpar filtro */}
+                <MenuOptionButton
+                  containerStyle={[
+                    globalStyles.button,
+                    globalStyles.buttonFiltrosContainer,
+                    {
+                      borderWidth: temFiltroAtivo ? 3 : 2,
+                      borderColor: temFiltroAtivo ? colors.red : colors.gray,
+                    },
+                  ]}
+                  labelStyle={globalStyles.buttonText}
+                  label={
+                    <View style={globalStyles.buttonLabel}>
+                      <MaterialCommunityIcons
+                        name="cancel"
+                        size={24}
+                        color={temFiltroAtivo ? colors.red : colors.gray}
+                      />
+                      <Text
+                        style={
+                          temFiltroAtivo
+                            ? { color: colors.red, fontWeight: 700 }
+                            : { color: colors.gray }
+                        }
+                      >
+                        Limpar filtro
+                      </Text>
+                    </View>
+                  }
+                  onPress={limparFiltro}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      <ScrollView
+        style={{ marginRight: -16 }}
+        contentContainerStyle={{ gap: 16, paddingRight: 16, paddingBottom: 16 }}
+      >
+        {orcamentos.length === 0 ? (
+          <View style={styles.card}>
+            <Text style={[styles.value, { textAlign: "center" }]}>{aviso}</Text>
+          </View>
+        ) : (
+          orcamentosFiltrados.map(renderOrcamento)
+        )}
+      </ScrollView>
+
+      <StatusModal
+        visible={isStatusModalVisible}
+        onClose={() => setIsStatusModalVisible(false)}
+      >
+        <View style={{ gap: 20, alignItems: "center" }}>
+          <Text style={{ fontSize: 36, fontWeight: 700 }}>Alterar Status</Text>
+          <View style={{ gap: 20 }}>
+            {/* PENDENTE */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() => setStatusSelecionado("PENDENTE")}
+            >
+              <View style={globalStyles.radioButton}>
+                {statusSelecionado === "PENDENTE" && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  statusSelecionado === "PENDENTE"
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Pendente
+              </Text>
+            </Pressable>
+
+            {/* ACEITO */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() => setStatusSelecionado("ACEITO")}
+            >
+              <View style={globalStyles.radioButton}>
+                {statusSelecionado === "ACEITO" && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  statusSelecionado === "ACEITO"
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Aceito
+              </Text>
+            </Pressable>
+
+            {/* RECUSADO */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() => setStatusSelecionado("RECUSADO")}
+            >
+              <View style={globalStyles.radioButton}>
+                {statusSelecionado === "RECUSADO" && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  statusSelecionado === "RECUSADO"
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Recusado
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Salvar */}
+          <MenuOptionButton
+            containerStyle={[
+              globalStyles.button,
+              { backgroundColor: colors.green },
+            ]}
+            labelStyle={globalStyles.buttonText}
+            label={
+              <View
+                style={{ flexDirection: "row", gap: 8, alignItems: "center" }}
+              >
+                <Text style={globalStyles.buttonText} selectable={false}>
+                  Salvar
+                </Text>
+                <Feather
+                  name="check-circle"
+                  size={24}
+                  color="white"
+                  style={{ marginBottom: -2 }}
+                />
+              </View>
+            }
+            onPress={atualizarStatusOrcamento}
+          />
+        </View>
+      </StatusModal>
+    </View>
+  );
+}
+
+function juntarDataHora(dataBase: Date, hora: string) {
+  const [h, m] = hora.split(":").map(Number);
+
+  const nova = new Date(dataBase);
+  nova.setHours(h);
+  nova.setMinutes(m);
+  nova.setSeconds(0);
+  nova.setMilliseconds(0);
+
+  return nova;
+}
+
+function parseDateLocal(dateStr: string) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}

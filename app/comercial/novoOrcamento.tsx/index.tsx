@@ -5,6 +5,7 @@ import {
   ICreateOrcamento,
   IMaterial,
   IMaterialForm,
+  IOrcamento,
   IOrcamentoForm,
 } from "../../../interfaces/comercial/orcamento";
 import {
@@ -141,8 +142,8 @@ export default function NovoOrcamento() {
         status: "PENDENTE",
         usuarioId: usuario?.sub!,
       };
-      await gerarPdfOrcamentoFront(form);
-      await createOrcamento(criarOrcamento);
+      const orcamentoCriado: IOrcamento = await createOrcamento(criarOrcamento);
+      await gerarPdfOrcamentoFront(form, orcamentoCriado.id);
 
       alert("Orçamento criado com sucesso!");
     } catch (erro: any) {
