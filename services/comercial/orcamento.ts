@@ -337,14 +337,16 @@ export function exportarExcelOrcamentos(dados: IOrcamento[]) {
 
   dados.forEach((item) => {
     item.materiais.forEach((m: any) => {
-      linhas.push({
-        ID: item.id,
-        Cliente: item.enviarPara ?? "",
-        Status: item.status ?? "",
-        Data: item.data ? new Date(item.data) : "",
-        Material: m.material.nome ?? "",
-        Preco: Number(m.preco ?? 0),
-      });
+      if (item.status !== "CANCELADO") {
+        linhas.push({
+          ID: item.id,
+          Cliente: item.enviarPara ?? "",
+          Status: item.status ?? "",
+          Data: item.data ? new Date(item.data) : "",
+          Material: m.material.nome ?? "",
+          Preco: Number(m.preco ?? 0),
+        });
+      }
     });
   });
 
@@ -469,25 +471,27 @@ export function exportarPDFOrcamentos(dados: IOrcamento[]) {
   ];
 
   // Linhas formatadas
-  const body = dados.map((item) => [
-    item.id ?? "",
-    item.enviarPara ?? "",
-    item.aosCuidados ?? "",
-    item.departamento ?? "",
-    item.telefone ?? "",
-    item.email ?? "",
-    item.inscricao ?? "",
-    item.status ?? "",
-    item.data ? new Date(item.data).toLocaleDateString() : "",
-    Array.isArray(item.materiais)
-      ? item.materiais
-          .map(
-            (m) =>
-              `${m.material.nome || ""} - R$ ${Number(m.preco || 0).toFixed(2)}`,
-          )
-          .join("\n")
-      : "",
-  ]);
+  const body = dados
+    .filter((item) => item.status !== "CANCELADO")
+    .map((item) => [
+      item.id ?? "",
+      item.enviarPara ?? "",
+      item.aosCuidados ?? "",
+      item.departamento ?? "",
+      item.telefone ?? "",
+      item.email ?? "",
+      item.inscricao ?? "",
+      item.status ?? "",
+      item.data ? new Date(item.data).toLocaleDateString() : "",
+      Array.isArray(item.materiais)
+        ? item.materiais
+            .map(
+              (m) =>
+                `${m.material?.nome || ""} - R$ ${Number(m.preco || 0).toFixed(2)}`,
+            )
+            .join("\n")
+        : "",
+    ]);
 
   autoTable(doc, {
     head,

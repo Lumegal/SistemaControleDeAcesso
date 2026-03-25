@@ -310,12 +310,13 @@ export default function Orcamentos() {
     id: {
       fontSize: 28,
       fontWeight: "bold",
-      color: colors.lightBlue,
+      color: "black",
     },
 
     status: {
       fontSize: 28,
       fontWeight: "bold",
+      color: "black",
     },
 
     section: {
@@ -831,6 +832,31 @@ export default function Orcamentos() {
                     RECUSADO
                   </Text>
                 </Pressable>
+
+                {/* CANCELADO */}
+                <Pressable
+                  style={globalStyles.radioLabelContainer}
+                  onPress={() =>
+                    setFiltros((prev) => ({ ...prev, status: "CANCELADO" }))
+                  }
+                >
+                  <View style={globalStyles.radioButton}>
+                    {filtros.status === "CANCELADO" && (
+                      <View style={globalStyles.radioFill} />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      globalStyles.labelText,
+                      filtros.status === "CANCELADO"
+                        ? { fontWeight: 700 }
+                        : { fontWeight: 400 },
+                    ]}
+                    selectable={false}
+                  >
+                    CANCELADO
+                  </Text>
+                </Pressable>
               </View>
 
               {/* Lado direito */}
@@ -982,6 +1008,29 @@ export default function Orcamentos() {
                 selectable={false}
               >
                 Recusado
+              </Text>
+            </Pressable>
+
+            {/* CANCELADO */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() => setStatusSelecionado("CANCELADO")}
+            >
+              <View style={globalStyles.radioButton}>
+                {statusSelecionado === "CANCELADO" && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  statusSelecionado === "CANCELADO"
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Cancelado
               </Text>
             </Pressable>
           </View>
