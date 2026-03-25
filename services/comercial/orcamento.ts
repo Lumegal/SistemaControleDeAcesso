@@ -1,11 +1,16 @@
 import html2pdf from "html2pdf.js";
 import {
   ICreateOrcamento,
+  IOrcamento,
   IOrcamentoForm,
   IUpdateOrcamento,
 } from "../../interfaces/comercial/orcamento";
 import { colors } from "../../colors";
 import { httpClient } from "../httpclient";
+import * as XLSX from "xlsx-js-style";
+import { saveAs } from "file-saver";
+import autoTable from "jspdf-autotable";
+import jsPDF from "jspdf";
 
 function formatarData(dataISO: string): string {
   const [data] = dataISO.split("T");
@@ -323,4 +328,199 @@ export async function updateOrcamento(id: number, orcamento: IUpdateOrcamento) {
     },
     "http://localhost:3003",
   );
+}
+
+export function exportarExcelOrcamentos(dados: IOrcamento[]) {
+  if (!dados || !dados.length) return;
+
+  const linhas: any[] = [];
+
+  dados.forEach((item) => {
+    item.materiais.forEach((m: any) => {
+      linhas.push({
+        ID: item.id,
+        Cliente: item.enviarPara ?? "",
+        Status: item.status ?? "",
+        Data: item.data ? new Date(item.data) : "",
+        Material: m.material.nome ?? "",
+        Preco: Number(m.preco ?? 0),
+      });
+    });
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(linhas, {
+    cellDates: true,
+  });
+
+  const range = XLSX.utils.decode_range(worksheet["!ref"]!);
+
+  for (let row = range.s.r + 1; row <= range.e.r; row++) {
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
+
+      if (!cell) continue;
+
+      const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
+      const nomeColuna = headerCell?.v;
+
+      // DATA
+      if (nomeColuna === "Data" && cell.v instanceof Date) {
+        cell.t = "d";
+        cell.z = "dd/mm/yyyy";
+      }
+
+      // PREÇO
+      const precoCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 5 })];
+
+      if (precoCell && typeof precoCell.v === "number") {
+        precoCell.t = "n"; // número
+        precoCell.z = '_-"R$" * #,##0.00_-'; // formato contábil
+      }
+
+      // ESTILO
+      cell.s = {
+        alignment: {
+          horizontal: "center",
+          vertical: "center",
+          wrapText: true,
+        },
+      };
+    }
+  }
+
+  // HEADER ESTILIZADO
+  for (let col = range.s.c; col <= range.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+
+    if (!worksheet[cellAddress]) continue;
+
+    worksheet[cellAddress].s = {
+      alignment: {
+        horizontal: "center",
+        vertical: "center",
+      },
+      font: {
+        bold: true,
+        color: { rgb: "FFFFFFFF" },
+      },
+      fill: {
+        patternType: "solid",
+        fgColor: { rgb: "FF16A085" },
+      },
+    };
+  }
+
+  worksheet["!autofilter"] = {
+    ref: XLSX.utils.encode_range(range),
+  };
+
+  worksheet["!cols"] = [
+    { wch: 10 }, // ID
+    { wch: 20 }, // Cliente
+    { wch: 20 }, // A/C
+    { wch: 18 }, // Departamento
+    { wch: 15 }, // Telefone
+    { wch: 25 }, // Email
+    { wch: 15 }, // Inscrição
+    { wch: 12 }, // Status
+    { wch: 20 }, // Data
+    { wch: 40 }, // Materiais
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Orçamentos");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+    cellDates: true,
+  });
+
+  const blob = new Blob([excelBuffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, "Relatório de orçamentos.xlsx");
+}
+
+export function exportarPDFOrcamentos(dados: IOrcamento[]) {
+  if (!dados || !dados.length) return;
+
+  const doc = new jsPDF("landscape");
+
+  doc.setFontSize(16);
+  doc.text("Relatório de Orçamentos", 14, 15);
+
+  // Cabeçalho fixo
+  const head = [
+    [
+      "ID",
+      "Cliente",
+      "A/C",
+      "Departamento",
+      "Telefone",
+      "Email",
+      "Inscrição",
+      "Status",
+      "Data",
+      "Materiais",
+    ],
+  ];
+
+  // Linhas formatadas
+  const body = dados.map((item) => [
+    item.id ?? "",
+    item.enviarPara ?? "",
+    item.aosCuidados ?? "",
+    item.departamento ?? "",
+    item.telefone ?? "",
+    item.email ?? "",
+    item.inscricao ?? "",
+    item.status ?? "",
+    item.data ? new Date(item.data).toLocaleDateString() : "",
+    Array.isArray(item.materiais)
+      ? item.materiais
+          .map(
+            (m) =>
+              `${m.material.nome || ""} - R$ ${Number(m.preco || 0).toFixed(2)}`,
+          )
+          .join("\n")
+      : "",
+  ]);
+
+  autoTable(doc, {
+    head,
+    body,
+    startY: 25,
+
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+      valign: "middle",
+    },
+
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      halign: "center",
+    },
+
+    bodyStyles: {
+      halign: "center",
+    },
+
+    columnStyles: {
+      9: { cellWidth: 60 }, // Materiais maior
+    },
+
+    didParseCell: (data) => {
+      // quebra de linha automática nos materiais
+      if (data.column.index === 9) {
+        data.cell.styles.valign = "top";
+      }
+    },
+  });
+
+  doc.save("Relatório de orçamentos.pdf");
 }

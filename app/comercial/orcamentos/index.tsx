@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { dataInputStyle, getGlobalStyles } from "../../../globalStyles";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,14 +20,18 @@ import {
   Feather,
   FontAwesome,
   FontAwesome6,
-  Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
 import MenuOptionButton from "../../_components/MenuOptionButton";
 import { useLoading } from "../../../context/providers/loading";
 import StatusModal from "../../_components/SimpleModal";
-import { updateOrcamento } from "../../../services/comercial/orcamento";
+import ExportarModal from "../../_components/SimpleModal";
+import {
+  exportarExcelOrcamentos,
+  exportarPDFOrcamentos,
+  updateOrcamento,
+} from "../../../services/comercial/orcamento";
 import { socketOrcamento } from "../../../services/httpclient";
 
 export default function Orcamentos() {
@@ -37,6 +42,7 @@ export default function Orcamentos() {
     useState<boolean>(false);
   const [isExportarModalVisible, setIsExportarModalVisible] =
     useState<boolean>(false);
+  const [tipoExport, setTipoExport] = useState<1 | 2>(1);
 
   const [orcamentos, setOrcamentos] = useState<IOrcamento[]>([]);
   const [orcamentosFiltrados, setOrcamentosFiltrados] = useState<IOrcamento[]>(
@@ -49,9 +55,7 @@ export default function Orcamentos() {
 
   const [filtros, setFiltros] = useState<IOrcamentoFiltros>({
     dataInicial: "",
-    horarioInicial: "00:00",
     dataFinal: "",
-    horarioFinal: "23:59",
     id: "",
     enviarPara: "",
     inscricao: "",
@@ -65,9 +69,7 @@ export default function Orcamentos() {
   const temFiltroAtivo = useMemo(() => {
     return (
       filtros.dataInicial !== "" ||
-      filtros.horarioInicial !== "00:00" ||
       filtros.dataFinal !== "" ||
-      filtros.horarioFinal !== "23:59" ||
       filtros.id.trim() !== "" ||
       filtros.enviarPara.trim() !== "" ||
       filtros.inscricao.trim() !== "" ||
@@ -79,9 +81,7 @@ export default function Orcamentos() {
     );
   }, [
     filtros.dataInicial,
-    filtros.horarioInicial,
     filtros.dataFinal,
-    filtros.horarioFinal,
     filtros.id,
     filtros.enviarPara,
     filtros.inscricao,
@@ -97,24 +97,19 @@ export default function Orcamentos() {
 
     resultado = resultado.filter((orcamento) => {
       // PERÍODO
-      const inicio =
-        filtros.dataInicial && filtros.horarioInicial
-          ? juntarDataHora(
-              parseDateLocal(filtros.dataInicial),
-              filtros.horarioInicial,
-            )
-          : null;
+      const inicio = filtros.dataInicial
+        ? juntarDataHora(parseDateLocal(filtros.dataInicial), "00:00")
+        : null;
 
-      const fim =
-        filtros.dataFinal && filtros.horarioFinal
-          ? juntarDataHora(
-              parseDateLocal(filtros.dataFinal),
-              filtros.horarioFinal,
-            )
-          : null;
+      let fim = filtros.dataFinal
+        ? juntarDataHora(parseDateLocal(filtros.dataFinal), "23:59")
+        : null;
 
-      if (inicio && orcamento.data < inicio) return false;
-      if (fim && orcamento.data > fim) return false;
+      if (inicio! > fim!)
+        setFiltros((prev) => ({ ...prev, dataFinal: filtros.dataInicial }));
+
+      if (inicio && new Date(orcamento.data) < inicio) return false;
+      if (fim && new Date(orcamento.data) > fim) return false;
 
       // ID
       if (filtros.id && !orcamento.id.toString().includes(filtros.id.trim()))
@@ -190,14 +185,24 @@ export default function Orcamentos() {
 
   useEffect(() => {
     filtrar();
-  }, [orcamentosFiltrados]);
+  }, [
+    filtros.dataInicial,
+    filtros.dataFinal,
+    filtros.id,
+    filtros.enviarPara,
+    filtros.inscricao,
+    filtros.email,
+    filtros.telefone,
+    filtros.departamento,
+    filtros.aosCuidadosDe,
+    filtros.status,
+    orcamentos,
+  ]);
 
   const limparFiltro = () => {
     setFiltros({
       dataInicial: "",
-      horarioInicial: "00:00",
       dataFinal: "",
-      horarioFinal: "23:59",
       id: "",
       enviarPara: "",
       inscricao: "",
@@ -220,8 +225,6 @@ export default function Orcamentos() {
       }
 
       const resultadoOrdenado = resultado.sort((a, b) => b.id - a.id);
-
-      console.log(resultadoOrdenado);
 
       setOrcamentos(resultadoOrdenado);
     } catch (erro: any) {
@@ -452,7 +455,6 @@ export default function Orcamentos() {
                   styles.row,
                   {
                     borderBottomWidth: 1,
-                    borderTopWidth: 1,
                     borderColor: "#b8b8b8",
 
                     paddingBottom: 12,
@@ -501,6 +503,7 @@ export default function Orcamentos() {
 
       {filtrosVisible && (
         <View style={globalStyles.mainContainer}>
+          {/* BOTAO MINIMIZAR FILTRO */}
           <Pressable
             style={globalStyles.minimizarFiltroButton}
             onPress={() => setFiltrosVisible(false)}
@@ -513,8 +516,11 @@ export default function Orcamentos() {
             </Text>
             <AntDesign name="arrow-up" size={16} color="black" />
           </Pressable>
+
           <View style={globalStyles.filtroContainer}>
+            {/* PRIMEIRA LINHA */}
             <View style={globalStyles.filtroContainerRow}>
+              {/* DATA INICIAL */}
               <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
@@ -535,27 +541,9 @@ export default function Orcamentos() {
                     }
                   />
                 </View>
-                <View style={globalStyles.dataLabelInputContainer}>
-                  <View style={globalStyles.dataLabelContainer}>
-                    <Feather name="clock" size={24} color="black" />
-                    <Text style={globalStyles.dataLabelText} selectable={false}>
-                      Horário de chegada
-                    </Text>
-                  </View>
-                  <input
-                    type="time"
-                    style={dataInputStyle}
-                    value={filtros.horarioInicial}
-                    onChange={(e) =>
-                      setFiltros((prev) => ({
-                        ...prev,
-                        horarioInicial: e.target.value,
-                      }))
-                    }
-                  />
-                </View>
               </View>
 
+              {/* DATA FINAL */}
               <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
@@ -576,29 +564,12 @@ export default function Orcamentos() {
                     }
                   />
                 </View>
-                <View style={globalStyles.dataLabelInputContainer}>
-                  <View style={globalStyles.dataLabelContainer}>
-                    <Feather name="clock" size={24} color="black" />
-                    <Text style={globalStyles.dataLabelText} selectable={false}>
-                      Horário final
-                    </Text>
-                  </View>
-                  <input
-                    type="time"
-                    style={dataInputStyle}
-                    value={filtros.horarioFinal}
-                    onChange={(e) =>
-                      setFiltros((prev) => ({
-                        ...prev,
-                        horarioFinal: e.target.value,
-                      }))
-                    }
-                  />
-                </View>
               </View>
             </View>
 
+            {/* SEGUNDA LINHA */}
             <View style={globalStyles.filtroContainerRow}>
+              {/* ID */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <FontAwesome name="id-badge" size={24} color="black" />
@@ -615,6 +586,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* ENVIAR PARA */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <FontAwesome name="send" size={24} color="black" />
@@ -631,6 +603,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* INSCRIÇÃO */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <MaterialCommunityIcons
@@ -651,6 +624,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* E-MAIL */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <MaterialIcons
@@ -672,7 +646,9 @@ export default function Orcamentos() {
               </View>
             </View>
 
+            {/* TERCEIRA LINHA */}
             <View style={globalStyles.filtroContainerRow}>
+              {/* TELEFONE */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <FontAwesome name="phone" size={24} color="black" />
@@ -689,6 +665,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* DEPARTAMENTO */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <FontAwesome6 name="industry" size={24} color="black" />
@@ -705,6 +682,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* AOS CUIDADOS DE */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <MaterialIcons name="co-present" size={24} color="black" />
@@ -721,6 +699,7 @@ export default function Orcamentos() {
                 />
               </View>
 
+              {/* STATUS */}
               <View style={globalStyles.dataLabelInputContainer}>
                 <View style={globalStyles.dataLabelContainer}>
                   <MaterialCommunityIcons
@@ -1033,6 +1012,88 @@ export default function Orcamentos() {
           />
         </View>
       </StatusModal>
+
+      {/* ExportModal */}
+      <ExportarModal
+        visible={isExportarModalVisible}
+        onClose={() => setIsExportarModalVisible(false)}
+        title="Exportar dados"
+        maxWidth={1000}
+      >
+        <View style={{ flexDirection: "row", gap: 30 }}>
+          {/* PDF */}
+          <Pressable
+            style={globalStyles.radioLabelContainer}
+            onPress={() => setTipoExport(1)}
+          >
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 1 && <View style={globalStyles.radioFill} />}
+            </View>
+            <Text
+              style={[
+                globalStyles.labelText,
+                tipoExport === 1 ? { fontWeight: 700 } : { fontWeight: 400 },
+              ]}
+              selectable={false}
+            >
+              PDF
+            </Text>
+          </Pressable>
+
+          {/* EXCEL */}
+          <Pressable
+            style={globalStyles.radioLabelContainer}
+            onPress={() => setTipoExport(2)}
+          >
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 2 && <View style={globalStyles.radioFill} />}
+            </View>
+            <Text
+              style={[
+                globalStyles.labelText,
+                tipoExport === 2 ? { fontWeight: 700 } : { fontWeight: 400 },
+              ]}
+              selectable={false}
+            >
+              EXCEL
+            </Text>
+          </Pressable>
+        </View>
+
+        <Text style={[globalStyles.labelText, { color: colors.red }]}>
+          ATENÇÃO: Os dados exportados serão de acordo com o filtro selecionado
+        </Text>
+
+        <MenuOptionButton
+          containerStyle={[
+            globalStyles.button,
+            {
+              backgroundColor: colors.purple,
+            },
+          ]}
+          labelStyle={globalStyles.buttonText}
+          label={
+            <View style={globalStyles.buttonLabel}>
+              <Text style={{ color: "white" }}>Exportar</Text>
+              <MaterialCommunityIcons
+                name="file-export-outline"
+                size={28}
+                color="white"
+              />
+            </View>
+          }
+          onPress={async () => {
+            try {
+              if (tipoExport === 1) exportarPDFOrcamentos(orcamentosFiltrados);
+              if (tipoExport === 2)
+                exportarExcelOrcamentos(orcamentosFiltrados);
+            } catch (erro: any) {
+              alert(erro.message);
+              console.log(erro.message);
+            }
+          }}
+        />
+      </ExportarModal>
     </View>
   );
 }
@@ -1041,10 +1102,7 @@ function juntarDataHora(dataBase: Date, hora: string) {
   const [h, m] = hora.split(":").map(Number);
 
   const nova = new Date(dataBase);
-  nova.setHours(h);
-  nova.setMinutes(m);
-  nova.setSeconds(0);
-  nova.setMilliseconds(0);
+  nova.setHours(h, m, 0, 0);
 
   return nova;
 }

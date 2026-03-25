@@ -78,9 +78,7 @@ export interface IUpdateMaterial {
 
 export type IOrcamentoFiltros = {
   dataInicial: string;
-  horarioInicial: string;
   dataFinal: string;
-  horarioFinal: string;
   id: string;
   enviarPara: string;
   inscricao: string;
