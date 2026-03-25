@@ -14,6 +14,7 @@ export interface IOrcamento {
   data: Date;
   materiais: IOrcamentoMaterial[];
   status: string;
+  motivoRecusa: string
 }
 
 export interface IMaterial {
@@ -69,6 +70,7 @@ export interface IUpdateOrcamento {
   data?: Date;
   materiais?: IUpdateOrcamentoMaterial[];
   status?: string;
+  motivoRecusa?: string
 }
 
 export interface IUpdateMaterial {
@@ -87,4 +89,5 @@ export type IOrcamentoFiltros = {
   departamento: string;
   aosCuidadosDe: string;
   status: string
+  motivoRecusa: string
 };

@@ -340,11 +340,17 @@ export function exportarExcelOrcamentos(dados: IOrcamento[]) {
       if (item.status !== "CANCELADO") {
         linhas.push({
           ID: item.id,
-          Cliente: item.enviarPara ?? "",
-          Status: item.status ?? "",
           Data: item.data ? new Date(item.data) : "",
+          Cliente: item.enviarPara ?? "",
+          Inscrição: item.inscricao ?? "",
+          "E-mail": item.email ?? "",
+          Telefone: item.telefone ?? "",
+          Departamento: item.departamento ?? "",
+          "Aos cuidados de": item.aosCuidados ?? "",
+          Status: item.status ?? "",
           Material: m.material.nome ?? "",
           Preco: Number(m.preco ?? 0),
+          "Motivo da recusa": item.motivoRecusa ?? "",
         });
       }
     });
@@ -373,7 +379,7 @@ export function exportarExcelOrcamentos(dados: IOrcamento[]) {
       }
 
       // PREÇO
-      const precoCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 5 })];
+      const precoCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 10 })];
 
       if (precoCell && typeof precoCell.v === "number") {
         precoCell.t = "n"; // número
@@ -419,15 +425,17 @@ export function exportarExcelOrcamentos(dados: IOrcamento[]) {
 
   worksheet["!cols"] = [
     { wch: 10 }, // ID
+    { wch: 15 }, // Data
     { wch: 20 }, // Cliente
-    { wch: 20 }, // A/C
-    { wch: 18 }, // Departamento
-    { wch: 15 }, // Telefone
-    { wch: 25 }, // Email
     { wch: 15 }, // Inscrição
+    { wch: 25 }, // Email
+    { wch: 15 }, // Telefone
+    { wch: 18 }, // Departamento
+    { wch: 20 }, // A/C
     { wch: 12 }, // Status
-    { wch: 20 }, // Data
     { wch: 40 }, // Materiais
+    { wch: 15 }, // Preço
+    { wch: 40 }, // Motivo da recusa
   ];
 
   const workbook = XLSX.utils.book_new();
@@ -458,15 +466,16 @@ export function exportarPDFOrcamentos(dados: IOrcamento[]) {
   const head = [
     [
       "ID",
-      "Cliente",
-      "A/C",
-      "Departamento",
-      "Telefone",
-      "Email",
-      "Inscrição",
-      "Status",
       "Data",
+      "Cliente",
+      "Inscrição",
+      "Email",
+      "Telefone",
+      "Departamento",
+      "A/C",
+      "Status",
       "Materiais",
+      "Motivo da recusa",
     ],
   ];
 
@@ -475,14 +484,14 @@ export function exportarPDFOrcamentos(dados: IOrcamento[]) {
     .filter((item) => item.status !== "CANCELADO")
     .map((item) => [
       item.id ?? "",
-      item.enviarPara ?? "",
-      item.aosCuidados ?? "",
-      item.departamento ?? "",
-      item.telefone ?? "",
-      item.email ?? "",
-      item.inscricao ?? "",
-      item.status ?? "",
       item.data ? new Date(item.data).toLocaleDateString() : "",
+      item.enviarPara ?? "",
+      item.inscricao ?? "",
+      item.email ?? "",
+      item.telefone ?? "",
+      item.departamento ?? "",
+      item.aosCuidados ?? "",
+      item.status ?? "",
       Array.isArray(item.materiais)
         ? item.materiais
             .map(
@@ -491,6 +500,7 @@ export function exportarPDFOrcamentos(dados: IOrcamento[]) {
             )
             .join("\n")
         : "",
+      item.motivoRecusa ?? "",
     ]);
 
   autoTable(doc, {
@@ -516,6 +526,7 @@ export function exportarPDFOrcamentos(dados: IOrcamento[]) {
 
     columnStyles: {
       9: { cellWidth: 60 }, // Materiais maior
+      10: { cellWidth: 30 },
     },
 
     didParseCell: (data) => {

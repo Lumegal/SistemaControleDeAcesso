@@ -5,7 +5,6 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  TouchableOpacity,
 } from "react-native";
 import { dataInputStyle, getGlobalStyles } from "../../../globalStyles";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -33,6 +32,7 @@ import {
   updateOrcamento,
 } from "../../../services/comercial/orcamento";
 import { socketOrcamento } from "../../../services/httpclient";
+import Picker from "react-native-picker-select";
 
 export default function Orcamentos() {
   const globalStyles = getGlobalStyles();
@@ -43,6 +43,9 @@ export default function Orcamentos() {
   const [isExportarModalVisible, setIsExportarModalVisible] =
     useState<boolean>(false);
   const [tipoExport, setTipoExport] = useState<1 | 2>(1);
+  const [motivoRecusa, setMotivoRecusa] = useState<string>("");
+  const [motivoRecusaObrigatorioMsg, setMotivoRecusaObrigatorioMsg] =
+    useState<string>("Selecione o motivo da recusa.");
 
   const [orcamentos, setOrcamentos] = useState<IOrcamento[]>([]);
   const [orcamentosFiltrados, setOrcamentosFiltrados] = useState<IOrcamento[]>(
@@ -64,6 +67,7 @@ export default function Orcamentos() {
     departamento: "",
     aosCuidadosDe: "",
     status: "TODOS",
+    motivoRecusa: "TODOS",
   });
 
   const temFiltroAtivo = useMemo(() => {
@@ -77,7 +81,8 @@ export default function Orcamentos() {
       filtros.telefone.trim() !== "" ||
       filtros.departamento.trim() !== "" ||
       filtros.aosCuidadosDe.trim() !== "" ||
-      filtros.status.trim() !== "TODOS"
+      filtros.status.trim() !== "TODOS" ||
+      filtros.motivoRecusa.trim() !== "TODOS"
     );
   }, [
     filtros.dataInicial,
@@ -90,6 +95,7 @@ export default function Orcamentos() {
     filtros.departamento,
     filtros.aosCuidadosDe,
     filtros.status,
+    filtros.motivoRecusa,
   ]);
 
   const filtrar = () => {
@@ -177,6 +183,28 @@ export default function Orcamentos() {
         return false;
       }
 
+      // MOTIVO DA RECUSA
+      // if (
+      //   filtros.motivoRecusa !== "TODOS" &&
+      //   orcamento.motivoRecusa.toLowerCase() !==
+      //     filtros.motivoRecusa.trim().toLowerCase()
+      // ) {
+      //   return false;
+      // }
+
+      if (filtros.motivoRecusa !== "TODOS" && !orcamento.motivoRecusa) {
+        return false;
+      }
+
+      if (orcamento.motivoRecusa && filtros.motivoRecusa !== "TODOS") {
+        if (
+          orcamento.motivoRecusa.trim().toLowerCase() !==
+          filtros.motivoRecusa.trim().toLowerCase()
+        ) {
+          return false;
+        }
+      }
+
       return true;
     });
 
@@ -196,6 +224,7 @@ export default function Orcamentos() {
     filtros.departamento,
     filtros.aosCuidadosDe,
     filtros.status,
+    filtros.motivoRecusa,
     orcamentos,
   ]);
 
@@ -211,6 +240,7 @@ export default function Orcamentos() {
       departamento: "",
       aosCuidadosDe: "",
       status: "TODOS",
+      motivoRecusa: "TODOS",
     });
   };
 
@@ -253,14 +283,30 @@ export default function Orcamentos() {
     };
   }, []);
 
+  useEffect(() => {
+    if (statusSelecionado === "RECUSADO" && !motivoRecusa) {
+      setMotivoRecusaObrigatorioMsg("Selecione o motivo da recusa.");
+    } else {
+      setMotivoRecusaObrigatorioMsg("");
+    }
+  }, [statusSelecionado, motivoRecusa]);
+
+  useEffect(() => {
+    if (filtros.status !== "RECUSADO") {
+      setFiltros((prev) => ({ ...prev, motivoRecusa: "TODOS" }));
+    }
+  }, [filtros.status]);
+
   const atualizarStatusOrcamento = async () => {
     try {
       showLoading();
       await updateOrcamento(orcamentoSelecionado!.id, {
         status: statusSelecionado,
+        motivoRecusa,
       });
 
       alert("Status do orçamento atualizado com sucesso!");
+      setMotivoRecusa("");
       setIsStatusModalVisible(false);
     } catch (erro: any) {
       alert(erro.message);
@@ -370,16 +416,29 @@ export default function Orcamentos() {
             orcamentoRecusado && styles.orcamentoRecusado,
           ]}
         >
-          <Text
-            style={[
-              styles.id,
-              orcamentoAceito && styles.orcamentoAceito,
-              orcamentoPendente && styles.orcamentoPendente,
-              orcamentoRecusado && styles.orcamentoRecusado,
-            ]}
-          >
-            Orçamento #{orcamento.id}
-          </Text>
+          <View>
+            <Text
+              style={[
+                styles.id,
+                orcamentoAceito && styles.orcamentoAceito,
+                orcamentoPendente && styles.orcamentoPendente,
+                orcamentoRecusado && styles.orcamentoRecusado,
+              ]}
+            >
+              Orçamento #{orcamento.id}
+            </Text>
+            <Text
+              style={[
+                styles.id,
+                orcamentoAceito && styles.orcamentoAceito,
+                orcamentoPendente && styles.orcamentoPendente,
+                orcamentoRecusado && styles.orcamentoRecusado,
+              ]}
+            >
+              {orcamento.motivoRecusa &&
+                `Motivo da recusa: ${orcamento.motivoRecusa}`}
+            </Text>
+          </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 20 }}>
             <Text
               style={[
@@ -395,16 +454,17 @@ export default function Orcamentos() {
             <MenuOptionButton
               containerStyle={{
                 backgroundColor: "#4CA64C",
-                height: 40,
-                width: 40,
+                height: 55,
+                width: 55,
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 10,
               }}
-              label={<Feather name="edit" size={25} color="white" />}
+              label={<Feather name="edit" size={35} color="white" />}
               onPress={() => {
                 setOrcamentoSelecionado(orcamento);
                 setStatusSelecionado(orcamento.status);
+                setMotivoRecusa(orcamento.motivoRecusa);
                 setIsStatusModalVisible(true);
               }}
             />
@@ -724,14 +784,19 @@ export default function Orcamentos() {
               </View>
             </View>
 
-            {/* Ultima linha Container */}
+            {/* Penultima linha Container */}
             <View
               style={[
                 globalStyles.filtroContainerRow,
-                { justifyContent: "space-between", marginTop: -10 },
+                {
+                  justifyContent: "space-between",
+                  marginTop: -10,
+                  flexWrap: "wrap",
+                },
               ]}
             >
               {/* Lado esquerdo */}
+              {/* STATUS */}
               <View style={globalStyles.filtroUltimaLinha}>
                 {/* TODOS */}
                 <Pressable
@@ -859,6 +924,105 @@ export default function Orcamentos() {
                 </Pressable>
               </View>
 
+              {/* Lado Direito */}
+              {/* MOTIVO DA RECUSA */}
+              {filtros.status === "RECUSADO" && (
+                <View style={globalStyles.filtroUltimaLinha}>
+                  {/* TODOS */}
+                  <Pressable
+                    style={globalStyles.radioLabelContainer}
+                    onPress={() =>
+                      setFiltros((prev) => ({ ...prev, motivoRecusa: "TODOS" }))
+                    }
+                  >
+                    <View style={globalStyles.radioButton}>
+                      {filtros.motivoRecusa === "TODOS" && (
+                        <View style={globalStyles.radioFill} />
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        globalStyles.labelText,
+                        filtros.motivoRecusa === "TODOS"
+                          ? { fontWeight: 700 }
+                          : { fontWeight: 400 },
+                      ]}
+                      selectable={false}
+                    >
+                      TODOS
+                    </Text>
+                  </Pressable>
+
+                  {/* ORÇAMENTO NÃO PROSSEGUIU */}
+                  <Pressable
+                    style={globalStyles.radioLabelContainer}
+                    onPress={() =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        motivoRecusa: "ORÇAMENTO NÃO PROSSEGUIU",
+                      }))
+                    }
+                  >
+                    <View style={globalStyles.radioButton}>
+                      {filtros.motivoRecusa === "ORÇAMENTO NÃO PROSSEGUIU" && (
+                        <View style={globalStyles.radioFill} />
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        globalStyles.labelText,
+                        filtros.motivoRecusa === "ORÇAMENTO NÃO PROSSEGUIU"
+                          ? { fontWeight: 700 }
+                          : { fontWeight: 400 },
+                      ]}
+                      selectable={false}
+                    >
+                      ORÇAMENTO NÃO PROSSEGUIU
+                    </Text>
+                  </Pressable>
+
+                  {/* FECHOU COM OUTRA GALVANIZADORA */}
+                  <Pressable
+                    style={globalStyles.radioLabelContainer}
+                    onPress={() =>
+                      setFiltros((prev) => ({
+                        ...prev,
+                        motivoRecusa: "FECHOU COM OUTRA GALVANIZADORA",
+                      }))
+                    }
+                  >
+                    <View style={globalStyles.radioButton}>
+                      {filtros.motivoRecusa ===
+                        "FECHOU COM OUTRA GALVANIZADORA" && (
+                        <View style={globalStyles.radioFill} />
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        globalStyles.labelText,
+                        filtros.motivoRecusa ===
+                        "FECHOU COM OUTRA GALVANIZADORA"
+                          ? { fontWeight: 700 }
+                          : { fontWeight: 400 },
+                      ]}
+                      selectable={false}
+                    >
+                      FECHOU COM OUTRA GALVANIZADORA
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+
+            {/* Ultima linha Container */}
+            <View
+              style={[
+                globalStyles.filtroContainerRow,
+                { justifyContent: "space-between", marginTop: -10 },
+              ]}
+            >
+              <View />
+
               {/* Lado direito */}
               <View style={globalStyles.filtroUltimaLinha}>
                 {/* Exportar */}
@@ -937,11 +1101,19 @@ export default function Orcamentos() {
 
       <StatusModal
         visible={isStatusModalVisible}
-        onClose={() => setIsStatusModalVisible(false)}
+        onClose={() => {
+          setMotivoRecusaObrigatorioMsg("");
+          setIsStatusModalVisible(false);
+        }}
       >
         <View style={{ gap: 20, alignItems: "center" }}>
           <Text style={{ fontSize: 36, fontWeight: 700 }}>Alterar Status</Text>
-          <View style={{ gap: 20 }}>
+          <View
+            style={{
+              gap: 20,
+              marginLeft: statusSelecionado === "RECUSADO" ? 82 : 0,
+            }}
+          >
             {/* PENDENTE */}
             <Pressable
               style={globalStyles.radioLabelContainer}
@@ -1011,9 +1183,67 @@ export default function Orcamentos() {
               </Text>
             </Pressable>
 
+            {/* MOTIVO DA RECUSA */}
+            {statusSelecionado === "RECUSADO" && (
+              <View>
+                <Text
+                  style={[
+                    globalStyles.labelText,
+                    { fontSize: 16, marginTop: -12, marginBottom: 4 },
+                  ]}
+                >
+                  Motivo da recusa:
+                </Text>
+                <Picker
+                  placeholder={{
+                    label: "Selecione uma opção...",
+                    value: "",
+                  }}
+                  style={{
+                    inputWeb: {
+                      fontSize: 18,
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: "#ccc",
+                      borderRadius: 10,
+                      color: "#333",
+                      backgroundColor: "white",
+                      marginLeft: statusSelecionado === "RECUSADO" ? -82 : 0,
+                    },
+                  }}
+                  value={motivoRecusa}
+                  onValueChange={(value) => setMotivoRecusa(value)}
+                  items={[
+                    {
+                      label: "Orçamento não prosseguiu",
+                      value: "Orçamento não prosseguiu",
+                    },
+                    {
+                      label: "Fechou com outra galvanizadora",
+                      value: "Fechou com outra galvanizadora",
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    globalStyles.errorText,
+                    {
+                      marginLeft: statusSelecionado === "RECUSADO" ? -40 : 0,
+                    },
+                  ]}
+                  selectable={false}
+                >
+                  {motivoRecusaObrigatorioMsg}
+                </Text>
+              </View>
+            )}
+
             {/* CANCELADO */}
             <Pressable
-              style={globalStyles.radioLabelContainer}
+              style={[
+                globalStyles.radioLabelContainer,
+                statusSelecionado === "RECUSADO" && { marginTop: -12 },
+              ]}
               onPress={() => setStatusSelecionado("CANCELADO")}
             >
               <View style={globalStyles.radioButton}>
@@ -1037,6 +1267,7 @@ export default function Orcamentos() {
 
           {/* Salvar */}
           <MenuOptionButton
+            enabled={motivoRecusa !== ""}
             containerStyle={[
               globalStyles.button,
               { backgroundColor: colors.green },
@@ -1057,7 +1288,12 @@ export default function Orcamentos() {
                 />
               </View>
             }
-            onPress={atualizarStatusOrcamento}
+            onPress={() => {
+              if (motivoRecusa !== "") {
+                setMotivoRecusaObrigatorioMsg("");
+                atualizarStatusOrcamento();
+              }
+            }}
           />
         </View>
       </StatusModal>
