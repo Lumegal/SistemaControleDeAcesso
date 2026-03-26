@@ -874,7 +874,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
             <Text style={styles.version} selectable={false}>
               {`BASE DE TESTES
-V2.8.0`}
+V2.8.1`}
             </Text>
           </ScrollView>
         </Animated.View>

@@ -105,11 +105,11 @@ export default function Orcamentos() {
       // PERÍODO
       const inicio = filtros.dataInicial
         ? juntarDataHora(parseDateLocal(filtros.dataInicial), "00:00")
-        : null;
+        : "";
 
       let fim = filtros.dataFinal
         ? juntarDataHora(parseDateLocal(filtros.dataFinal), "23:59")
-        : null;
+        : "";
 
       if (inicio! > fim!)
         setFiltros((prev) => ({ ...prev, dataFinal: filtros.dataInicial }));
@@ -182,15 +182,6 @@ export default function Orcamentos() {
       ) {
         return false;
       }
-
-      // MOTIVO DA RECUSA
-      // if (
-      //   filtros.motivoRecusa !== "TODOS" &&
-      //   orcamento.motivoRecusa.toLowerCase() !==
-      //     filtros.motivoRecusa.trim().toLowerCase()
-      // ) {
-      //   return false;
-      // }
 
       if (filtros.motivoRecusa !== "TODOS" && !orcamento.motivoRecusa) {
         return false;
@@ -1267,7 +1258,10 @@ export default function Orcamentos() {
 
           {/* Salvar */}
           <MenuOptionButton
-            enabled={motivoRecusa !== ""}
+            enabled={
+              (statusSelecionado === "RECUSADO" && motivoRecusa !== "") ||
+              statusSelecionado !== "RECUSADO"
+            }
             containerStyle={[
               globalStyles.button,
               { backgroundColor: colors.green },
