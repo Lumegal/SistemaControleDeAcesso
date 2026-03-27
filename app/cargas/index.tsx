@@ -723,7 +723,7 @@ export default function Cargas() {
       hideLoading();
       setIsEditModalVisible(false);
 
-      alert("Horário atualizado com sucesso!");
+      alert("Carga atualizada com sucesso!");
     } catch (erro: any) {
       alert(erro.message);
     } finally {

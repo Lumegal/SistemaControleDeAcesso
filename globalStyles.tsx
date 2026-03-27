@@ -128,6 +128,34 @@ export const getGlobalStyles = () => {
       borderColor: colors.gray,
     },
 
+    checkboxRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 20,
+      marginTop: 5,
+    },
+    checkboxOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    checkboxBox: {
+      width: 24,
+      height: 24,
+      borderWidth: 2,
+      borderColor: "#555",
+      borderRadius: 4,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    checkboxChecked: {
+      backgroundColor: colors.lightBlue,
+      borderColor: colors.lightBlue,
+    },
+    checkboxLabel: {
+      fontSize: 24,
+    },
+
     // Tabela
     mainContainer: {
       borderRadius: 10,

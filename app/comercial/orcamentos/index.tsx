@@ -29,6 +29,7 @@ import ExportarModal from "../../_components/SimpleModal";
 import {
   exportarExcelOrcamentos,
   exportarPDFOrcamentos,
+  gerarPdfOrcamentoSalvo,
   updateOrcamento,
 } from "../../../services/comercial/orcamento";
 import { socketOrcamento } from "../../../services/httpclient";
@@ -36,6 +37,7 @@ import Picker from "react-native-picker-select";
 
 export default function Orcamentos() {
   const globalStyles = getGlobalStyles();
+  const checkboxSize: number = 24;
   const { showLoading, hideLoading } = useLoading();
   const [aviso, setAviso] = useState<string>("Carregando...");
   const [isStatusModalVisible, setIsStatusModalVisible] =
@@ -69,6 +71,7 @@ export default function Orcamentos() {
     status: "TODOS",
     motivoRecusa: "TODOS",
   });
+  const [showCancelados, setShowCancelados] = useState<boolean>(false);
 
   const temFiltroAtivo = useMemo(() => {
     return (
@@ -82,7 +85,8 @@ export default function Orcamentos() {
       filtros.departamento.trim() !== "" ||
       filtros.aosCuidadosDe.trim() !== "" ||
       filtros.status.trim() !== "TODOS" ||
-      filtros.motivoRecusa.trim() !== "TODOS"
+      filtros.motivoRecusa.trim() !== "TODOS" ||
+      showCancelados
     );
   }, [
     filtros.dataInicial,
@@ -96,6 +100,7 @@ export default function Orcamentos() {
     filtros.aosCuidadosDe,
     filtros.status,
     filtros.motivoRecusa,
+    showCancelados,
   ]);
 
   const filtrar = () => {
@@ -196,6 +201,10 @@ export default function Orcamentos() {
         }
       }
 
+      if (!showCancelados && orcamento.status === "CANCELADO") {
+        return false;
+      }
+
       return true;
     });
 
@@ -216,6 +225,7 @@ export default function Orcamentos() {
     filtros.aosCuidadosDe,
     filtros.status,
     filtros.motivoRecusa,
+    showCancelados,
     orcamentos,
   ]);
 
@@ -233,6 +243,7 @@ export default function Orcamentos() {
       status: "TODOS",
       motivoRecusa: "TODOS",
     });
+    setShowCancelados(false);
   };
 
   const getData = useCallback(async () => {
@@ -451,7 +462,7 @@ export default function Orcamentos() {
                 justifyContent: "center",
                 borderRadius: 10,
               }}
-              label={<Feather name="edit" size={35} color="white" />}
+              label={<Feather name="edit" size={40} color="white" />}
               onPress={() => {
                 setOrcamentoSelecionado(orcamento);
                 setStatusSelecionado(orcamento.status);
@@ -461,6 +472,33 @@ export default function Orcamentos() {
             />
           </View>
         </View>
+
+        {/* Imprimir */}
+        <MenuOptionButton
+          containerStyle={{
+            position: "absolute",
+            right: 26,
+            top: 119,
+            backgroundColor: colors.blue,
+            height: 55,
+            width: 55,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 10,
+            zIndex: 9999,
+          }}
+          label={<Feather name="printer" size={40} color="white" />}
+          onPress={async () => {
+            try {
+              showLoading();
+              await gerarPdfOrcamentoSalvo(orcamento);
+            } catch (erro: any) {
+              alert(erro.message);
+            } finally {
+              hideLoading();
+            }
+          }}
+        />
 
         {/* DATA */}
         <View style={styles.section}>
@@ -536,7 +574,6 @@ export default function Orcamentos() {
         {
           flexDirection: "column",
           flex: 1,
-          margin: 24,
         },
       ]}
     >
@@ -892,9 +929,10 @@ export default function Orcamentos() {
                 {/* CANCELADO */}
                 <Pressable
                   style={globalStyles.radioLabelContainer}
-                  onPress={() =>
-                    setFiltros((prev) => ({ ...prev, status: "CANCELADO" }))
-                  }
+                  onPress={() => {
+                    setFiltros((prev) => ({ ...prev, status: "CANCELADO" }));
+                    setShowCancelados(true);
+                  }}
                 >
                   <View style={globalStyles.radioButton}>
                     {filtros.status === "CANCELADO" && (
@@ -1012,7 +1050,29 @@ export default function Orcamentos() {
                 { justifyContent: "space-between", marginTop: -10 },
               ]}
             >
-              <View />
+              {/* Mostrar orçamentos cancelados? */}
+              {filtros.status === "TODOS" ? (
+                <Pressable
+                  style={globalStyles.checkboxOption}
+                  onPress={() => setShowCancelados(!showCancelados)}
+                >
+                  <View
+                    style={[
+                      globalStyles.checkboxBox,
+                      showCancelados && globalStyles.checkboxChecked,
+                    ]}
+                  >
+                    {showCancelados && (
+                      <Feather name="check" size={checkboxSize} color="white" />
+                    )}
+                  </View>
+                  <Text style={globalStyles.checkboxLabel} selectable={false}>
+                    Mostrar orçamentos cancelados?
+                  </Text>
+                </Pressable>
+              ) : (
+                <View />
+              )}
 
               {/* Lado direito */}
               <View style={globalStyles.filtroUltimaLinha}>
@@ -1078,8 +1138,8 @@ export default function Orcamentos() {
       )}
 
       <ScrollView
-        style={{ marginRight: -16 }}
-        contentContainerStyle={{ gap: 16, paddingRight: 16, paddingBottom: 16 }}
+        style={{ marginRight: -23 }}
+        contentContainerStyle={{ gap: 16, paddingRight: 3, paddingBottom: 16 }}
       >
         {orcamentos.length === 0 ? (
           <View style={styles.card}>
