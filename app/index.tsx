@@ -33,8 +33,8 @@ export default function Login() {
       const usuarioLogado = await login({ email, senha });
 
       if (
-        usuarioLogado.nivelDeAcesso === 1 ||
-        usuarioLogado.nivelDeAcesso === 2
+        usuarioLogado.tipoDeAcesso === "adm" ||
+        usuarioLogado.tipoDeAcesso === "portariaEdit"
       ) {
         router.push({
           pathname: "/main",
@@ -45,7 +45,7 @@ export default function Login() {
         });
       }
 
-      if (usuarioLogado.nivelDeAcesso === 3) {
+      if (usuarioLogado.tipoDeAcesso === "portariaView" || usuarioLogado.tipoDeAcesso === "comercial") {
         router.push({
           pathname: "/main",
           params: {
@@ -73,7 +73,7 @@ export default function Login() {
             color: "black",
           }}
         >
-          PORTARIA LUMEGAL
+          SISTEMA LUMEGAL
         </Text>
         <View style={styles.loginInputContainer}>
           <Feather

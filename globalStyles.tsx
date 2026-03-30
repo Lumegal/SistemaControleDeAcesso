@@ -76,15 +76,99 @@ export const getGlobalStyles = () => {
       fontSize: 18,
       marginTop: 4,
     },
+    dataHorarioContainer: {
+      flex: 1,
+      flexDirection: "row",
+      gap: 20,
+    },
+    maximizarFiltroButton: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#e2e8f0",
+      boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#ffffff",
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+    },
+    minimizarFiltroButton: {
+      height: 20,
+      width: "auto",
+      position: "absolute",
+      zIndex: 999,
+      right: 28,
+      top: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    filtroUltimaLinha: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 40,
+    },
+    buttonLabel: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonFiltrosContainer: {
+      minWidth: 130,
+      maxHeight: 50,
+    },
+    buttonFiltrar: {
+      backgroundColor: colors.lightBlue,
+    },
+    buttonLimpar: {
+      borderWidth: 2,
+      borderColor: colors.gray,
+    },
+
+    checkboxRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 20,
+      marginTop: 5,
+    },
+    checkboxOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    checkboxBox: {
+      width: 24,
+      height: 24,
+      borderWidth: 2,
+      borderColor: "#555",
+      borderRadius: 4,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    checkboxChecked: {
+      backgroundColor: colors.lightBlue,
+      borderColor: colors.lightBlue,
+    },
+    checkboxLabel: {
+      fontSize: 24,
+    },
 
     // Tabela
     mainContainer: {
-      borderRadius: 5,
+      borderRadius: 10,
       padding: 24,
       flexDirection: "row",
       gap: 20,
-      boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
-      backgroundColor: "white",
+
+      backgroundColor: "#ffffff",
+
+      borderWidth: 1,
+      borderColor: "#e2e8f0",
+
+      boxShadow: "0px 4px 14px rgba(0,0,0,0.06)",
     },
     filtroContainer: {
       flex: 1,
@@ -96,6 +180,26 @@ export const getGlobalStyles = () => {
       flexDirection: "row",
       gap: 20,
       backgroundColor: "white",
+    },
+    radioLabelContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    radioButton: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: colors.lightBlue,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    radioFill: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.lightBlue,
     },
     dataLabelInputContainer: {
       flex: 1,

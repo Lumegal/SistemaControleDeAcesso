@@ -1,0 +1,23 @@
+/* Chrome, Edge, Safari */
+#sidebarScroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebarScroll::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.08);
+}
+
+#sidebarScroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.35);
+  border-radius: 8px;
+}
+
+#sidebarScroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.6);
+}
+
+/* Firefox */
+#sidebarScroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.4) transparent;
+}

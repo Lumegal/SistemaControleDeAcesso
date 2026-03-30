@@ -60,10 +60,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (usuarioLogin: ILoginRequest) => {
-    const response = await httpClient("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(usuarioLogin),
-    });
+    const response = await httpClient(
+      "/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify(usuarioLogin),
+      },
+      "http://localhost:3002",
+    );
 
     const token: string = response.token;
 

@@ -3,110 +3,134 @@ import { Text, View, TextInput, FlatList } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
 import MenuOptionButton from "../_components/MenuOptionButton";
 import { colors } from "../../colors";
-import { useEffect, useState } from "react";
-import { getAllMotoristas } from "../../services/motorista";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getAllMotoristas, updateMotorista } from "../../services/motorista";
 import { IMotorista } from "../../interfaces/motorista";
 import React from "react";
 import { IJwtPayload } from "../../interfaces/jwt";
 import SimpleModal from "../_components/SimpleModal";
+import { useAuth } from "../../context/auth";
+import { useLoading } from "../../context/providers/loading";
+import { router } from "expo-router";
+
+const renderTableHeader = (
+  globalStyles: ReturnType<typeof getGlobalStyles>,
+  ordemAsc: boolean,
+  onToggleOrdem: () => void,
+) => {
+  return (
+    <View
+      style={[globalStyles.mainContainer, { height: 70, alignItems: "center" }]}
+    >
+      <Text style={globalStyles.tableHeader}>NOME</Text>
+      <Text style={globalStyles.tableHeader}>RG/CPF</Text>
+      <Text style={globalStyles.tableHeader}>CELULAR</Text>
+      <Text style={globalStyles.tableHeader}>AÇÕES</Text>
+    </View>
+  );
+};
+
+const CargaRow = React.memo(
+  ({
+    motorista,
+    globalStyles,
+    onEdit,
+  }: {
+    motorista: IMotorista;
+    usuario?: IJwtPayload | null;
+    globalStyles: ReturnType<typeof getGlobalStyles>;
+    onEdit: (m: IMotorista) => void;
+  }) => {
+    return (
+      <View key={motorista.id} style={globalStyles.tableRegister}>
+        <View style={globalStyles.tableColumn}>
+          <Text style={globalStyles.tableColumnText}>{motorista.nome}</Text>
+        </View>
+
+        <View style={globalStyles.tableColumn}>
+          <Text style={globalStyles.tableColumnText}>{motorista.rgCpf}</Text>
+        </View>
+        <View style={globalStyles.tableColumn}>
+          <Text style={globalStyles.tableColumnText}>{motorista.celular}</Text>
+        </View>
+
+        <View style={globalStyles.tableColumn}>
+          <MenuOptionButton
+            containerStyle={{
+              backgroundColor: "#4CA64C",
+              paddingHorizontal: 10,
+              paddingVertical: 7,
+              borderRadius: 10,
+            }}
+            label={<Feather name="edit" size={35} color="white" />}
+            onPress={() => onEdit(motorista)}
+          />
+          {/* <MenuOptionButton
+            containerStyle={{
+              backgroundColor: colors.red,
+              paddingHorizontal: 13,
+              paddingVertical: 8,
+              borderRadius: 10,
+            }}
+            label={<FontAwesome name="trash-o" size={37} color="white" />}
+            onPress={() => {}}
+          /> */}
+        </View>
+      </View>
+    );
+  },
+);
 
 export default function Motoristas() {
+  const { usuario } = useAuth();
+  const { showLoading, hideLoading } = useLoading();
   const globalStyles = getGlobalStyles();
   const [motoristas, setMotoristas] = useState<IMotorista[]>([]);
-  const [motoristaSelecionado, setMotoristaSelecionado] =
-    useState<IMotorista>();
-  const [motoristaInput, setMotoristaInput] = useState<{
-    nome: string;
-    rgCpf: string;
-    celular: string;
-  }>({ nome: "", rgCpf: "", celular: "" });
+
+  const [motoristaSelecionado, setMotoristaSelecionado] = useState<IMotorista>({
+    id: 0,
+    nome: "",
+    rgCpf: "",
+    celular: "",
+  });
+
+  const [ordemAsc, setOrdemAsc] = useState(false);
 
   const [isModalEdicaoVisible, setIsModalEdicaoVisible] =
     useState<boolean>(false);
 
-  const tableHeader = () => {
-    return (
-      <View
-        style={[
-          globalStyles.mainContainer,
-          { height: 70, alignItems: "center" },
-        ]}
-      >
-        <Text style={globalStyles.tableHeader}>NOME</Text>
-        <Text style={globalStyles.tableHeader}>RG/CPF</Text>
-        <Text style={globalStyles.tableHeader}>CELULAR</Text>
-        <Text style={globalStyles.tableHeader}>AÇÕES</Text>
-      </View>
-    );
+  const toggleOrdem = () => {
+    setOrdemAsc((prev) => !prev);
   };
 
-  const CargaRow = React.memo(
-    ({
-      motorista,
-      globalStyles,
-    }: {
-      motorista: IMotorista;
-      usuario?: IJwtPayload | null;
-      globalStyles: ReturnType<typeof getGlobalStyles>;
-      onEdit?: (m: IMotorista) => void;
-      onDelete?: (m: IMotorista) => void;
-    }) => {
-      return (
-        <View key={motorista.id} style={globalStyles.tableRegister}>
-          <View style={globalStyles.tableColumn}>
-            <Text style={globalStyles.tableColumnText}>{motorista.nome}</Text>
-          </View>
-
-          <View style={globalStyles.tableColumn}>
-            <Text style={globalStyles.tableColumnText}>{motorista.rgCpf}</Text>
-          </View>
-          <View style={globalStyles.tableColumn}>
-            <Text style={globalStyles.tableColumnText}>
-              {motorista.celular}
-            </Text>
-          </View>
-
-          <View style={globalStyles.tableColumn}>
-            <MenuOptionButton
-              containerStyle={{
-                backgroundColor: "#4CA64C",
-                paddingHorizontal: 10,
-                paddingVertical: 7,
-                borderRadius: 10,
-              }}
-              label={<Feather name="edit" size={35} color="white" />}
-              onPress={() => {
-                setMotoristaInput({
-                  nome: motorista.nome,
-                  rgCpf: motorista.rgCpf,
-                  celular: motorista.celular ?? "",
-                });
-                setIsModalEdicaoVisible(true);
-              }}
-            />
-            {/* <MenuOptionButton
-                    containerStyle={{
-                      backgroundColor: colors.red,
-                      paddingHorizontal: 13,
-                      paddingVertical: 8,
-                      borderRadius: 10,
-                    }}
-                    label={<FontAwesome name="trash-o" size={37} color="white" />}
-                    onPress={() => {}}
-                  /> */}
-          </View>
-        </View>
-      );
-    },
+  const tableHeader = useMemo(
+    () => renderTableHeader(globalStyles, ordemAsc, toggleOrdem),
+    [usuario, globalStyles, ordemAsc],
   );
 
   useEffect(() => {
     const getData = async () => {
-      const resultado = await getAllMotoristas();
-      setMotoristas(resultado);
+      const resultado: IMotorista[] = await getAllMotoristas();
+      const motoristasOrdenados: IMotorista[] = resultado.sort((a, b) =>
+        a.nome.localeCompare(b.nome, "pt-BR", {
+          sensitivity: "base",
+        }),
+      );
+
+      setMotoristas(motoristasOrdenados);
     };
 
     getData();
+  }, []);
+
+  const handleEdit = useCallback((motorista: IMotorista) => {
+    setMotoristaSelecionado({
+      id: motorista.id,
+      nome: motorista.nome,
+      rgCpf: motorista.rgCpf,
+      celular: motorista.celular ?? "",
+    });
+    setIsModalEdicaoVisible(true);
   }, []);
 
   return (
@@ -160,7 +184,11 @@ export default function Motoristas() {
           windowSize={5}
           removeClippedSubviews
           renderItem={({ item }) => (
-            <CargaRow motorista={item} globalStyles={globalStyles} />
+            <CargaRow
+              motorista={item}
+              globalStyles={globalStyles}
+              onEdit={handleEdit}
+            />
           )}
         />
       </View>
@@ -177,7 +205,7 @@ export default function Motoristas() {
               style={globalStyles.input}
               value={motoristaSelecionado?.nome}
               onChangeText={(text) =>
-                setMotoristaInput((prev) => ({ ...prev, nome: text }))
+                setMotoristaSelecionado((prev) => ({ ...prev, nome: text }))
               }
             />
           </View>
@@ -188,7 +216,7 @@ export default function Motoristas() {
               style={globalStyles.input}
               value={motoristaSelecionado?.rgCpf}
               onChangeText={(text) =>
-                setMotoristaInput((prev) => ({ ...prev, rgCpf: text }))
+                setMotoristaSelecionado((prev) => ({ ...prev, rgCpf: text }))
               }
             />
           </View>
@@ -199,7 +227,7 @@ export default function Motoristas() {
               style={globalStyles.input}
               value={motoristaSelecionado?.celular}
               onChangeText={(text) =>
-                setMotoristaInput((prev) => ({ ...prev, celular: text }))
+                setMotoristaSelecionado((prev) => ({ ...prev, celular: text }))
               }
             />
           </View>
@@ -226,7 +254,30 @@ export default function Motoristas() {
                 />
               </View>
             }
-            onPress={async () => {}}
+            onPress={async () => {
+              try {
+                showLoading();
+
+                const resultado = await updateMotorista(
+                  {
+                    nome: motoristaSelecionado?.nome,
+                    rgCpf: motoristaSelecionado?.rgCpf,
+                    celular: motoristaSelecionado?.celular,
+                  },
+                  motoristaSelecionado.id,
+                );
+
+                alert("Motorista atualizado com sucesso!");
+                router.push({
+                  pathname: "/main",
+                  params: { pageName: "cadastros", subPage: "motoristas" },
+                });
+              } catch (erro: any) {
+                alert(erro.message);
+              } finally {
+                hideLoading();
+              }
+            }}
           />
         </View>
       </SimpleModal>

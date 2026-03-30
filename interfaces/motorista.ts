@@ -10,3 +10,9 @@ export interface ICreateMotorista {
   rgCpf: string;
   celular?: string;
 }
+
+export interface IUpdateMotorista {
+  nome?: string;
+  rgCpf?: string;
+  celular?: string;
+}

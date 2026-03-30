@@ -1,6 +1,5 @@
 import {
   ICarga,
-  ICargaFiltros,
   INovaCarga,
   IUpdateCarga,
 } from "../interfaces/carga";

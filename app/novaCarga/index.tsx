@@ -31,40 +31,9 @@ import {
   getEmpresa,
 } from "../../services/empresa";
 
-const checkboxSize: number = 24;
-
-const styles = StyleSheet.create({
-  checkboxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 20,
-    marginTop: 5,
-  },
-  checkboxOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  checkboxBox: {
-    width: checkboxSize,
-    height: checkboxSize,
-    borderWidth: 2,
-    borderColor: "#555",
-    borderRadius: 4,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkboxChecked: {
-    backgroundColor: colors.lightBlue,
-    borderColor: colors.lightBlue,
-  },
-  checkboxLabel: {
-    fontSize: checkboxSize,
-  },
-});
-
 export default function NovaCarga() {
   const globalStyles = useMemo(() => getGlobalStyles(), []);
+  const checkboxSize: number = 24;
 
   const nowLocal = useMemo(() => {
     const now = new Date();
@@ -208,13 +177,9 @@ export default function NovaCarga() {
   };
 
   const createCarga = async () => {
-    console.log("1");
     try {
       showLoading();
-      console.log("2");
-      console.log(form);
       if (!validarFormulario()) return;
-      console.log("3");
 
       // ===== EMPRESA =====
       let empresa = await getEmpresa(form.empresa.trim().toUpperCase());
@@ -224,7 +189,6 @@ export default function NovaCarga() {
           nome: form.empresa.trim().toUpperCase(),
           ativo: true,
         });
-        console.log(empresa);
       }
 
       // ===== MOTORISTA =====
@@ -271,9 +235,7 @@ export default function NovaCarga() {
         },
       });
     } catch (erro: any) {
-      if (erro.message === "Empresa não encontrada") alert("aqui ó");
-      alert(erro.message);
-      console.warn(erro.message);
+      if (erro.message === "Empresa não encontrada") alert(erro.message);
     } finally {
       hideLoading();
     }
@@ -603,10 +565,10 @@ export default function NovaCarga() {
             CARREGAMENTO / DESCARREGAMENTO*
           </Text>
 
-          <View style={styles.checkboxRow}>
+          <View style={globalStyles.checkboxRow}>
             {/* Carregamento */}
             <Pressable
-              style={styles.checkboxOption}
+              style={globalStyles.checkboxOption}
               onPress={() => {
                 updateField("tipoOperacao", 1);
                 setErrors((prev) => ({ ...prev, tipoOperacao: undefined }));
@@ -614,22 +576,22 @@ export default function NovaCarga() {
             >
               <View
                 style={[
-                  styles.checkboxBox,
-                  form.tipoOperacao === 1 && styles.checkboxChecked,
+                  globalStyles.checkboxBox,
+                  form.tipoOperacao === 1 && globalStyles.checkboxChecked,
                 ]}
               >
                 {form.tipoOperacao === 1 && (
                   <Feather name="check" size={checkboxSize} color="white" />
                 )}
               </View>
-              <Text style={styles.checkboxLabel} selectable={false}>
+              <Text style={globalStyles.checkboxLabel} selectable={false}>
                 Carregamento
               </Text>
             </Pressable>
 
             {/* Descarregamento */}
             <Pressable
-              style={styles.checkboxOption}
+              style={globalStyles.checkboxOption}
               onPress={() => {
                 updateField("tipoOperacao", 2);
                 setErrors((prev) => ({ ...prev, tipoOperacao: undefined }));
@@ -637,15 +599,15 @@ export default function NovaCarga() {
             >
               <View
                 style={[
-                  styles.checkboxBox,
-                  form.tipoOperacao === 2 && styles.checkboxChecked,
+                  globalStyles.checkboxBox,
+                  form.tipoOperacao === 2 && globalStyles.checkboxChecked,
                 ]}
               >
                 {form.tipoOperacao === 2 && (
                   <Feather name="check" size={checkboxSize} color="white" />
                 )}
               </View>
-              <Text style={styles.checkboxLabel} selectable={false}>
+              <Text style={globalStyles.checkboxLabel} selectable={false}>
                 Descarregamento
               </Text>
             </Pressable>
@@ -656,6 +618,7 @@ export default function NovaCarga() {
         </View>
       </View>
 
+      {/* SALVAR */}
       <View
         style={[globalStyles.formRow, { justifyContent: "flex-end", gap: 50 }]}
       >

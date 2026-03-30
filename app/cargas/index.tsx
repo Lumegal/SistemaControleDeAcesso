@@ -153,7 +153,8 @@ const renderTableHeader = (
       <Text style={globalStyles.tableHeader} selectable={false}>
         C/D
       </Text>
-      {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+      {(usuario?.tipoDeAcesso === "adm" ||
+        usuario?.tipoDeAcesso === "portariaEdit") && (
         <Text style={globalStyles.tableHeader} selectable={false}>
           AÇÕES
         </Text>
@@ -344,7 +345,8 @@ const CargaRow = React.memo(
         </View>
 
         {/* Ações */}
-        {(usuario?.nivelDeAcesso === 1 || usuario?.nivelDeAcesso === 2) && (
+        {(usuario?.tipoDeAcesso === "adm" ||
+          usuario?.tipoDeAcesso === "portariaEdit") && (
           <View
             style={[
               globalStyles.tableColumn,
@@ -391,56 +393,6 @@ const CargaRow = React.memo(
     );
   },
 );
-
-const styles = StyleSheet.create({
-  dataHorarioContainer: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 20,
-  },
-  button: {
-    minWidth: 130,
-    maxHeight: 50,
-  },
-  buttonFiltrar: {
-    backgroundColor: colors.lightBlue,
-  },
-  buttonLimpar: {
-    borderWidth: 2,
-    borderColor: colors.gray,
-  },
-  buttonLabel: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filtroUltimaLinha: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 40,
-  },
-  radioLabelContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.lightBlue,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioFill: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.lightBlue,
-  },
-});
 
 export default function Cargas() {
   const { usuario } = useAuth();
@@ -771,7 +723,7 @@ export default function Cargas() {
       hideLoading();
       setIsEditModalVisible(false);
 
-      alert("Horário atualizado com sucesso!");
+      alert("Carga atualizada com sucesso!");
     } catch (erro: any) {
       alert(erro.message);
     } finally {
@@ -866,15 +818,7 @@ export default function Cargas() {
       {/* FILTRO CONTAINER */}
       {!filtrosVisible && (
         <Pressable
-          style={{
-            flexDirection: "row",
-            gap: 10,
-            boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.4)",
-            backgroundColor: "white",
-            paddingHorizontal: 12,
-            justifyContent: "flex-end",
-            alignItems: "flex-end",
-          }}
+          style={globalStyles.maximizarFiltroButton}
           onPress={() => setFiltrosVisible(true)}
         >
           <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
@@ -887,17 +831,7 @@ export default function Cargas() {
       {filtrosVisible && (
         <View style={globalStyles.mainContainer}>
           <Pressable
-            style={{
-              height: 20,
-              width: "auto",
-              position: "absolute",
-              zIndex: 999,
-              right: 28,
-              top: 16,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-            }}
+            style={globalStyles.minimizarFiltroButton}
             onPress={() => setFiltrosVisible(false)}
           >
             <Text
@@ -910,7 +844,7 @@ export default function Cargas() {
           </Pressable>
           <View style={globalStyles.filtroContainer}>
             <View style={globalStyles.filtroContainerRow}>
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -951,7 +885,7 @@ export default function Cargas() {
                 </View>
               </View>
 
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -1091,17 +1025,17 @@ export default function Cargas() {
               ]}
             >
               {/* Lado esquerdo */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* TODOS */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 0 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 0 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1119,14 +1053,14 @@ export default function Cargas() {
 
                 {/* CARREGAMENTO */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 1 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 1 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1144,14 +1078,14 @@ export default function Cargas() {
 
                 {/* DESCARREGAMENTO */}
                 <Pressable
-                  style={styles.radioLabelContainer}
+                  style={globalStyles.radioLabelContainer}
                   onPress={() =>
                     setFiltros((prev) => ({ ...prev, tipoOperacao: 2 }))
                   }
                 >
-                  <View style={styles.radioButton}>
+                  <View style={globalStyles.radioButton}>
                     {filtros.tipoOperacao === 2 && (
-                      <View style={styles.radioFill} />
+                      <View style={globalStyles.radioFill} />
                     )}
                   </View>
                   <Text
@@ -1169,7 +1103,7 @@ export default function Cargas() {
               </View>
 
               {/* Lado direito */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* Exportar */}
                 <MenuOptionButton
                   containerStyle={[
@@ -1180,7 +1114,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="microsoft-excel"
                         size={35}
@@ -1198,7 +1132,7 @@ export default function Cargas() {
                 <MenuOptionButton
                   containerStyle={[
                     globalStyles.button,
-                    styles.button,
+                    globalStyles.buttonFiltrosContainer,
                     {
                       borderWidth: temFiltroAtivo ? 3 : 2,
                       borderColor: temFiltroAtivo ? colors.red : colors.gray,
@@ -1206,7 +1140,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="cancel"
                         size={24}
@@ -1447,11 +1381,11 @@ export default function Cargas() {
         <View style={{ flexDirection: "row", gap: 30 }}>
           {/* PDF */}
           <Pressable
-            style={styles.radioLabelContainer}
+            style={globalStyles.radioLabelContainer}
             onPress={() => setTipoExport(1)}
           >
-            <View style={styles.radioButton}>
-              {tipoExport === 1 && <View style={styles.radioFill} />}
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 1 && <View style={globalStyles.radioFill} />}
             </View>
             <Text
               style={[
@@ -1466,11 +1400,11 @@ export default function Cargas() {
 
           {/* EXCEL */}
           <Pressable
-            style={styles.radioLabelContainer}
+            style={globalStyles.radioLabelContainer}
             onPress={() => setTipoExport(2)}
           >
-            <View style={styles.radioButton}>
-              {tipoExport === 2 && <View style={styles.radioFill} />}
+            <View style={globalStyles.radioButton}>
+              {tipoExport === 2 && <View style={globalStyles.radioFill} />}
             </View>
             <Text
               style={[
@@ -1657,7 +1591,7 @@ export default function Cargas() {
           ]}
           labelStyle={globalStyles.buttonText}
           label={
-            <View style={styles.buttonLabel}>
+            <View style={globalStyles.buttonLabel}>
               <Text style={{ color: "white" }}>Exportar</Text>
               <MaterialCommunityIcons
                 name="file-export-outline"

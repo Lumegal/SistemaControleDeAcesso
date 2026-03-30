@@ -14,7 +14,7 @@ interface MenuOptionButtonProps {
   labelStyle?: StyleProp<TextStyle>;
   label: string | React.ReactNode;
   icon?: React.ReactNode;
-  onPress: () => void;
+  onPress?: () => void;
   enabled?: boolean;
 }
 
@@ -36,6 +36,13 @@ export default function MenuOptionButton({
         !enabled && { opacity: 0.5, cursor: "not-allowed" },
         enabled && Platform.OS === "web" && state.hovered && hoverStyle,
         enabled && state.pressed && pressedStyle,
+        {
+          ...Platform.select({
+            web: {
+              transitionDuration: "150ms",
+            },
+          }),
+        },
       ]}
       onPress={enabled ? onPress : undefined}
     >
