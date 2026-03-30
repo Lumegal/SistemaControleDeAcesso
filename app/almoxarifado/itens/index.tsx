@@ -1,13 +1,11 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { getGlobalStyles } from "../../../globalStyles";
 import { useEffect, useState } from "react";
-import { getAllEpis } from "../../../services/almoxarifado/epi";
-import { IEpi } from "../../../interfaces/almoxarifado/epi";
+import { getAllItens } from "../../../services/almoxarifado/item";
 import { colors } from "../../../colors";
 import { useLoading } from "../../../context/providers/loading";
-import { ISuprimento } from "../../../interfaces/almoxarifado/suprimentos";
 import { useAuth } from "../../../context/auth";
-import { getAllSuprimentos } from "../../../services/almoxarifado/suprimento";
+import { IItem } from "../../../interfaces/almoxarifado/item";
 
 export default function Itens() {
   const globalStyles = getGlobalStyles();
@@ -15,7 +13,7 @@ export default function Itens() {
   const { usuario } = useAuth();
 
   const selecao = ["TODOS", "EM FALTA", "ESTOQUE OK"];
-  const tipoItem = ["TODOS", "EPIs", "SUPRIMENTOS"];
+  const tipoItem = ["TODOS", "EPI", "SUPRIMENTO"];
 
   const [filtros, setFiltros] = useState<{
     selecao: string;
@@ -28,31 +26,19 @@ export default function Itens() {
         : tipoItem[1],
   });
 
-  const [epis, setEpis] = useState<IEpi[]>([]);
-  const [suprimentos, setSuprimentos] = useState<ISuprimento[]>([]);
-  const [itensFiltrados, setItensFiltrados] = useState<
-    IEpi[] | ISuprimento[]
-  >();
-  type Item = IEpi | ISuprimento;
+  const [itens, setItens] = useState<IItem[]>([]);
+  const [itensFiltrados, setItensFiltrados] = useState<IItem[]>();
 
-  function isEpi(item: Item): item is IEpi {
-    return "certificadoAprovacao" in item;
-  }
-
-  function isSuprimento(item: Item): item is ISuprimento {
-    return !("certificadoAprovacao" in item);
-  }
-
-  function estoqueBaixo(item: Item) {
+  function estoqueBaixo(item: IItem) {
     return item.quantidade <= item.quantidadeParaAviso;
   }
 
-  const renderItem = (item: IEpi | ISuprimento) => {
+  const renderItem = (item: IItem) => {
     const estoqueBaixo = item.quantidade <= item.quantidadeParaAviso;
 
     return (
       <View
-        key={`${isEpi(item) ? "epi" : "sup"}-${item.id}`}
+        key={`${item.tipoItem}-${item.id}`}
         style={[styles.card, estoqueBaixo && { borderLeftColor: colors.red }]}
       >
         <Text
@@ -69,7 +55,7 @@ export default function Itens() {
 
         <Text style={styles.epi}>{item.nome}</Text>
 
-        {isEpi(item) && (
+        {item.tipoItem.tipo === tipoItem[1] && (
           <View style={styles.row}>
             <Text style={styles.label}>C.A.:</Text>
             <Text style={styles.value}>{item.certificadoAprovacao}</Text>
@@ -95,7 +81,7 @@ export default function Itens() {
   };
 
   const filtrar = () => {
-    let resultado = [...(epis ?? []), ...(suprimentos ?? [])];
+    let resultado = [...itens];
 
     resultado = resultado.filter((item) => {
       // Filtro por estoque
@@ -109,11 +95,11 @@ export default function Itens() {
 
       // Filtro por tipo
       if (filtros.tipoItem !== tipoItem[0]) {
-        if (filtros.tipoItem === tipoItem[1] && !isEpi(item)) {
+        if (filtros.tipoItem === tipoItem[1] && item.tipoItem.tipo !== tipoItem[1] ) {
           return false;
         }
 
-        if (filtros.tipoItem === tipoItem[2] && !isSuprimento(item)) {
+        if (filtros.tipoItem === tipoItem[2] && item.tipoItem.tipo !== tipoItem[2] ) {
           return false;
         }
       }
@@ -132,11 +118,8 @@ export default function Itens() {
     const getData = async () => {
       try {
         showLoading();
-        const resultadoEpis = await getAllEpis();
-        setEpis(resultadoEpis);
-
-        const resultadoSuprimentos = await getAllSuprimentos();
-        setSuprimentos(resultadoSuprimentos);
+        const resultadoItens: IItem[] = await getAllItens();
+        setItens(resultadoItens);
       } catch (erro: any) {
         alert(erro.message);
       } finally {
@@ -149,7 +132,7 @@ export default function Itens() {
 
   useEffect(() => {
     filtrar();
-  }, [filtros.selecao, filtros.tipoItem, epis, suprimentos]);
+  }, [filtros.selecao, filtros.tipoItem, itens]);
 
   return (
     <View

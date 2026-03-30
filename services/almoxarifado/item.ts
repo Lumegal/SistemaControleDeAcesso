@@ -1,9 +1,9 @@
-import { IEpi } from "../../interfaces/almoxarifado/epi";
+import { IItem } from "../../interfaces/almoxarifado/item";
 import { httpClient } from "../httpclient";
 
-export async function getAllEpis(): Promise<IEpi[]> {
+export async function getAllItens(): Promise<IItem[]> {
   return await httpClient(
-    "/epi",
+    "/item",
     {
       method: "GET",
     },
