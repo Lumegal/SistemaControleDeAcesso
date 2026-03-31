@@ -26,7 +26,7 @@ export interface ICriarItem {
   fornecedores?: number[];
   preco?: string;
   ipi?: number;
-  tipoItem: ITipoItem;
+  tipoItemId: number;
 }
 
 export interface INovoItemForm {
@@ -35,9 +35,9 @@ export interface INovoItemForm {
   certificadoAprovacao?: string;
   quantidade: string; //ok
   quantidadeParaAviso: string; //ok
-  tipoUnidadeId: string; //ok
-  fornecedores?: IFornecedorForm[];
+  tipoUnidadeId: ITipoUnidade; //ok
+  fornecedores?: IFornecedor[];
   preco?: string;
   ipi?: string;
-  tipoItem: string; //ok
+  tipoItemId: ITipoItem; //ok
 }

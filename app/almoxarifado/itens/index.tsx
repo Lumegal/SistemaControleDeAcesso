@@ -68,6 +68,15 @@ export default function Itens() {
         </View>
 
         <View style={styles.row}>
+          <Text style={styles.label}>Fornecedores:</Text>
+          <Text style={styles.value}>
+            {item.fornecedores.length !== 0
+              ? item.fornecedores.map((fornecedor) => `"${fornecedor.nome}"; `)
+              : "Nenhum fornecedor cadastrado."}
+          </Text>
+        </View>
+
+        <View style={styles.row}>
           <Text style={styles.label}>Estoque</Text>
 
           <Text
@@ -95,11 +104,17 @@ export default function Itens() {
 
       // Filtro por tipo
       if (filtros.tipoItem !== tipoItem[0]) {
-        if (filtros.tipoItem === tipoItem[1] && item.tipoItem.tipo !== tipoItem[1] ) {
+        if (
+          filtros.tipoItem === tipoItem[1] &&
+          item.tipoItem.tipo !== tipoItem[1]
+        ) {
           return false;
         }
 
-        if (filtros.tipoItem === tipoItem[2] && item.tipoItem.tipo !== tipoItem[2] ) {
+        if (
+          filtros.tipoItem === tipoItem[2] &&
+          item.tipoItem.tipo !== tipoItem[2]
+        ) {
           return false;
         }
       }

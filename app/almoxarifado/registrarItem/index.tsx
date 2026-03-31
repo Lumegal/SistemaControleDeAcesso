@@ -1,10 +1,4 @@
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { getGlobalStyles } from "../../../globalStyles";
 import { useEffect, useState } from "react";
 import { Feather, FontAwesome } from "@expo/vector-icons";
@@ -13,6 +7,8 @@ import MenuOptionButton from "../../_components/MenuOptionButton";
 import { useLoading } from "../../../context/providers/loading";
 import { useAuth } from "../../../context/auth";
 import {
+  ICriarItem,
+  IItem,
   INovoItemForm,
 } from "../../../interfaces/almoxarifado/item";
 import {
@@ -24,6 +20,7 @@ import { ITipoUnidade } from "../../../interfaces/almoxarifado/tipoUnidade";
 import { getAllTiposItem } from "../../../services/almoxarifado/tipoItem";
 import { getAllTiposUnidade } from "../../../services/almoxarifado/tipoUnidade";
 import { getAllFornecedores } from "../../../services/almoxarifado/fornecedores";
+import { createItem } from "../../../services/almoxarifado/item";
 
 export default function NovoOrcamento() {
   const globalStyles = getGlobalStyles();
@@ -36,13 +33,13 @@ export default function NovoOrcamento() {
     certificadoAprovacao: "",
     quantidade: "0",
     quantidadeParaAviso: "0",
-    tipoUnidadeId: "",
+    tipoUnidadeId: { id: 0, tipo: "" },
     fornecedores: [
       { id: 0, nome: "", enderecos: [], categoriasFornecedor: [] },
     ],
     preco: "",
     ipi: "",
-    tipoItem: "",
+    tipoItemId: { id: 0, tipo: "" },
   });
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -75,10 +72,10 @@ export default function NovoOrcamento() {
     if (!form.quantidadeParaAviso.trim())
       novosErros.quantidadeParaAviso = "A quantidade para aviso é obrigatória.";
 
-    if (!form.tipoUnidadeId.trim())
+    if (!form.tipoUnidadeId.tipo.trim())
       novosErros.tipoUnidadeId = "Tipo de unidade é obrigatório.";
 
-    if (!form.tipoItem.trim())
+    if (!form.tipoItemId.tipo.trim())
       novosErros.tipoItem = "Tipo do item é obrigatório.";
 
     setErrors(novosErros);
@@ -123,6 +120,20 @@ export default function NovoOrcamento() {
     novosFornecedores[index] = { ...novosFornecedores[index], [field]: value };
 
     setForm((prev) => ({ ...prev, fornecedores: novosFornecedores }));
+  };
+
+  const updateTipoItem = (value: { id: number; tipo: string }) => {
+    setForm((prev) => ({
+      ...prev,
+      tipoItemId: value,
+    }));
+  };
+
+  const updateTipoUnidade = (value: { id: number; tipo: string }) => {
+    setForm((prev) => ({
+      ...prev,
+      tipoUnidadeId: value,
+    }));
   };
 
   function formatDinheiro(value: string) {
@@ -172,13 +183,23 @@ export default function NovoOrcamento() {
     try {
       showLoading();
 
-      // const criarItem: ICriarItem = {
-      //   ...form,
-      //   quantidade: Number(form.quantidade),
-      //   quantidadeParaAviso: Number(form.quantidade),
-      //   tipoUnidadeId: Number(form.tipoUnidadeId),
-      // };
-      // const itemCriado: IItem = await createItem(criarItem);
+      console.log("form: ", form);
+
+      const criarItem: ICriarItem = {
+        ...form,
+        quantidade: Number(form.quantidade),
+        quantidadeParaAviso: Number(form.quantidade),
+        tipoUnidadeId: form.tipoUnidadeId.id,
+        fornecedores:
+          form.fornecedores?.map((fornecedor) => {
+            return fornecedor.id;
+          }) ?? [],
+        tipoItemId: form.tipoItemId.id,
+        ipi: Number(form.ipi),
+        preco: form.preco ? form.preco : "0.00"
+      };
+      
+      const itemCriado: IItem = await createItem(criarItem);
 
       alert("Item criado com sucesso!");
     } catch (erro: any) {
@@ -243,8 +264,7 @@ export default function NovoOrcamento() {
               <TextInput
                 editable={false}
                 style={globalStyles.input}
-                value={form.tipoItem}
-                onChangeText={(text) => updateField("tipoItem", text)}
+                value={form.tipoItemId.tipo}
                 onFocus={() =>
                   setDropdowns((prev) => ({ ...prev, tipoItem: true }))
                 }
@@ -265,7 +285,7 @@ export default function NovoOrcamento() {
                         key={tipoItem.id}
                         style={{ padding: 10 }}
                         onPress={() => {
-                          updateField("tipoItem", tipoItem.tipo);
+                          updateTipoItem(tipoItem);
                           setErrors((prev) => ({
                             ...prev,
                             tipoItem: undefined,
@@ -293,10 +313,7 @@ export default function NovoOrcamento() {
               <TextInput
                 editable={false}
                 style={globalStyles.input}
-                value={form.tipoUnidadeId}
-                onChangeText={(text) => {
-                  updateField("tipoUnidadeId", text);
-                }}
+                value={form.tipoUnidadeId.tipo}
                 onFocus={() =>
                   setDropdowns((prev) => ({ ...prev, tipoUnidade: true }))
                 }
@@ -318,7 +335,7 @@ export default function NovoOrcamento() {
                         key={tipoUnidade.id}
                         style={{ padding: 10 }}
                         onPress={() => {
-                          updateField("tipoUnidadeId", tipoUnidade.tipo);
+                          updateTipoUnidade(tipoUnidade);
                           setErrors((prev) => ({
                             ...prev,
                             tipoUnidade: undefined,
@@ -366,7 +383,10 @@ export default function NovoOrcamento() {
                 style={globalStyles.input}
                 value={form.quantidadeParaAviso}
                 onChangeText={(text) =>
-                  updateField("quantidadeParaAviso", formatStringToOnlyNumber(text))
+                  updateField(
+                    "quantidadeParaAviso",
+                    formatStringToOnlyNumber(text),
+                  )
                 }
               />
               <Text style={globalStyles.errorText} selectable={false}>
