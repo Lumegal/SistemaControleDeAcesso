@@ -1,13 +1,13 @@
-import {
-  ICarga,
-  INovaCarga,
-  IUpdateCarga,
-} from "../interfaces/carga";
-import { httpClient } from "./httpclient";
+import { httpClient } from "../httpclient";
 import * as XLSX from "xlsx-js-style";
 import { saveAs } from "file-saver";
 import autoTable from "jspdf-autotable";
 import jsPDF from "jspdf";
+import {
+  ICarga,
+  INovaCarga,
+  IUpdateCarga,
+} from "../../interfaces/portaria/carga";
 
 export async function getCargas(): Promise<ICarga[]> {
   const data = await httpClient("/cargas", {

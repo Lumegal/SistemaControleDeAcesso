@@ -1,5 +1,5 @@
-import { ICreatePlaca, IPlaca } from "../interfaces/placa";
-import { httpClient } from "./httpclient";
+import { ICreatePlaca, IPlaca } from "../../interfaces/portaria/placa";
+import { httpClient } from "../httpclient";
 
 export async function getAllPlacas(): Promise<IPlaca[]> {
   return await httpClient("/placa", {

@@ -6,3 +6,7 @@ export interface ICategoriaFornecedor {
 export interface ICriarCategoriaFornecedor {
   categoria: string;
 }
+
+export interface ICategoriaFornecedorForm {
+  categoria: string;
+}

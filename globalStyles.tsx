@@ -77,6 +77,19 @@ export const getGlobalStyles = () => {
       marginTop: 4,
     },
 
+    // Dropdown
+    dropdownContainer: {
+      borderWidth: 1,
+      borderColor: "#ccc",
+      borderRadius: 8,
+      backgroundColor: "white",
+      position: "absolute",
+      top: 85,
+      width: "100%",
+      zIndex: 999,
+      maxHeight: 180,
+    },
+
     // Tabela
     mainContainer: {
       borderRadius: 10,

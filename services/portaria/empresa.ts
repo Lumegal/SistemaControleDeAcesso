@@ -1,5 +1,5 @@
-import { ICreateEmpresa, IEmpresa } from "../interfaces/empresa";
-import { httpClient } from "./httpclient";
+import { ICreateEmpresa, IEmpresa } from "../../interfaces/portaria/empresa";
+import { httpClient } from "../httpclient";
 
 export async function getAllEmpresas(): Promise<IEmpresa[]> {
   return await httpClient("/empresa", {

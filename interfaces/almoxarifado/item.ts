@@ -1,9 +1,9 @@
-import { IFornecedor } from "./fornecedor";
+import { IFornecedor, IFornecedorForm } from "./fornecedor";
 import { ITipoItem } from "./tipoItem";
 import { ITipoUnidade } from "./tipoUnidade";
 
 export interface IItem {
-  id: string;
+  id: number;
   nome: string;
   descricao?: string;
   certificadoAprovacao?: string;
@@ -11,7 +11,7 @@ export interface IItem {
   quantidadeParaAviso: number;
   tipoUnidade: ITipoUnidade;
   fornecedores: IFornecedor[];
-  preco?: string;
+  preco?: number;
   ipi?: number;
   tipoItem: ITipoItem;
 }
@@ -27,4 +27,17 @@ export interface ICriarItem {
   preco?: string;
   ipi?: number;
   tipoItem: ITipoItem;
+}
+
+export interface INovoItemForm {
+  nome: string; //ok
+  descricao?: string; //ok
+  certificadoAprovacao?: string;
+  quantidade: string; //ok
+  quantidadeParaAviso: string; //ok
+  tipoUnidadeId: string; //ok
+  fornecedores?: IFornecedorForm[];
+  preco?: string;
+  ipi?: string;
+  tipoItem: string; //ok
 }

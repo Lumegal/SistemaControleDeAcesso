@@ -9,27 +9,31 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
-import MenuOptionButton from "../_components/MenuOptionButton";
-import { createNovaCarga } from "../../services/cargas";
-import { INovaCargaForm, INovaCarga } from "../../interfaces/carga";
-import { useLoading } from "../../context/providers/loading";
 import { router } from "expo-router";
 import { colors } from "../../colors";
+import { useLoading } from "../../context/providers/loading";
+import { getGlobalStyles, dataInputStyle } from "../../globalStyles";
+import { IEmpresa } from "../../interfaces/portaria/empresa";
+import { IMotorista } from "../../interfaces/portaria/motorista";
+import { IPlaca } from "../../interfaces/portaria/placa";
+import { createNovaCarga } from "../../services/portaria/cargas";
 import {
-  createMotorista,
-  getAllMotoristas,
-  getMotoristaPorRgCpf,
-} from "../../services/motorista";
-import { IMotorista } from "../../interfaces/motorista";
-import { IPlaca } from "../../interfaces/placa";
-import { createPlaca, getAllPlacas, getPlaca } from "../../services/placa";
-import { IEmpresa } from "../../interfaces/empresa";
-import {
-  createEmpresa,
   getAllEmpresas,
   getEmpresa,
-} from "../../services/empresa";
+  createEmpresa,
+} from "../../services/portaria/empresa";
+import {
+  getAllMotoristas,
+  getMotoristaPorRgCpf,
+  createMotorista,
+} from "../../services/portaria/motorista";
+import {
+  getAllPlacas,
+  getPlaca,
+  createPlaca,
+} from "../../services/portaria/placa";
+import MenuOptionButton from "../_components/MenuOptionButton";
+import { INovaCarga, INovaCargaForm } from "../../interfaces/portaria/carga";
 
 const checkboxSize: number = 24;
 
@@ -331,19 +335,7 @@ export default function NovaCarga() {
           {dropdowns.empresa &&
             empresasFiltradas &&
             empresasFiltradas.length > 0 && (
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 8,
-                  backgroundColor: "white",
-                  position: "absolute",
-                  top: 95,
-                  width: "95%",
-                  zIndex: 999,
-                  maxHeight: 180,
-                }}
-              >
+              <View style={globalStyles.dropdownContainer}>
                 <ScrollView
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
@@ -409,19 +401,7 @@ export default function NovaCarga() {
           </Text>
 
           {dropdowns.placa && placasFiltrados && placasFiltrados.length > 0 && (
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: "#ccc",
-                borderRadius: 8,
-                backgroundColor: "white",
-                position: "absolute",
-                top: 95,
-                width: "95%",
-                zIndex: 999,
-                maxHeight: 180,
-              }}
-            >
+            <View style={globalStyles.dropdownContainer}>
               <ScrollView
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled
@@ -473,19 +453,7 @@ export default function NovaCarga() {
           {dropdowns.rgCpf &&
             allRgCpfFiltradas &&
             allRgCpfFiltradas.length > 0 && (
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 8,
-                  backgroundColor: "white",
-                  position: "absolute",
-                  top: 95,
-                  width: "95%",
-                  zIndex: 999,
-                  maxHeight: 180,
-                }}
-              >
+              <View style={globalStyles.dropdownContainer}>
                 <ScrollView
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled

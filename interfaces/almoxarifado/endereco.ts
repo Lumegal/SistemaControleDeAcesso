@@ -6,3 +6,7 @@ export interface IEndereco {
 export interface ICriarEndereco {
   cidade: string;
 }
+
+export interface IEnderecoForm {
+  cidade: string;
+}

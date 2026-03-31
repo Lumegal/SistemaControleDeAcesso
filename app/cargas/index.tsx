@@ -15,39 +15,38 @@ import {
   Pressable,
   TouchableOpacity,
 } from "react-native";
-import MenuOptionButton from "../_components/MenuOptionButton";
-import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors } from "../../colors";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/auth";
+import { useLoading } from "../../context/providers/loading";
+import { getGlobalStyles, dataInputStyle } from "../../globalStyles";
+import { IJwtPayload } from "../../interfaces/jwt";
 import {
   ICarga,
-  IUpdateCargaForm,
   ICargaFormatada,
-  INovaCarga,
+  IUpdateCargaForm,
   ICargaFiltros,
-} from "../../interfaces/carga";
-import {
-  createNovaCarga,
-  deleteCarga,
-  exportarExcel,
-  exportarPDF,
-  getCargas,
-  updateCarga,
-} from "../../services/cargas";
-import { useLoading } from "../../context/providers/loading";
-import EditModal from "../_components/SimpleModal";
-import DeleteModal from "../_components/SimpleModal";
-import ExportarModal from "../_components/SimpleModal";
-import { useAuth } from "../../context/auth";
+  INovaCarga,
+} from "../../interfaces/portaria/carga";
 import { socket } from "../../services/httpclient";
-import { IJwtPayload } from "../../interfaces/jwt";
-import React from "react";
-import { getEmpresa, createEmpresa } from "../../services/empresa";
+import {
+  getCargas,
+  deleteCarga,
+  updateCarga,
+  createNovaCarga,
+  exportarPDF,
+  exportarExcel,
+} from "../../services/portaria/cargas";
+import { getEmpresa, createEmpresa } from "../../services/portaria/empresa";
 import {
   getMotoristaPorRgCpf,
   createMotorista,
-} from "../../services/motorista";
-import { getPlaca, createPlaca } from "../../services/placa";
+} from "../../services/portaria/motorista";
+import { getPlaca, createPlaca } from "../../services/portaria/placa";
+import MenuOptionButton from "../_components/MenuOptionButton";
+import EditModal from "../_components/SimpleModal";
+import DeleteModal from "../_components/SimpleModal";
+import ExportarModal from "../_components/SimpleModal";
 
 const widthIdColumn: number = 0.6;
 

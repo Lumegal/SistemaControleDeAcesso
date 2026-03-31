@@ -1,15 +1,16 @@
 import { View } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
-import NovaCarga from "../novaCarga";
 import { useLocalSearchParams } from "expo-router";
 import SideBar from "../_components/SideBar";
 import TopBar from "../_components/TopBar";
-import Cargas from "../cargas";
+import { useState } from "react";
+import Cargas from "../cargas"
 import Motoristas from "../motoristas";
+import NovaCarga from "../novaCarga";
 import Clientes from "../clientes";
 import Veiculos from "../veiculos";
-import { useState } from "react";
 import Itens from "../almoxarifado/itens";
+import RegistrarItem from "../almoxarifado/registrarItem";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -55,6 +56,10 @@ export default function Main() {
 
           {params.pageName === "almoxarifado" && params.subPage === "itens" && (
             <Itens />
+          )}
+
+          {params.pageName === "almoxarifado" && params.subPage === "registrarItem" && (
+            <RegistrarItem />
           )}
         </View>
       </View>

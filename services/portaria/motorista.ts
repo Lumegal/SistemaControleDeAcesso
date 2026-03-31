@@ -2,8 +2,8 @@ import {
   ICreateMotorista,
   IMotorista,
   IUpdateMotorista,
-} from "../interfaces/motorista";
-import { httpClient } from "./httpclient";
+} from "../../interfaces/portaria/motorista";
+import { httpClient } from "../httpclient";
 
 export async function getAllMotoristas(): Promise<IMotorista[]> {
   return await httpClient("/motorista", {
