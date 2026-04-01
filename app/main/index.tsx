@@ -11,6 +11,7 @@ import Clientes from "../clientes";
 import Veiculos from "../veiculos";
 import Itens from "../almoxarifado/itens";
 import RegistrarItem from "../almoxarifado/registrarItem";
+import EntradaSaida from "../almoxarifado/entradaSaida";
 
 export default function Main() {
   const globalStyles = getGlobalStyles();
@@ -60,6 +61,10 @@ export default function Main() {
 
           {params.pageName === "almoxarifado" && params.subPage === "registrarItem" && (
             <RegistrarItem />
+          )}
+
+          {params.pageName === "almoxarifado" && params.subPage === "entradaSaida" && (
+            <EntradaSaida />
           )}
         </View>
       </View>

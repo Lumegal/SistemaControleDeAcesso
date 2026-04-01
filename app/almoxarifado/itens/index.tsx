@@ -6,6 +6,8 @@ import { colors } from "../../../colors";
 import { useLoading } from "../../../context/providers/loading";
 import { useAuth } from "../../../context/auth";
 import { IItem } from "../../../interfaces/almoxarifado/item";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import { socketAlmoxarifado } from "../../../services/httpclient";
 
 export default function Itens() {
   const globalStyles = getGlobalStyles();
@@ -38,22 +40,45 @@ export default function Itens() {
 
     return (
       <View
-        key={`${item.tipoItem}-${item.id}`}
+        key={item.id}
         style={[styles.card, estoqueBaixo && { borderLeftColor: colors.red }]}
       >
-        <Text
-          style={[
-            styles.badge,
-            estoqueBaixo && {
-              color: colors.red,
-              backgroundColor: colors.lightRed,
-            },
-          ]}
-        >
-          {estoqueBaixo ? "ESTOQUE BAIXO" : "ESTOQUE OK"}
-        </Text>
+        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+          {item.tipoItem.tipo === "EPI" ? (
+            <FontAwesome6 name="helmet-safety" size={28} color="black" />
+          ) : (
+            <AntDesign name="shopping" size={30} color="black" />
+          )}
+          <View
+            style={[
+              styles.badge,
+              estoqueBaixo && styles.badgeEstoqueBaixo,
+              { flexDirection: "row", gap: 4, justifyContent: "center" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                estoqueBaixo && styles.badgeTextEstoqueBaixo,
+              ]}
+            >{`${item.tipoItem.tipo}`}</Text>
+          </View>
 
-        <Text style={styles.epi}>{item.nome}</Text>
+          <View
+            style={[styles.badge, estoqueBaixo && styles.badgeEstoqueBaixo]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                estoqueBaixo && styles.badgeTextEstoqueBaixo,
+              ]}
+            >
+              {estoqueBaixo ? "ESTOQUE BAIXO" : "ESTOQUE OK"}
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.epi}>{`Nome: ${item.nome}`}</Text>
 
         {item.tipoItem.tipo === tipoItem[1] && (
           <View style={styles.row}>
@@ -130,24 +155,39 @@ export default function Itens() {
   };
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        showLoading();
-        const resultadoItens: IItem[] = await getAllItens();
-        setItens(resultadoItens);
-      } catch (erro: any) {
-        alert(erro.message);
-      } finally {
-        hideLoading();
-      }
-    };
-
-    getData();
-  }, []);
-
-  useEffect(() => {
     filtrar();
   }, [filtros.selecao, filtros.tipoItem, itens]);
+
+  const getData = async () => {
+    try {
+      showLoading();
+      const resultadoItens: IItem[] = await getAllItens();
+      setItens(resultadoItens);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  useEffect(() => {
+    getData();
+
+    const handleItemAtualizado = () => {
+      getData();
+    };
+
+    socketAlmoxarifado.on("itemAtualizado", handleItemAtualizado);
+
+    socketAlmoxarifado.on("connect_error", (erro: any) => {
+      alert(erro.message);
+    });
+
+    return () => {
+      socketAlmoxarifado.off("itemAtualizado", handleItemAtualizado);
+      socketAlmoxarifado.off("connect_error");
+    };
+  }, []);
 
   return (
     <View
@@ -397,11 +437,24 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
 
-    fontSize: 11,
-    fontWeight: "600",
-
     backgroundColor: "#dcfce7",
+
+    width: 150,
+    alignItems: "center",
+  },
+
+  badgeText: {
     color: "#166534",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  badgeEstoqueBaixo: {
+    backgroundColor: colors.lightRed,
+  },
+
+  badgeTextEstoqueBaixo: {
+    color: colors.red,
   },
 
   epi: {

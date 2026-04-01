@@ -40,3 +40,5 @@ export async function httpClient(
 }
 
 export const socket = io(api);
+
+export const socketAlmoxarifado = io("http://localhost:3000")

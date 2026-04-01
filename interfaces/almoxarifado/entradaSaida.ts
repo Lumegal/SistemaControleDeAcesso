@@ -1,7 +1,7 @@
 import { IItem } from "./item";
 
 export interface IMovimentacaoItem {
-  id: string;
+  itemId: number;
   quantidade: number;
 }
 

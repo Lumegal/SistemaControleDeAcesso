@@ -496,7 +496,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                         styles.menuSectionVersion,
                       ]}
                     >
-                      {` - v4.1.0`}
+                      {` - v4.2.0`}
                     </Text>
                   </View>
                   <Entypo
@@ -866,7 +866,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               <Text style={styles.version} selectable={false}>
                 {`BASE DE TESTES
 LoginAuth v0.1.0
-V2.13.0`}
+V2.14.0`}
               </Text>
             </View>
           </ScrollView>

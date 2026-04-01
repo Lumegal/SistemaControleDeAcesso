@@ -30,14 +30,24 @@ export interface ICriarItem {
 }
 
 export interface INovoItemForm {
-  nome: string; //ok
-  descricao?: string; //ok
+  nome: string;
+  descricao?: string;
   certificadoAprovacao?: string;
-  quantidade: string; //ok
-  quantidadeParaAviso: string; //ok
-  tipoUnidadeId: ITipoUnidade; //ok
+  quantidade: string;
+  quantidadeParaAviso: string;
+  tipoUnidadeId: ITipoUnidade;
   fornecedores?: IFornecedor[];
   preco?: string;
   ipi?: string;
-  tipoItemId: ITipoItem; //ok
+  tipoItemId: ITipoItem;
+}
+
+export type IItemComMovimentacao = IItem & {
+  quantidadeMovimentada: number;
+  quantidadeMovimentadaInput?: string;
+};
+
+export interface IUpdateMovimentacoes {
+  id: number;
+  quantidade: number;
 }

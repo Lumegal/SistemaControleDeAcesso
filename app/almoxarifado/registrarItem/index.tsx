@@ -1,4 +1,11 @@
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { getGlobalStyles } from "../../../globalStyles";
 import { useEffect, useState } from "react";
 import { Feather, FontAwesome } from "@expo/vector-icons";
@@ -21,6 +28,7 @@ import { getAllTiposItem } from "../../../services/almoxarifado/tipoItem";
 import { getAllTiposUnidade } from "../../../services/almoxarifado/tipoUnidade";
 import { getAllFornecedores } from "../../../services/almoxarifado/fornecedores";
 import { createItem } from "../../../services/almoxarifado/item";
+import { socketAlmoxarifado } from "../../../services/httpclient";
 
 export default function NovoOrcamento() {
   const globalStyles = getGlobalStyles();
@@ -33,13 +41,13 @@ export default function NovoOrcamento() {
     certificadoAprovacao: "",
     quantidade: "0",
     quantidadeParaAviso: "0",
+    tipoItemId: { id: 0, tipo: "" },
     tipoUnidadeId: { id: 0, tipo: "" },
     fornecedores: [
       { id: 0, nome: "", enderecos: [], categoriasFornecedor: [] },
     ],
     preco: "",
     ipi: "",
-    tipoItemId: { id: 0, tipo: "" },
   });
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -83,26 +91,22 @@ export default function NovoOrcamento() {
     return Object.keys(novosErros).length === 0;
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        showLoading();
-        const resultadoTiposItem = await getAllTiposItem();
-        const resultadoTiposUnidade = await getAllTiposUnidade();
-        const resultadoFornecedores = await getAllFornecedores();
-
-        setTiposItem(resultadoTiposItem);
-        setTiposUnidade(resultadoTiposUnidade);
-        setFornecedores(resultadoFornecedores);
-      } catch (erro: any) {
-        console.log(erro.message);
-      } finally {
-        hideLoading();
-      }
-    };
-
-    getData();
-  }, []);
+  const limparFormulario = () => {
+    setForm({
+      nome: "",
+      descricao: "",
+      certificadoAprovacao: "",
+      quantidade: "0",
+      quantidadeParaAviso: "0",
+      tipoItemId: { id: 0, tipo: "" },
+      tipoUnidadeId: { id: 0, tipo: "" },
+      fornecedores: [
+        { id: 0, nome: "", enderecos: [], categoriasFornecedor: [] },
+      ],
+      preco: "",
+      ipi: "",
+    });
+  };
 
   const updateField = <K extends keyof INovoItemForm>(
     field: K,
@@ -167,28 +171,28 @@ export default function NovoOrcamento() {
     });
   };
 
-  const cardStyle = {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  };
+  const styles = StyleSheet.create({
+    cardStyle: {
+      backgroundColor: "#fff",
+      padding: 16,
+      borderRadius: 16,
+      marginBottom: 16,
+      shadowColor: "#000",
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+  });
 
   const criarItem = async (form: INovoItemForm) => {
     if (!validarFormulario()) return;
     try {
       showLoading();
 
-      console.log("form: ", form);
-
       const criarItem: ICriarItem = {
         ...form,
         quantidade: Number(form.quantidade),
-        quantidadeParaAviso: Number(form.quantidade),
+        quantidadeParaAviso: Number(form.quantidadeParaAviso),
         tipoUnidadeId: form.tipoUnidadeId.id,
         fornecedores:
           form.fornecedores?.map((fornecedor) => {
@@ -196,18 +200,55 @@ export default function NovoOrcamento() {
           }) ?? [],
         tipoItemId: form.tipoItemId.id,
         ipi: Number(form.ipi),
-        preco: form.preco ? form.preco : "0.00"
+        preco: form.preco ? form.preco : "0.00",
       };
-      
+
       const itemCriado: IItem = await createItem(criarItem);
 
       alert("Item criado com sucesso!");
+      limparFormulario();
     } catch (erro: any) {
       alert(erro.message);
     } finally {
       hideLoading();
     }
   };
+
+  const getData = async () => {
+    try {
+      showLoading();
+      const resultadoTiposItem = await getAllTiposItem();
+      const resultadoTiposUnidade = await getAllTiposUnidade();
+      const resultadoFornecedores = await getAllFornecedores();
+
+      setTiposItem(resultadoTiposItem);
+      setTiposUnidade(resultadoTiposUnidade);
+      setFornecedores(resultadoFornecedores);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  useEffect(() => {
+    getData();
+
+    const handleRegistroAtualizado = () => {
+      getData();
+    };
+
+    socketAlmoxarifado.on("registroAtualizado", handleRegistroAtualizado);
+
+    socketAlmoxarifado.on("connect_error", (erro: any) => {
+      alert(erro.message);
+    });
+
+    return () => {
+      socketAlmoxarifado.off("registroAtualizado", handleRegistroAtualizado);
+      socketAlmoxarifado.off("connect_error");
+    };
+  }, []);
 
   return (
     <View
@@ -219,7 +260,7 @@ export default function NovoOrcamento() {
     >
       <ScrollView>
         {/* Dados gerais */}
-        <View style={cardStyle}>
+        <View style={styles.cardStyle}>
           <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}>
             Dados do Item
           </Text>
@@ -462,28 +503,29 @@ export default function NovoOrcamento() {
           )}
 
           {/* C.A */}
-          <View style={globalStyles.formRow}>
-            {/* C.A. */}
-            <View style={globalStyles.labelInputContainer}>
-              <Text style={globalStyles.labelText}>
-                Certificado de aprovação
-              </Text>
-              <TextInput
-                style={globalStyles.input}
-                value={form.certificadoAprovacao}
-                onChangeText={(text) => {
-                  updateField("certificadoAprovacao", text);
-                }}
-              />
-            </View>
+          {form.tipoItemId.tipo === "EPI" && (
+            <View style={globalStyles.formRow}>
+              {/* C.A. */}
+              <View style={globalStyles.labelInputContainer}>
+                <Text style={globalStyles.labelText}>
+                  Certificado de aprovação
+                </Text>
+                <TextInput
+                  style={globalStyles.input}
+                  value={form.certificadoAprovacao}
+                  onChangeText={(text) => {
+                    updateField("certificadoAprovacao", text);
+                  }}
+                />
+              </View>
 
-            {/* DESCRIÇÃO */}
-            <View style={globalStyles.labelInputContainer} />
-          </View>
+              <View style={globalStyles.labelInputContainer} />
+            </View>
+          )}
         </View>
 
         {/* Fornecedores */}
-        <View style={cardStyle}>
+        <View style={styles.cardStyle}>
           <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}>
             Fornecedores
           </Text>
