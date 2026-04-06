@@ -79,8 +79,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const decoded = jwtDecode<IJwtPayload>(token);
 
-    console.log(decoded)
-
     setUsuario(decoded);
     setIsAuthenticated(true);
 

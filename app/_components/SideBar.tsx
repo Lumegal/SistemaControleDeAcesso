@@ -337,6 +337,60 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                         }}
                       />
                     )}
+                    {(usuario?.tipoDeAcesso === "adm" ||
+                      usuario?.tipoDeAcesso === "portariaEdit" ||
+                      usuario?.tipoDeAcesso === "portariaView" ||
+                      usuario?.tipoDeAcesso === "comercial") && (
+                      <MenuOptionButton
+                        containerStyle={[
+                          globalStyles.menuOption,
+                          {
+                            backgroundColor:
+                              params.subPage === "cargas"
+                                ? textMainColor
+                                : colors.blue,
+                          },
+                        ]}
+                        hoverStyle={[
+                          params.subPage === "cargas"
+                            ? {}
+                            : { backgroundColor: "rgba(255,255,255,0.2)" },
+                        ]}
+                        pressedStyle={{
+                          backgroundColor: "rgba(255,255,255,0.5)",
+                        }}
+                        labelStyle={[
+                          styles.menuOptionLabel,
+                          {
+                            color:
+                              params.subPage === "cargas"
+                                ? colors.blue
+                                : textMainColor,
+                          },
+                        ]}
+                        label="Cargas"
+                        icon={
+                          <Feather
+                            name="package"
+                            size={menuIconSize}
+                            color={
+                              params.subPage === "cargas"
+                                ? colors.blue
+                                : textMainColor
+                            }
+                          />
+                        }
+                        onPress={() => {
+                          router.push({
+                            pathname: "/main",
+                            params: {
+                              pageName: "operacoes",
+                              subPage: "cargas",
+                            },
+                          });
+                        }}
+                      />
+                    )}
                   </View>
 
                   {usuario?.tipoDeAcesso === "adm" && (

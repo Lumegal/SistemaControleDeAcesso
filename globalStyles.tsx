@@ -98,6 +98,85 @@ export const getGlobalStyles = () => {
       zIndex: 999,
       maxHeight: 180,
     },
+    dataHorarioContainer: {
+      flex: 1,
+      flexDirection: "row",
+      gap: 20,
+    },
+    maximizarFiltroButton: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#e2e8f0",
+      boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#ffffff",
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+    },
+    minimizarFiltroButton: {
+      height: 20,
+      width: "auto",
+      position: "absolute",
+      zIndex: 999,
+      right: 28,
+      top: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    filtroUltimaLinha: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 40,
+    },
+    buttonLabel: {
+      flexDirection: "row",
+      gap: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    buttonFiltrosContainer: {
+      minWidth: 130,
+      maxHeight: 50,
+    },
+    buttonFiltrar: {
+      backgroundColor: colors.lightBlue,
+    },
+    buttonLimpar: {
+      borderWidth: 2,
+      borderColor: colors.gray,
+    },
+
+    checkboxRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 20,
+      marginTop: 5,
+    },
+    checkboxOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    checkboxBox: {
+      width: 24,
+      height: 24,
+      borderWidth: 2,
+      borderColor: "#555",
+      borderRadius: 4,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    checkboxChecked: {
+      backgroundColor: colors.lightBlue,
+      borderColor: colors.lightBlue,
+    },
+    checkboxLabel: {
+      fontSize: 24,
+    },
 
     // Tabela
     mainContainer: {

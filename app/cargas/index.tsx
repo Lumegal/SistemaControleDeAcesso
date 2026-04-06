@@ -776,7 +776,7 @@ export default function Cargas() {
       hideLoading();
       setIsEditModalVisible(false);
 
-      alert("Horário atualizado com sucesso!");
+      alert("Carga atualizada com sucesso!");
     } catch (erro: any) {
       alert(erro.message);
     } finally {
@@ -871,7 +871,7 @@ export default function Cargas() {
       {/* FILTRO CONTAINER */}
       {!filtrosVisible && (
         <Pressable
-          style={styles.maximizarFiltroButton}
+          style={globalStyles.maximizarFiltroButton}
           onPress={() => setFiltrosVisible(true)}
         >
           <Text style={{ fontWeight: 500, fontSize: 22 }} selectable={false}>
@@ -884,7 +884,7 @@ export default function Cargas() {
       {filtrosVisible && (
         <View style={globalStyles.mainContainer}>
           <Pressable
-            style={styles.minimizarFiltroButton}
+            style={globalStyles.minimizarFiltroButton}
             onPress={() => setFiltrosVisible(false)}
           >
             <Text
@@ -897,7 +897,7 @@ export default function Cargas() {
           </Pressable>
           <View style={globalStyles.filtroContainer}>
             <View style={globalStyles.filtroContainerRow}>
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -938,7 +938,7 @@ export default function Cargas() {
                 </View>
               </View>
 
-              <View style={styles.dataHorarioContainer}>
+              <View style={globalStyles.dataHorarioContainer}>
                 <View style={globalStyles.dataLabelInputContainer}>
                   <View style={globalStyles.dataLabelContainer}>
                     <FontAwesome name="calendar-o" size={24} color="black" />
@@ -1078,7 +1078,7 @@ export default function Cargas() {
               ]}
             >
               {/* Lado esquerdo */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* TODOS */}
                 <Pressable
                   style={globalStyles.radioLabelContainer}
@@ -1156,7 +1156,7 @@ export default function Cargas() {
               </View>
 
               {/* Lado direito */}
-              <View style={styles.filtroUltimaLinha}>
+              <View style={globalStyles.filtroUltimaLinha}>
                 {/* Exportar */}
                 <MenuOptionButton
                   containerStyle={[
@@ -1167,7 +1167,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="microsoft-excel"
                         size={35}
@@ -1185,7 +1185,7 @@ export default function Cargas() {
                 <MenuOptionButton
                   containerStyle={[
                     globalStyles.button,
-                    styles.button,
+                    globalStyles.buttonFiltrosContainer,
                     {
                       borderWidth: temFiltroAtivo ? 3 : 2,
                       borderColor: temFiltroAtivo ? colors.red : colors.gray,
@@ -1193,7 +1193,7 @@ export default function Cargas() {
                   ]}
                   labelStyle={globalStyles.buttonText}
                   label={
-                    <View style={styles.buttonLabel}>
+                    <View style={globalStyles.buttonLabel}>
                       <MaterialCommunityIcons
                         name="cancel"
                         size={24}
@@ -1644,7 +1644,7 @@ export default function Cargas() {
           ]}
           labelStyle={globalStyles.buttonText}
           label={
-            <View style={styles.buttonLabel}>
+            <View style={globalStyles.buttonLabel}>
               <Text style={{ color: "white" }}>Exportar</Text>
               <MaterialCommunityIcons
                 name="file-export-outline"
