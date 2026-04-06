@@ -49,6 +49,7 @@ export default function EntradaSaida() {
   const [itens, setItens] = useState<IItemComMovimentacao[]>([]);
   const [itensFiltrados, setItensFiltrados] =
     useState<IItemComMovimentacao[]>();
+  const [pesquisa, setPesquisa] = useState<string>("");
 
   const temMovimentacao = itens.some(
     (item) => item.quantidadeMovimentada !== 0,
@@ -114,7 +115,7 @@ export default function EntradaSaida() {
       const resultado = await confirmarMovimentacoes(movimentacoes);
 
       const resultadoAtualizarItens = await updateQuantidades(movimentacoes);
-      
+
       alert(`Movimentações confirmadas:\n${resumo}`);
 
       // resetar valores
@@ -282,6 +283,10 @@ export default function EntradaSaida() {
         }
       }
 
+      if (!item.nome.includes(pesquisa)) {
+        return false;
+      }
+
       return true;
     });
 
@@ -331,7 +336,7 @@ export default function EntradaSaida() {
 
   useEffect(() => {
     filtrar();
-  }, [filtros.tipoItem, itens]);
+  }, [filtros.tipoItem, itens, pesquisa]);
 
   return (
     <View
@@ -442,6 +447,24 @@ export default function EntradaSaida() {
                 </Text>
               </Pressable>
             )}
+          </View>
+
+          {/* PESQUISAR */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <Text style={globalStyles.labelText} selectable={false}>
+              Pesquisar:
+            </Text>
+            <TextInput
+              style={[globalStyles.input, { width: 500 }]}
+              value={pesquisa}
+              onChangeText={(text) => setPesquisa(text)}
+            />
           </View>
         </View>
 
@@ -573,6 +596,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     flexDirection: "row",
     gap: 30,
+    alignItems: "center",
   },
 
   scrollContainer: {
