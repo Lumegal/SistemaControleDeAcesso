@@ -866,7 +866,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               <Text style={styles.version} selectable={false}>
                 {`BASE DE TESTES
 LoginAuth v0.1.0
-V2.14.0`}
+V2.15.0`}
               </Text>
             </View>
           </ScrollView>

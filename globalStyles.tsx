@@ -76,6 +76,15 @@ export const getGlobalStyles = () => {
       fontSize: 18,
       marginTop: 4,
     },
+    dataPicker: {
+      padding: 10,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "black",
+      backgroundColor: "#fff",
+      color: "black",
+      fontSize: 16,
+    },
 
     // Dropdown
     dropdownContainer: {
@@ -97,7 +106,7 @@ export const getGlobalStyles = () => {
       flexDirection: "row",
       gap: 20,
 
-      backgroundColor: "#ffffff",
+      backgroundColor: "white",
 
       borderWidth: 1,
       borderColor: "#e2e8f0",
