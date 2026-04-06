@@ -54,6 +54,16 @@ export default function Login() {
           },
         });
       }
+
+      if (usuarioLogado.tipoDeAcesso === "almoxarifado") {
+        router.push({
+          pathname: "/main",
+          params: {
+            pageName: "almoxarifado",
+            subPage: "itens",
+          },
+        });
+      }
     } catch (erro: any) {
       alert(erro.message);
     } finally {

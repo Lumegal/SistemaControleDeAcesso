@@ -1,17 +1,17 @@
 import { Feather } from "@expo/vector-icons";
 import { Text, View, TextInput, FlatList } from "react-native";
-import { getGlobalStyles } from "../../globalStyles";
-import MenuOptionButton from "../_components/MenuOptionButton";
-import { colors } from "../../colors";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllMotoristas, updateMotorista } from "../../services/motorista";
-import { IMotorista } from "../../interfaces/motorista";
 import React from "react";
-import { IJwtPayload } from "../../interfaces/jwt";
-import SimpleModal from "../_components/SimpleModal";
+import { router } from "expo-router";
+import { colors } from "../../colors";
 import { useAuth } from "../../context/auth";
 import { useLoading } from "../../context/providers/loading";
-import { router } from "expo-router";
+import { getGlobalStyles } from "../../globalStyles";
+import { IJwtPayload } from "../../interfaces/jwt";
+import { IMotorista } from "../../interfaces/portaria/motorista";
+import { getAllMotoristas, updateMotorista } from "../../services/portaria/motorista";
+import MenuOptionButton from "../_components/MenuOptionButton";
+import SimpleModal from "../_components/SimpleModal";
 
 const renderTableHeader = (
   globalStyles: ReturnType<typeof getGlobalStyles>,

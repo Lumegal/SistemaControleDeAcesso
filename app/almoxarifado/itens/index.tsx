@@ -1,40 +1,49 @@
-import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  TextInput,
+} from "react-native";
 import { getGlobalStyles } from "../../../globalStyles";
 import { useEffect, useState } from "react";
-import { getAllEpis } from "../../../services/almoxarifado/epi";
-import { IEpi } from "../../../interfaces/almoxarifado/epi";
+import { getAllItens } from "../../../services/almoxarifado/item";
 import { colors } from "../../../colors";
 import { useLoading } from "../../../context/providers/loading";
-import { ISuprimento } from "../../../interfaces/almoxarifado/suprimentos";
+import { useAuth } from "../../../context/auth";
+import { IItem } from "../../../interfaces/almoxarifado/item";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import { socketAlmoxarifado } from "../../../services/httpclient";
 
 export default function Itens() {
   const globalStyles = getGlobalStyles();
   const { showLoading, hideLoading } = useLoading();
+  const { usuario } = useAuth();
+
+  const selecao = ["TODOS", "EM FALTA", "ESTOQUE OK"];
+  const tipoItem = ["TODOS", "EPI", "SUPRIMENTO"];
 
   const [filtros, setFiltros] = useState<{
-    selecao: 0 | 1 | 2; // 0 = Todos; 1 = Em falta; 2 = Estoque OK
-    tipoItem: 0 | 1 | 2; // 0 = Todos; 1 = Epis; 2 = Suprimentos
+    selecao: string;
+    tipoItem: string;
   }>({
-    selecao: 0,
-    tipoItem: 0,
+    selecao: selecao[0],
+    tipoItem:
+      usuario?.tipoDeAcesso === "adm" || usuario?.tipoDeAcesso === "compras"
+        ? tipoItem[0]
+        : tipoItem[1],
   });
 
-  const [epis, setEpis] = useState<IEpi[] | null>(null);
-  type Item = IEpi | ISuprimento;
+  const [itens, setItens] = useState<IItem[]>([]);
+  const [itensFiltrados, setItensFiltrados] = useState<IItem[]>();
+  const [pesquisa, setPesquisa] = useState<string>("");
 
-  function isEpi(item: Item): item is IEpi {
-    return "certificadoAprovacao" in item;
-  }
-
-  function isSuprimento(item: Item): item is ISuprimento {
-    return !("certificadoAprovacao" in item);
-  }
-
-  function estoqueBaixo(item: Item) {
+  function estoqueBaixo(item: IItem) {
     return item.quantidade <= item.quantidadeParaAviso;
   }
 
-  const renderEpi = (item: IEpi) => {
+  const renderItem = (item: IItem) => {
     const estoqueBaixo = item.quantidade <= item.quantidadeParaAviso;
 
     return (
@@ -42,28 +51,62 @@ export default function Itens() {
         key={item.id}
         style={[styles.card, estoqueBaixo && { borderLeftColor: colors.red }]}
       >
-        <Text
-          style={[
-            styles.badge,
-            estoqueBaixo && {
-              color: colors.red,
-              backgroundColor: colors.lightRed,
-            },
-          ]}
-        >
-          {estoqueBaixo ? "ESTOQUE BAIXO" : "ESTOQUE OK"}
-        </Text>
+        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+          {item.tipoItem.tipo === "EPI" ? (
+            <FontAwesome6 name="helmet-safety" size={28} color="black" />
+          ) : (
+            <AntDesign name="shopping" size={30} color="black" />
+          )}
+          <View
+            style={[
+              styles.badge,
+              estoqueBaixo && styles.badgeEstoqueBaixo,
+              { flexDirection: "row", gap: 4, justifyContent: "center" },
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                estoqueBaixo && styles.badgeTextEstoqueBaixo,
+              ]}
+            >{`${item.tipoItem.tipo}`}</Text>
+          </View>
 
-        <Text style={styles.epi}>{item.nome}</Text>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>C.A.:</Text>
-          <Text style={styles.value}>{item.certificadoAprovacao}</Text>
+          <View
+            style={[styles.badge, estoqueBaixo && styles.badgeEstoqueBaixo]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                estoqueBaixo && styles.badgeTextEstoqueBaixo,
+              ]}
+            >
+              {estoqueBaixo ? "ESTOQUE BAIXO" : "ESTOQUE OK"}
+            </Text>
+          </View>
         </View>
+
+        <Text style={styles.epi}>{`Nome: ${item.nome}`}</Text>
+
+        {item.tipoItem.tipo === tipoItem[1] && (
+          <View style={styles.row}>
+            <Text style={styles.label}>C.A.:</Text>
+            <Text style={styles.value}>{item.certificadoAprovacao}</Text>
+          </View>
+        )}
 
         <View style={styles.row}>
           <Text style={styles.label}>Tipo Unidade:</Text>
           <Text style={styles.value}>{item.tipoUnidade.tipo}</Text>
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Fornecedores:</Text>
+          <Text style={styles.value}>
+            {item.fornecedores.length !== 0
+              ? item.fornecedores.map((fornecedor) => `"${fornecedor.nome}"; `)
+              : "Nenhum fornecedor cadastrado."}
+          </Text>
         </View>
 
         <View style={styles.row}>
@@ -79,316 +122,297 @@ export default function Itens() {
     );
   };
 
-  const renderSuprimento = (item: ISuprimento) => {
-    const estoqueBaixo = item.quantidade <= item.quantidadeParaAviso;
+  const filtrar = () => {
+    let resultado = [...itens];
 
-    return (
-      <View
-        key={item.id}
-        style={[styles.card, estoqueBaixo && { borderLeftColor: colors.red }]}
-      >
-        <Text
-          style={[
-            styles.badge,
-            estoqueBaixo && {
-              color: colors.red,
-              backgroundColor: colors.lightRed,
-            },
-          ]}
-        >
-          {estoqueBaixo ? "ESTOQUE BAIXO" : "ESTOQUE OK"}
-        </Text>
+    resultado = resultado.filter((item) => {
+      // Filtro por estoque
+      if (filtros.selecao === selecao[1] && !estoqueBaixo(item)) {
+        return false; // só estoque baixo
+      }
 
-        <Text style={styles.epi}>{item.nome}</Text>
+      if (filtros.selecao === selecao[2] && estoqueBaixo(item)) {
+        return false; // só estoque ok
+      }
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Tipo Unidade:</Text>
-          <Text style={styles.value}>{item.tipoUnidade.tipo}</Text>
-        </View>
+      // Filtro por tipo
+      if (filtros.tipoItem !== tipoItem[0]) {
+        if (
+          filtros.tipoItem === tipoItem[1] &&
+          item.tipoItem.tipo !== tipoItem[1]
+        ) {
+          return false;
+        }
 
-        <View style={styles.row}>
-          <Text style={styles.label}>Estoque</Text>
-          <Text
-            style={[styles.quantidade, estoqueBaixo && { color: colors.red }]}
-          >
-            {item.quantidade} / {item.quantidadeParaAviso}
-          </Text>
-        </View>
-      </View>
-    );
+        if (
+          filtros.tipoItem === tipoItem[2] &&
+          item.tipoItem.tipo !== tipoItem[2]
+        ) {
+          return false;
+        }
+      }
+
+      if (!item.nome.includes(pesquisa)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    resultado = [...resultado].sort((a, b) => {
+      return a.nome.localeCompare(b.nome);
+    });
+
+    setItensFiltrados(resultado);
   };
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        showLoading();
-        const resultadoEpis = await getAllEpis();
-        setEpis(resultadoEpis);
-        console.log(resultadoEpis);
-      } catch (erro: any) {
-        alert(erro.message);
-      } finally {
-        hideLoading();
-      }
+    filtrar();
+  }, [filtros.selecao, filtros.tipoItem, itens, pesquisa]);
+
+  const getData = async () => {
+    try {
+      showLoading();
+      const resultadoItens: IItem[] = await getAllItens();
+      setItens(resultadoItens);
+    } catch (erro: any) {
+      alert(erro.message);
+    } finally {
+      hideLoading();
+    }
+  };
+
+  useEffect(() => {
+    getData();
+
+    const handleItemAtualizado = () => {
+      getData();
     };
 
-    getData();
+    socketAlmoxarifado.on("itemAtualizado", handleItemAtualizado);
+
+    socketAlmoxarifado.on("connect_error", (erro: any) => {
+      alert(erro.message);
+    });
+
+    return () => {
+      socketAlmoxarifado.off("itemAtualizado", handleItemAtualizado);
+      socketAlmoxarifado.off("connect_error");
+    };
   }, []);
-
-  const suprimentosMockup: ISuprimento[] = [
-    {
-      id: 1,
-      nome: "item 1",
-      quantidade: 10,
-      quantidadeParaAviso: 20,
-      preco: 20,
-      tipoUnidade: { id: 1, tipo: "unidade" },
-    },
-    {
-      id: 2,
-      nome: "item 2",
-      quantidade: 10,
-      quantidadeParaAviso: 20,
-      preco: 20,
-      tipoUnidade: { id: 1, tipo: "unidade" },
-    },
-    {
-      id: 3,
-      nome: "item 3",
-      quantidade: 10,
-      quantidadeParaAviso: 20,
-      preco: 20,
-      tipoUnidade: { id: 1, tipo: "unidade" },
-    },
-    {
-      id: 4,
-      nome: "item 4",
-      quantidade: 10,
-      quantidadeParaAviso: 20,
-      preco: 20,
-      tipoUnidade: { id: 1, tipo: "unidade" },
-    },
-    {
-      id: 5,
-      nome: "item 5",
-      quantidade: 10,
-      quantidadeParaAviso: 20,
-      preco: 20,
-      tipoUnidade: { id: 1, tipo: "unidade" },
-    },
-  ];
-
-  const itens = [...(epis ?? []), ...suprimentosMockup];
-
-  const itensFiltrados = itens.filter((item) => {
-    // filtro tipo
-    if (filtros.tipoItem === 1 && !isEpi(item)) return false;
-    if (filtros.tipoItem === 2 && isEpi(item)) return false;
-
-    // filtro estoque
-    if (filtros.selecao === 1 && !estoqueBaixo(item)) return false;
-    if (filtros.selecao === 2 && estoqueBaixo(item)) return false;
-
-    return true;
-  });
-
-  const itensOrdenados = [...itensFiltrados].sort((a, b) => {
-    const faltaA = estoqueBaixo(a);
-    const faltaB = estoqueBaixo(b);
-
-    if (faltaA !== faltaB) {
-      return faltaA ? -1 : 1;
-    }
-
-    return a.nome.localeCompare(b.nome);
-  });
 
   return (
     <View
       style={[
         globalStyles.mainContainer,
-        { flexDirection: "column", margin: 24, padding: 24, flex: 1 },
+        { flexDirection: "column", padding: 24, flex: 1, gap: 4 },
       ]}
     >
       <View style={styles.filtrosContainer}>
-        <View style={styles.filtrosColumn}>
-          <Text style={globalStyles.labelText}>Itens:</Text>
-          <Text style={globalStyles.labelText}>Tipo do item:</Text>
+        <View style={{ flexDirection: "row", gap: 30 }}>
+          {/* FILTROS */}
+          <View style={styles.filtrosColumn}>
+            <Text style={globalStyles.labelText}>Itens:</Text>
+            {(usuario?.tipoDeAcesso === "adm" ||
+              usuario?.tipoDeAcesso === "compras") && (
+              <Text style={globalStyles.labelText}>Tipo do item:</Text>
+            )}
+          </View>
+
+          {/* TODOS */}
+          <View style={styles.filtrosColumn}>
+            {/* Selecao: Todos */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() =>
+                setFiltros((prev) => ({ ...prev, selecao: selecao[0] }))
+              }
+            >
+              <View style={globalStyles.radioButton}>
+                {filtros.selecao === selecao[0] && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  filtros.selecao === selecao[0]
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Todos
+              </Text>
+            </Pressable>
+
+            {/* Tipo do item: TODOS */}
+            {(usuario?.tipoDeAcesso === "adm" ||
+              usuario?.tipoDeAcesso == "compras") && (
+              <Pressable
+                style={globalStyles.radioLabelContainer}
+                onPress={() =>
+                  setFiltros((prev) => ({ ...prev, tipoItem: tipoItem[0] }))
+                }
+              >
+                <View style={globalStyles.radioButton}>
+                  {filtros.tipoItem === tipoItem[0] && (
+                    <View style={globalStyles.radioFill} />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    globalStyles.labelText,
+                    filtros.tipoItem === tipoItem[0]
+                      ? { fontWeight: 700 }
+                      : { fontWeight: 400 },
+                  ]}
+                  selectable={false}
+                >
+                  Todos
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
+          {/* Em falta / EPIs */}
+          <View style={styles.filtrosColumn}>
+            {/* Selecao: Em falta */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() =>
+                setFiltros((prev) => ({ ...prev, selecao: selecao[1] }))
+              }
+            >
+              <View style={globalStyles.radioButton}>
+                {filtros.selecao === selecao[1] && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  filtros.selecao === selecao[1]
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Em falta
+              </Text>
+            </Pressable>
+
+            {/* Tipo do item: EPIs */}
+            {(usuario?.tipoDeAcesso === "adm" ||
+              usuario?.tipoDeAcesso == "compras") && (
+              <Pressable
+                style={globalStyles.radioLabelContainer}
+                onPress={() =>
+                  setFiltros((prev) => ({ ...prev, tipoItem: tipoItem[1] }))
+                }
+              >
+                <View style={globalStyles.radioButton}>
+                  {filtros.tipoItem === tipoItem[1] && (
+                    <View style={globalStyles.radioFill} />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    globalStyles.labelText,
+                    filtros.tipoItem === tipoItem[1]
+                      ? { fontWeight: 700 }
+                      : { fontWeight: 400 },
+                  ]}
+                  selectable={false}
+                >
+                  EPIs
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
+          {/* Estoque OK / Suprimentos */}
+          <View style={styles.filtrosColumn}>
+            {/* Selecao: Estoque OK */}
+            <Pressable
+              style={globalStyles.radioLabelContainer}
+              onPress={() =>
+                setFiltros((prev) => ({ ...prev, selecao: selecao[2] }))
+              }
+            >
+              <View style={globalStyles.radioButton}>
+                {filtros.selecao === selecao[2] && (
+                  <View style={globalStyles.radioFill} />
+                )}
+              </View>
+              <Text
+                style={[
+                  globalStyles.labelText,
+                  filtros.selecao === selecao[2]
+                    ? { fontWeight: 700 }
+                    : { fontWeight: 400 },
+                ]}
+                selectable={false}
+              >
+                Estoque OK
+              </Text>
+            </Pressable>
+
+            {/* Tipo do item: Suprimentos */}
+            {(usuario?.tipoDeAcesso === "adm" ||
+              usuario?.tipoDeAcesso == "compras") && (
+              <Pressable
+                style={globalStyles.radioLabelContainer}
+                onPress={() =>
+                  setFiltros((prev) => ({ ...prev, tipoItem: tipoItem[2] }))
+                }
+              >
+                <View style={globalStyles.radioButton}>
+                  {filtros.tipoItem === tipoItem[2] && (
+                    <View style={globalStyles.radioFill} />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    globalStyles.labelText,
+                    filtros.tipoItem === tipoItem[2]
+                      ? { fontWeight: 700 }
+                      : { fontWeight: 400 },
+                  ]}
+                  selectable={false}
+                >
+                  Suprimentos
+                </Text>
+              </Pressable>
+            )}
+          </View>
         </View>
 
-        <View style={styles.filtrosColumn}>
-          {/* Selecao: Todos */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, selecao: 0 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.selecao === 0 && <View style={globalStyles.radioFill} />}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.selecao === 0
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              Todos
-            </Text>
-          </Pressable>
-
-          {/* Tipo do item: Todos */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, tipoItem: 0 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.tipoItem === 0 && (
-                <View style={globalStyles.radioFill} />
-              )}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.tipoItem === 0
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              Todos
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.filtrosColumn}>
-          {/* Selecao: Em falta */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, selecao: 1 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.selecao === 1 && <View style={globalStyles.radioFill} />}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.selecao === 1
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              Em falta
-            </Text>
-          </Pressable>
-
-          {/* Tipo do item: EPIs */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, tipoItem: 1 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.tipoItem === 1 && (
-                <View style={globalStyles.radioFill} />
-              )}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.tipoItem === 1
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              EPIs
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.filtrosColumn}>
-          {/* Selecao: Estoque OK */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, selecao: 2 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.selecao === 2 && <View style={globalStyles.radioFill} />}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.selecao === 2
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              Estoque OK
-            </Text>
-          </Pressable>
-
-          {/* Tipo do item: Suprimentos */}
-          <Pressable
-            style={globalStyles.radioLabelContainer}
-            onPress={() => setFiltros((prev) => ({ ...prev, tipoItem: 2 }))}
-          >
-            <View style={globalStyles.radioButton}>
-              {filtros.tipoItem === 2 && (
-                <View style={globalStyles.radioFill} />
-              )}
-            </View>
-            <Text
-              style={[
-                globalStyles.labelText,
-                filtros.tipoItem === 2
-                  ? { fontWeight: 700 }
-                  : { fontWeight: 400 },
-              ]}
-              selectable={false}
-            >
-              Suprimentos
-            </Text>
-          </Pressable>
+        {/* PESQUISAR */}
+        <View style={{ width: 500 }}>
+          <Text style={globalStyles.labelText} selectable={false}>
+            Pesquisar:
+          </Text>
+          <TextInput
+            style={globalStyles.input}
+            value={pesquisa}
+            onChangeText={(text) => setPesquisa(text)}
+          />
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", flex: 1, gap: 16 }}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>EPIs</Text>
-          <ScrollView
-            contentContainerStyle={{
-              gap: 16,
-              padding: 10,
-            }}
-            style={styles.scrollContainer}
-          >
-            {itensOrdenados.map((item) => {
-              if (isEpi(item)) return renderEpi(item);
-              return null;
-            })}
-          </ScrollView>
-        </View>
-
-        {filtros.tipoItem !== 1 && (
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>SUPRIMENTOS</Text>
-            <ScrollView
-              contentContainerStyle={{
-                gap: 16,
-                padding: 10,
-              }}
-              style={styles.scrollContainer}
-            >
-              {itensOrdenados.map((item) => {
-                if (isSuprimento(item)) return renderSuprimento(item);
-                return null;
-              })}
-            </ScrollView>
-          </View>
-        )}
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={{
+            gap: 16,
+            padding: 10,
+          }}
+          style={styles.scrollContainer}
+        >
+          {itensFiltrados?.map((item) => {
+            return renderItem(item);
+          })}
+        </ScrollView>
       </View>
     </View>
   );
@@ -443,11 +467,24 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 999,
 
-    fontSize: 11,
-    fontWeight: "600",
-
     backgroundColor: "#dcfce7",
+
+    width: 150,
+    alignItems: "center",
+  },
+
+  badgeText: {
     color: "#166534",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  badgeEstoqueBaixo: {
+    backgroundColor: colors.lightRed,
+  },
+
+  badgeTextEstoqueBaixo: {
+    color: colors.red,
   },
 
   epi: {
@@ -487,8 +524,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
     flexDirection: "row",
-    gap: 30,
     marginBottom: 12,
+    justifyContent: "space-between",
   },
 
   scrollContainer: {

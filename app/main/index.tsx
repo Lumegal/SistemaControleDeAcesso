@@ -1,15 +1,18 @@
 import { View } from "react-native";
 import { getGlobalStyles } from "../../globalStyles";
-import NovaCarga from "../novaCarga";
 import { useLocalSearchParams } from "expo-router";
 import SideBar from "../_components/SideBar";
 import TopBar from "../_components/TopBar";
-import Cargas from "../cargas";
+import { useState } from "react";
+import Cargas from "../cargas"
 import Motoristas from "../motoristas";
+import NovaCarga from "../novaCarga";
 import Clientes from "../clientes";
 import Veiculos from "../veiculos";
-import { useState } from "react";
 import Itens from "../almoxarifado/itens";
+import RegistrarItem from "../almoxarifado/registrarItem";
+import EntradaSaida from "../almoxarifado/entradaSaida";
+import Relatorios from "../almoxarifado/relatorios";
 import NovoOrcamento from "../comercial/novoOrcamento.tsx";
 import Orcamentos from "../comercial/orcamentos";
 
@@ -55,15 +58,29 @@ export default function Main() {
             <Veiculos />
           )}
 
+          {params.pageName === "comercial" && params.subPage === "novoOrcamento" && (
+            <NovoOrcamento />
+          )}
+
+          {params.pageName === "comercial" && params.subPage === "orcamentos" && (
+            <Orcamentos />
+          )}
+
           {params.pageName === "almoxarifado" && params.subPage === "itens" && (
             <Itens />
           )}
 
-          {params.pageName === "comercial" &&
-            params.subPage === "novoOrcamento" && <NovoOrcamento />}
+          {params.pageName === "almoxarifado" && params.subPage === "registrarItem" && (
+            <RegistrarItem />
+          )}
 
-          {params.pageName === "comercial" &&
-            params.subPage === "orcamentos" && <Orcamentos />}
+          {params.pageName === "almoxarifado" && params.subPage === "entradaSaida" && (
+            <EntradaSaida />
+          )}
+
+          {params.pageName === "almoxarifado" && params.subPage === "relatorios" && (
+            <Relatorios />
+          )}
         </View>
       </View>
     </View>

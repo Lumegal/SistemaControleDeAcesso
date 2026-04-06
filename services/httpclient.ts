@@ -41,4 +41,6 @@ export async function httpClient(
 
 export const socket = io(api);
 
+export const socketAlmoxarifado = io("http://localhost:3000")
+
 export const socketOrcamento = io("http://localhost:3003")

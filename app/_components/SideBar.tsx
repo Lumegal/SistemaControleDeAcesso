@@ -208,6 +208,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                   </Text>
                   <Text
                     style={[styles.menuSectionLabel, styles.menuSectionVersion]}
+                    selectable={false}
                   >
                     {` - v1.0.0`}
                   </Text>
@@ -495,8 +496,9 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                         styles.menuSectionLabel,
                         styles.menuSectionVersion,
                       ]}
+                      selectable={false}
                     >
-                      {` - v3.0.0`}
+                      {` - v4.3.0`}
                     </Text>
                   </View>
                   <Entypo
@@ -508,6 +510,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
 
                 {almoxarifadoDropdown && (
                   <>
+                    {/* ITENS */}
                     <MenuOptionButton
                       containerStyle={[
                         globalStyles.menuOption,
@@ -558,6 +561,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                       }}
                     />
 
+                    {/* REGISTRAR ITEM */}
                     <MenuOptionButton
                       containerStyle={[
                         globalStyles.menuOption,
@@ -659,57 +663,6 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                       }}
                     />
 
-                    {/* Pesquisar */}
-                    {/* <MenuOptionButton
-                    containerStyle={[
-                      globalStyles.menuOption,
-                      {
-                        backgroundColor:
-                          params.subPage === "pesquisar"
-                            ? textMainColor
-                            : colors.blue,
-                      },
-                    ]}
-                    hoverStyle={[
-                      params.subPage === "pesquisar"
-                        ? {}
-                        : { backgroundColor: "rgba(255,255,255,0.2)" },
-                    ]}
-                    pressedStyle={{
-                      backgroundColor: "rgba(255,255,255,0.5)",
-                    }}
-                    labelStyle={[
-                      styles.menuOptionLabel,
-                      {
-                        color:
-                          params.subPage === "pesquisar"
-                            ? colors.blue
-                            : textMainColor,
-                      },
-                    ]}
-                    label="Pesquisar"
-                    icon={
-                      <FontAwesome5
-                        name="search"
-                        size={menuIconSize}
-                        color={
-                          params.subPage === "pesquisar"
-                            ? colors.blue
-                            : textMainColor
-                        }
-                      />
-                    }
-                    onPress={() => {
-                      router.push({
-                        pathname: "/main",
-                        params: {
-                          pageName: "almoxarifado",
-                          subPage: "pesquisar",
-                        },
-                      });
-                    }}
-                  /> */}
-
                     {/* Relatórios */}
                     <MenuOptionButton
                       containerStyle={[
@@ -782,6 +735,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
                         styles.menuSectionLabel,
                         styles.menuSectionVersion,
                       ]}
+                      selectable={false}
                     >
                       {` - v1.0.0`}
                     </Text>
@@ -915,7 +869,7 @@ export default function SideBar({ closeModal, visible }: SideBarProps) {
               <Text style={styles.version} selectable={false}>
                 {`BASE DE TESTES
 LoginAuth v0.1.0
-V2.9.0`}
+V3.0.0`}
               </Text>
             </View>
           </ScrollView>

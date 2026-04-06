@@ -15,39 +15,38 @@ import {
   Pressable,
   TouchableOpacity,
 } from "react-native";
-import MenuOptionButton from "../_components/MenuOptionButton";
-import { dataInputStyle, getGlobalStyles } from "../../globalStyles";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { colors } from "../../colors";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/auth";
+import { useLoading } from "../../context/providers/loading";
+import { getGlobalStyles, dataInputStyle } from "../../globalStyles";
+import { IJwtPayload } from "../../interfaces/jwt";
 import {
   ICarga,
-  IUpdateCargaForm,
   ICargaFormatada,
-  INovaCarga,
+  IUpdateCargaForm,
   ICargaFiltros,
-} from "../../interfaces/carga";
-import {
-  createNovaCarga,
-  deleteCarga,
-  exportarExcel,
-  exportarPDF,
-  getCargas,
-  updateCarga,
-} from "../../services/cargas";
-import { useLoading } from "../../context/providers/loading";
-import EditModal from "../_components/SimpleModal";
-import DeleteModal from "../_components/SimpleModal";
-import ExportarModal from "../_components/SimpleModal";
-import { useAuth } from "../../context/auth";
+  INovaCarga,
+} from "../../interfaces/portaria/carga";
 import { socket } from "../../services/httpclient";
-import { IJwtPayload } from "../../interfaces/jwt";
-import React from "react";
-import { getEmpresa, createEmpresa } from "../../services/empresa";
+import {
+  getCargas,
+  deleteCarga,
+  updateCarga,
+  createNovaCarga,
+  exportarPDF,
+  exportarExcel,
+} from "../../services/portaria/cargas";
+import { getEmpresa, createEmpresa } from "../../services/portaria/empresa";
 import {
   getMotoristaPorRgCpf,
   createMotorista,
-} from "../../services/motorista";
-import { getPlaca, createPlaca } from "../../services/placa";
+} from "../../services/portaria/motorista";
+import { getPlaca, createPlaca } from "../../services/portaria/placa";
+import MenuOptionButton from "../_components/MenuOptionButton";
+import EditModal from "../_components/SimpleModal";
+import DeleteModal from "../_components/SimpleModal";
+import ExportarModal from "../_components/SimpleModal";
 
 const widthIdColumn: number = 0.6;
 
@@ -393,6 +392,60 @@ const CargaRow = React.memo(
     );
   },
 );
+
+const styles = StyleSheet.create({
+  dataHorarioContainer: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 20,
+  },
+  maximizarFiltroButton: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+    backgroundColor: "#ffffff",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+  },
+  minimizarFiltroButton: {
+    height: 20,
+    width: "auto",
+    position: "absolute",
+    zIndex: 999,
+    right: 28,
+    top: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  button: {
+    minWidth: 130,
+    maxHeight: 50,
+  },
+  buttonFiltrar: {
+    backgroundColor: colors.lightBlue,
+  },
+  buttonLimpar: {
+    borderWidth: 2,
+    borderColor: colors.gray,
+  },
+  buttonLabel: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filtroUltimaLinha: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 40,
+  },
+});
 
 export default function Cargas() {
   const { usuario } = useAuth();
